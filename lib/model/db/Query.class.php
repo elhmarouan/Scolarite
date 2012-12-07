@@ -143,8 +143,8 @@ class Query {
       return $this->_conditions;
    }
 
-   public function datasource() {
-      return $this->_datasource;
+   public function datasources() {
+      return $this->_datasources;
    }
 
    public function type() {
@@ -158,11 +158,13 @@ class Query {
    private function _buildToken($field) {
       $field = explode('.', $field);
       $token = isset($field[1]) ? $field[1] : $field[0];
-      $invalidToken = array_key_exists($token, $this->_values);
-      while($invalidToken) {
-         
+      $proposedToken = $token;
+      
+      for($i = 0 ; array_key_exists($proposedToken, $this->_values) ; ++$i) {
+         $proposedToken = $token . '_' . $i;
       }
       
+      return $proposedToken;
    }
    
    public function getArray() {

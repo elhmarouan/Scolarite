@@ -39,7 +39,7 @@ abstract class PDOAbstract implements DriverInterface {
 
       $sql = '
          SELECT ' . array_map(array($this, '_escapeField'), $query->fields()) . '
-         FROM ' . $query->datasource();
+         FROM ' . implode(', ', $query->datasources());
    }
 
    public function count(Query $query) {
@@ -48,7 +48,7 @@ abstract class PDOAbstract implements DriverInterface {
       }
       $sql = '
          SELECT COUNT(1)
-         FROM ' . $query->datasource();
+         FROM ' . implode(', ', $query->datasources());
    }
 
    public function update(Query $query) {
@@ -56,7 +56,7 @@ abstract class PDOAbstract implements DriverInterface {
          throw new InvalidArgumentException(__('Invalid query: update query required.'));
       }
       $sql = '
-         UPDATE ' . $query->datasource() . '
+         UPDATE ' . implode(', ', $query->datasources()) . '
          SET
          ';
    }
@@ -65,6 +65,9 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== 'delete') {
          throw new InvalidArgumentException(__('Invalid query: delete query required.'));
       }
+      $sql = '
+         DELETE FROM ' . implode(', ', $query->datasources()) . '
+         ';
    }
 
    public function createDatasource(Query $query) {
