@@ -1,0 +1,1 @@
+<h1>Gestion des étudiants de <?php echo $promo; ?></h1>

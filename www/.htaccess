@@ -1,0 +1,14 @@
+Allow From All
+
+<IfModule mod_rewrite.c>
+   Options +FollowSymLinks
+   RewriteEngine On
+
+   RewriteRule ^(admin|prof|eleve)/ backend.php [QSA,L]
+   RewriteRule ^sandbox/ sandbox.php [QSA,L]
+
+   #If the file exists, it isn't necessary to rewrite the url
+   RewriteCond %{REQUEST_FILENAME} !-f
+
+   RewriteRule ^(.*)$ frontend.php [QSA,L]
+</IfModule>
