@@ -32,18 +32,20 @@ abstract class PDOAbstract implements DriverInterface {
       $this->_pdo();
    }
    
-   public function select(Query $query) {
-      if ($query->type() !== 'select') {
+   public function select(Query $query, $outputFormat = Query::OUTPUT_ARRAY) {
+      if ($query->type() !== Query::SELECT) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
 
       $sql = '
-         SELECT ' . array_map(array($this, '_escapeField'), $query->fields()) . '
-         FROM ' . implode(', ', $query->datasources());
+         SELECT ' . $this->_selectFields($query->fields()) . '
+         FROM ' . implode(', ', $query->datasources()) . '
+         ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $query->limits()) : '');
+      debug($sql);
    }
 
    public function count(Query $query) {
-      if ($query->type() !== 'select') {
+      if ($query->type() !== Query::SELECT) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
       $sql = '
@@ -52,7 +54,7 @@ abstract class PDOAbstract implements DriverInterface {
    }
 
    public function update(Query $query) {
-      if ($query->type() !== 'update') {
+      if ($query->type() !== Query::UPDATE) {
          throw new InvalidArgumentException(__('Invalid query: update query required.'));
       }
       $sql = '
@@ -62,7 +64,7 @@ abstract class PDOAbstract implements DriverInterface {
    }
 
    public function delete(Query $query) {
-      if ($query->type() !== 'delete') {
+      if ($query->type() !== Query::DELETE) {
          throw new InvalidArgumentException(__('Invalid query: delete query required.'));
       }
       $sql = '
@@ -180,6 +182,10 @@ abstract class PDOAbstract implements DriverInterface {
 
    protected function _escapeField($field) {
       return $field;
+   }
+   
+   protected function _selectFields($fields) {
+      return is_array($fields) ? array_map(array($this, '_escapeField'), $fields) : '*';
    }
 
    protected function _escapeValue($field) {

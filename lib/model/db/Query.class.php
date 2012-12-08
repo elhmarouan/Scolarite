@@ -15,6 +15,9 @@ class Query {
    const UPDATE = 2;
    const DELETE = 3;
    
+   const OUTPUT_ARRAY = 1;
+   const OUTPUT_OBJECT = 2;
+   
    private static $_dao = array();
    private $_currentDao;
    private $_type;
@@ -24,6 +27,7 @@ class Query {
        'join' => array(),
        'set' => array(),
        'where' => null,
+       'limit' => array(),
        'groupBy' => array(),
        'having' => null,
        'orderBy' => array()
@@ -134,17 +138,36 @@ class Query {
       }
       return $this;
    }
+   
+   public function limit($limit = 20, $offset = null) {
+      if (is_int($limit) && $limit > 0) {
+         $this->_sqlParts['limit'] = array($limit);
+         if ($offset === null || is_int($offset) && $offset > 0) {
+            if ($offset !== null) {
+               $this->_sqlParts['limit'][] = $offset;
+            }
+         } else {
+            throw new InvalidArgumentException(__('Invalid query offset "%s"', (string) $offset));
+         }
+      } else {
+         throw new InvalidArgumentException(__('Invalid query limit "%s"', (string) $limit));
+      }
+   }
 
    public function fields() {
-      return $this->_fields;
+      return empty($this->_sqlParts['select']) ? '*' : $this->_fields;
    }
 
    public function conditions() {
       return $this->_conditions;
    }
+   
+   public function limits() {
+      return $this->_sqlParts['limit'];
+   }
 
    public function datasources() {
-      return $this->_datasources;
+      return $this->_sqlParts['from'];
    }
 
    public function type() {
@@ -167,15 +190,38 @@ class Query {
       return $proposedToken;
    }
    
-   public function getArray() {
-      
+   public function getFirst($outputFormat = self::OUTPUT_ARRAY) {
+      if(!empty($this->_type)) {
+         if($this->_type === self::SELECT) {
+            $this->limit(1);
+            return $this->getResult($outputFormat);
+         } else {
+            throw new ErrorException(__('Unable to execute the query: please only use select statements with the getFirst method.'));
+         }
+      } else {
+         throw new ErrorException(__('Unable to execute the query: please use "select" method first.'));
+      }
    }
    
-   public function getObject() {
-      
-   }
-   
-   public function getResult() {
-      
+   public function getResult($outputFormat = self::OUTPUT_ARRAY) {
+      if (!empty($this->_type)) {
+         if(!empty($this->_sqlParts['from'])) {
+            switch ($this->_type) {
+               case self::SELECT:
+                  return self::$_dao[$this->_currentDao]->select($this, $outputFormat);
+                  break;
+               case self::UPDATE:
+                  return self::$_dao[$this->_currentDao]->update($this);
+                  break;
+               case self::DELETE:
+                  return self::$_dao[$this->_currentDao]->delete($this);
+                  break;
+            }
+         } else {
+            throw new ErrorException(__('Unable to execute the query: please specify at least one datasource to work on.'));
+         }
+      } else {
+         throw new ErrorException(__('Unable to execute the query: please use "select", "update" or "delete" methods first.'));
+      }
    }
 }

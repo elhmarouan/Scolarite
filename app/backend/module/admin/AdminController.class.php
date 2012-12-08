@@ -24,6 +24,7 @@ class AdminController extends PandaController {
 
    public function enseignement() {
       $this->loadModels('Module');
+      //$this->model('Module')->findAll();
       if (PandaRequest::getExists('promo')) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          $this->setWindowTitle('Gestion de la promo ' . PandaRequest::get('promo'));

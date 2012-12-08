@@ -37,15 +37,15 @@ abstract class Model {
       if (!is_string($field) || empty($field) || !in_array('_' . $field, array_keys($modelAttributes))) {
          throw new InvalidArgumentException(__('Invalid or unknown field "%s".', $field));
       }
-      return $this->_query->select($field)->from($this->_tableName())->where($conditions);
+      return $this->_query->select($field)->from($this->_tableName())->where($conditions)->getResult();
    }
    
    public function find(array $conditions) {
-      return $this->_query->select()->from($this->_tableName())->where($conditions);
+      return $this->_query->select()->from($this->_tableName())->where($conditions)->getResult();
    }
    
    public function findAll() {
-      return $this->_query->select()->from($this->_tableName());
+      return $this->_query->select()->from($this->_tableName())->getResult();
    }
 
    public function create() {

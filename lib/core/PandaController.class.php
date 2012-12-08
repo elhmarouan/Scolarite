@@ -118,5 +118,13 @@ class PandaController {
          }
       }
    }
+   
+   public function model($modelName) {
+      if(isset($this->_models[$modelName]) && $this->_models[$modelName] instanceof Model) {
+         return $this->_models[$modelName];
+      } else {
+         throw new InvalidArgumentException(__('Unknown model "%s"', $modelName));
+      }
+   }
 
 }
