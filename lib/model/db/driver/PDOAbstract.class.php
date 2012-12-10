@@ -36,7 +36,6 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::SELECT) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
-
       $sql = '
          SELECT ' . $this->_selectFields($query->fields()) . '
          FROM ' . implode(', ', $query->datasources()) . '
@@ -185,7 +184,7 @@ abstract class PDOAbstract implements DriverInterface {
    }
    
    protected function _selectFields($fields) {
-      return is_array($fields) ? array_map(array($this, '_escapeField'), $fields) : '*';
+      return is_array($fields) ? implode(', ', array_map(array($this, '_escapeField'), $fields)) : '*';
    }
 
    protected function _escapeValue($field) {

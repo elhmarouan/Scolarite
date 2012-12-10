@@ -23,6 +23,19 @@ abstract class Model {
    protected function _tableName() {
       return pluralize(strtolower(str_replace('Model', '', get_class($this))));
    }
+   
+   protected function _tableFields() {
+      $fields = get_object_vars($this);
+      foreach($fields as $key => $value) {
+         if(in_array($key, array('_errors', '_query', '_daoName'))) {
+            unset($fields[$key]);
+         } else {
+            $fields[ltrim($key, '_')] = $fields[$key];
+            unset($fields[$key]);
+         }
+      }
+      return array_keys($fields);
+   }
 
    public function isValid() {
       return empty($this->_errors);
@@ -41,11 +54,11 @@ abstract class Model {
    }
    
    public function find(array $conditions) {
-      return $this->_query->select()->from($this->_tableName())->where($conditions)->getResult();
+      return $this->_query->select($this->_tableFields())->from($this->_tableName())->where($conditions)->getResult();
    }
    
    public function findAll() {
-      return $this->_query->select()->from($this->_tableName())->getResult();
+      return $this->_query->select($this->_tableFields())->from($this->_tableName())->getResult();
    }
 
    public function create() {

@@ -155,7 +155,7 @@ class Query {
    }
 
    public function fields() {
-      return empty($this->_sqlParts['select']) ? '*' : $this->_fields;
+      return empty($this->_sqlParts['select']) ? '*' : $this->_sqlParts['select'];
    }
 
    public function conditions() {
