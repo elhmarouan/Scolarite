@@ -109,30 +109,33 @@ class Query {
       return $this;
    }
 
-   public function where(array $conditions, $type = 'AND') {
+   public function where(array $conditions, $type = 'AND', $groupType = 'AND') {
       if (empty($conditions)) {
          throw new InvalidArgumentException(__('Invalid conditions: not-empty array required.'));
       }
       if (($type !== 'AND') &&  ($type !== 'OR')) {
          throw new InvalidArgumentException(__('Invalid type: "OR" or "AND" required.'));
       }
-      $where = array('type' => $type, 'conditions' => array());
+      if (($groupType !== 'AND') &&  ($groupType !== 'OR')) {
+         throw new InvalidArgumentException(__('Invalid group type: "OR" or "AND" required.'));
+      }
+      $where = array('type' => $type, 'groupType' => $groupType, 'conditions' => array());
       foreach ($conditions as $key => $value) {
          $operator = $this->_extractOperator($key);
          $token = $this->_buildToken($key);
-         $where['conditions'][] = array('token' => $token, 'operator' => $operator);
+         $where['conditions'][] = array('field' => $key, 'token' => $token, 'operator' => $operator);
          $this->_values[$token] = $value;
       }
       $this->_sqlParts['where'][] = $where;
       return $this;
    }
    
-   public function andWhere(array $conditions) {
-      return $this->where($conditions, 'AND');
+   public function andWhere(array $conditions, $type = 'AND') {
+      return $this->where($conditions, $type, 'AND');
    }
    
-   public function orWhere(array $conditions) {
-      return $this->where($conditions, 'OR');
+   public function orWhere(array $conditions, $type = 'AND') {
+      return $this->where($conditions, $type, 'OR');
    }
    
    public function limit($limit = 20, $offset = null) {
@@ -155,7 +158,7 @@ class Query {
    }
 
    public function conditions() {
-      return $this->_conditions;
+      return $this->_sqlParts['where'];
    }
    
    public function limits() {
@@ -168,6 +171,10 @@ class Query {
 
    public function type() {
       return $this->_type;
+   }
+   
+   public function tokensValues() {
+      return $this->_values;
    }
 
    public function customQuery($sql, $tokens) {
@@ -188,20 +195,22 @@ class Query {
    
    private function _extractOperator(&$field) {
       $knownOperators = array(
-          'gt' => '>',
-          'lt' => '<',
-          'eq' => '=',
-          'lte' => '<=',
-          'gte' => '>=',
-          'neq' => array('!=', '<>')
+          '>' => 'gt',
+          '<' => 'lt',
+          '>=' => 'gte',
+          '<=' => 'lte',
+          '=' => 'eq',
+          '==' => 'eq',
+          '!=' => 'neq',
+          '<>' => 'neq'
       );
       $fieldComponents = explode(' ', $field);
       if (isset($fieldComponents[1])) {
-         if (!in_array($fieldComponents[1], $knownOperators)) {
+         if (!array_key_exists($fieldComponents[1], $knownOperators)) {
             throw new InvalidArgumentException(__('Unknown operator "%s".', $fieldComponents[1]));
          }
          $field = $fieldComponents[0];
-         return array_search($fieldComponents[1], $knownOperators);
+         return $knownOperators[$fieldComponents[1]];
       } else {
          return 'eq';
       }

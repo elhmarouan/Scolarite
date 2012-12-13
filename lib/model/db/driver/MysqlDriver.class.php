@@ -30,16 +30,15 @@ class MysqlDriver extends PDOAbstract implements DriverInterface {
       if (isset($credentials['port'])) {
          $dsn .= 'port=' . $credentials['port'] . ';';
       }
-      if (isset($credentials['dbname'])) {
-         $dsn .= 'dbname=' . $credentials['dbname'] . ';';
+      if (isset($credentials['dbName'])) {
+         $dsn .= 'dbname=' . $credentials['dbName'] . ';';
       }
-      if (isset($credentials['unix_socket'])) {
+      if (isset($credentials['unixSocket'])) {
          $dsn .= 'unix_socket=' . $credentials['unix_socket'] . ';';
       }
       if (isset($credentials['charset'])) {
          $dsn .= 'charset=' . $credentials['charset'] . ';';
       }
-
       return $dsn;
    }
 

@@ -18,11 +18,22 @@ abstract class PDOAbstract implements DriverInterface {
    protected $_dsn;
    protected $_username;
    protected $_password;
+   protected $_prefix;
    
    //Date formats
    protected $_dateFormat;
    protected $_timeFormat;
    protected $_dateTimeFormat;
+   
+   //Operators
+   protected $_operators = array(
+       'gt' => '>',
+       'lt' => '<',
+       'eq' => '=',
+       'lte' => '<=',
+       'gte' => '>=',
+       'neq' => '<>'
+   );
 
    public function __construct(array $credentials) {
       $this->_setDsn($this->_buildDsn($credentials));
@@ -36,21 +47,32 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::SELECT) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
+      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
       $sql = '
          SELECT ' . $this->_selectFields($query->fields()) . '
          FROM ' . implode(', ', $query->datasources()) . '
+         ' . ( !empty($conditions) ? $conditions : '' ) . '
          ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $query->limits()) : '');
-      debug($sql);
-      debug($query);
+      switch ($outputFormat) {
+         case Query::OUTPUT_ARRAY:
+            $outputFormat = PDO::FETCH_ASSOC;
+            break;
+         case Query::OUTPUT_OBJECT:
+            $outputFormat = PDO::FETCH_OBJ;
+            break;
+      }
+      $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
    }
 
    public function count(Query $query) {
       if ($query->type() !== Query::SELECT) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
+      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
       $sql = '
          SELECT COUNT(1)
-         FROM ' . implode(', ', $query->datasources());
+         FROM ' . implode(', ', $query->datasources()) . '
+         ' . ( !empty($conditions) ? $conditions : '' );
    }
 
    public function update(Query $query) {
@@ -186,6 +208,38 @@ abstract class PDOAbstract implements DriverInterface {
    
    protected function _selectFields($fields) {
       return is_array($fields) ? implode(', ', array_map(array($this, '_escapeField'), $fields)) : '*';
+   }
+   
+   protected function _buildConditions(array $conditions, array $tokenValues) {
+      if ($conditions !== array()) {
+         $whereStatement = 'WHERE ';
+         $firstCondition = true;
+         foreach ($conditions as $conditionGroup) {
+            if (!empty($conditionGroup)) {
+               $currentType = $conditionGroup['type'];
+               $currentGroupType = $conditionGroup['groupType'];
+               if ($firstCondition) {
+                  $whereStatement .= '(';
+                  $firstCondition = false;
+               } else {
+                  $whereStatement .= ' ' . $currentGroupType . ' (';
+               }
+               $subWhereStatement = '';
+               foreach ($conditionGroup['conditions'] as $subCondition) {
+                  $subWhereStatement .= $currentType . ' (' . $this->_escapeField($subCondition['field']) . ' ';
+                  if(!array_key_exists($subCondition['operator'], $this->_operators)) {
+                     throw new ErrorException(__('Unable to build the WHERE statement: invalid operator "%s"', $subCondition['operator']));
+                  }
+                  //TODO! IN and NOT IN statements
+                  $subWhereStatement .= $this->_operators[$subCondition['operator']] . ' :' . $subCondition['token'] . ') ';
+               }
+               $whereStatement .= ltrim($subWhereStatement, $currentType) . ')';
+            }
+         }
+         return $whereStatement;
+      } else {
+         return '';
+      }
    }
 
    protected function _escapeValue($field) {
