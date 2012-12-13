@@ -26,13 +26,13 @@ class Query {
        'from' => array(),
        'join' => array(),
        'set' => array(),
-       'where' => null,
+       'where' => array(),
        'limit' => array(),
        'groupBy' => array(),
        'having' => null,
        'orderBy' => array()
    );
-   private $_values;
+   private $_values = array();
    
    public function __construct($daoName) {
       if (!is_string($daoName) || empty($daoName)) {
@@ -109,34 +109,30 @@ class Query {
       return $this;
    }
 
-   public function where(array $conditions) {
-      if(empty($conditions)) {
+   public function where(array $conditions, $type = 'AND') {
+      if (empty($conditions)) {
          throw new InvalidArgumentException(__('Invalid conditions: not-empty array required.'));
       }
-      foreach($conditions as $condition) {
-         
+      if (($type !== 'AND') &&  ($type !== 'OR')) {
+         throw new InvalidArgumentException(__('Invalid type: "OR" or "AND" required.'));
       }
+      $where = array('type' => $type, 'conditions' => array());
+      foreach ($conditions as $key => $value) {
+         $operator = $this->_extractOperator($key);
+         $token = $this->_buildToken($key);
+         $where['conditions'][] = array('token' => $token, 'operator' => $operator);
+         $this->_values[$token] = $value;
+      }
+      $this->_sqlParts['where'][] = $where;
       return $this;
    }
    
    public function andWhere(array $conditions) {
-      if(empty($conditions)) {
-         throw new InvalidArgumentException(__('Invalid conditions: not-empty array required.'));
-      }
-      foreach($conditions as $condition) {
-         
-      }
-      return $this;
+      return $this->where($conditions, 'AND');
    }
    
    public function orWhere(array $conditions) {
-      if(empty($conditions)) {
-         throw new InvalidArgumentException(__('Invalid conditions: not-empty array required.'));
-      }
-      foreach($conditions as $condition) {
-         
-      }
-      return $this;
+      return $this->where($conditions, 'OR');
    }
    
    public function limit($limit = 20, $offset = null) {
@@ -181,13 +177,34 @@ class Query {
    private function _buildToken($field) {
       $field = explode('.', $field);
       $token = isset($field[1]) ? $field[1] : $field[0];
-      $proposedToken = $token;
+      $proposedToken = $token . '_0';
       
       for($i = 0 ; array_key_exists($proposedToken, $this->_values) ; ++$i) {
          $proposedToken = $token . '_' . $i;
       }
       
       return $proposedToken;
+   }
+   
+   private function _extractOperator(&$field) {
+      $knownOperators = array(
+          'gt' => '>',
+          'lt' => '<',
+          'eq' => '=',
+          'lte' => '<=',
+          'gte' => '>=',
+          'neq' => array('!=', '<>')
+      );
+      $fieldComponents = explode(' ', $field);
+      if (isset($fieldComponents[1])) {
+         if (!in_array($fieldComponents[1], $knownOperators)) {
+            throw new InvalidArgumentException(__('Unknown operator "%s".', $fieldComponents[1]));
+         }
+         $field = $fieldComponents[0];
+         return array_search($fieldComponents[1], $knownOperators);
+      } else {
+         return 'eq';
+      }
    }
    
    public function getFirst($outputFormat = self::OUTPUT_ARRAY) {

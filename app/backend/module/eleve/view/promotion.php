@@ -8,10 +8,5 @@
       <li><a href="<?php echo $promo; ?>/moyennesm">Moyennes de la promotion par matière</a></li>
    </ul>
 <?php else : ?>
-        <li><a href="/eleve/"></a></li>
-   </ul>
+   <h1>Résultats de ma promo</h1>
 <?php endif; ?>
-
-   
-
-      

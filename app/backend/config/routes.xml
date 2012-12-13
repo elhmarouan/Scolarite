@@ -9,17 +9,15 @@
     <route url="/admin/(cpi1|cpi2)/([A-Za-zéèÉÈ' ]{1,})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module,matiere" />
     <route url="/admin/(cpi1|cpi2)/etudiants" module="Admin" action="etudiant" vars="promo" />
     
-    <route url="/prof/" module="Prof" action="index" />
+    <route url="/prof/promos" module="Prof" action="index" />
     <route url="/prof/(cpi1|cpi2)" module="Prof" action="promo" />
-    <!--<route url="/prof/(cpi1|cpi2)/(etudiants|notes)" module="Prof" action="promo" vars="promo,what" />-->
     <route url="/prof/(cpi1|cpi2)/modules" module="Prof" action="modules" vars="promo" />
     <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})" module="Prof" action="modules" vars="promo" />
     <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/matiere" module="Prof" action="modules" vars="promo,module" />
     <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/([A-Za-z+]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
-    <route url="/prof/(cpi1|cpi2)/notes/([A-Za-z]{1,})/([A-Za-z+]{1,})/(ajouter)" module="Prof" action="matiere" vars="promo,module,matiere,action" />
-    <route url="/prof/(cpi1|cpi2)/notes/([A-Za-z]{1,})/([A-Za-z]{1,})/([0-9]{1,})/(modifier|supprimer)" module="Prof" action="matiere" vars="promo,module,matiere,idExam,action" />
-    <route url="/prof/(cpi1|cpi2)/([0-9]{1,})/" module="Prof" action="student" vars="promo" />
+    <!-- <route url="/prof/(cpi1|cpi2)/([0-9]{1,})/" module="Prof" action="student" vars="promo" /> -->
     
     <route url="/eleve/" module="Eleve" action="index" />
-    
+    <route url="/eleve/perso" module="Eleve" action="perso" />
+    <route url="/eleve/promo" module="Eleve" action="promotion" />
 </routes>

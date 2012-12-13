@@ -11,7 +11,7 @@ class EleveController extends PandaController {
       $this->setWindowTitle('Accueil élève');      
    }
    
-   public function disciplines() {      
+   public function perso() {      
       $this->setWindowTitle('Informations personnelles');
    }
    

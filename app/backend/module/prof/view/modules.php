@@ -24,13 +24,13 @@
    }
 </style>
 
-<h1><center>Gestion des modules <?php echo $modules; ?></center></h1>
+<h1><center>Gestion des modules</center></h1>
 <center><ul id="menu">
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques">Mathématiques</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Physique">Physique</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique">Informatique</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Francais">Français</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Seriesdefourier">Mathématiques</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/BDD">Informatique</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Physique/Electromagnetisme">Physique</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Francais/Droit">Français</a></li>
       <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Anglais">Anglais</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Electronique">Electronique</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Electronique/Automatique">Electronique</a></li>
       <li><a href="http://www.scolarite.fr.nf/prof/cpi1/TIPE">TIPE</a></li>
    </ul></center>

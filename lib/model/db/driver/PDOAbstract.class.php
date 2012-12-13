@@ -41,6 +41,7 @@ abstract class PDOAbstract implements DriverInterface {
          FROM ' . implode(', ', $query->datasources()) . '
          ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $query->limits()) : '');
       debug($sql);
+      debug($query);
    }
 
    public function count(Query $query) {

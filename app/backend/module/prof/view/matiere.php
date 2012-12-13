@@ -30,9 +30,34 @@ color: #1D5CBC; /* couleur des liens quand il y a le surlignage. On garde la mê
       <h1><center>Gestion du module de <?php echo $modules; ?></center></h1>
 <center>Choisissez la matière à gérer:</center>
 
-<center><ul id="menu">
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Fourier">Séries de Fourier</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Entiere">Séries entières</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Fonctions">Séries de fonctions</a></li>
+<center>
+   <ul id="menu">
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Suitesfonctions">Suites de fonctions</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Seriesfonctions">Séries de fonctions</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Seriesentiere">Séries entières</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Mathematiques/Seriesfourier">Séries de Fourier</a></li>
+   </ul>
+   
+   <ul id="menu">
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/BDD">Base De Données</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/HTML">HTML</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/CSS">CSS</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/PHP">PHP</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Informatique/AJAX">AJAX</a></li>
+   </ul>
+   
+   <ul id="menu">
       <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Physique/Electromagnetisme">Electromagnétisme</a></li>
-   </ul></center>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Physique/Magnetisme">Magnétisme</a></li>
+   </ul> 
+      
+   <ul id="menu">
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Francais/Droit">Le droit</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Francais/Liensocials">Les liens socials</a></li>
+      <li><a href="http://www.scolarite.fr.nf/prof/cpi1/Francais/Justice">La justice</a>
+   </ul>
+   
+   <ul id="menu">
+      </li><li><a href="http://www.scolarite.fr.nf/prof/cpi1/Electronique/Automatique">Automatique</a></li>
+   </ul>
+</center>
