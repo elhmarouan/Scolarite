@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf8" ?>
+<routes>
+    <route url="/" module="Accueil" action="index" />
+    <route url="/test" module="Accueil" action="test" />
+</routes>

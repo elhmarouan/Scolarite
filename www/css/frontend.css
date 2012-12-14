@@ -1,0 +1,43 @@
+body {
+   background: pink;
+   font-family: "Open Sans", sans-serif;
+   color: blue;
+   margin: auto;
+}
+
+.menu {
+   margin-bottom: 20px;
+   border-bottom: solid 2px purple;
+   display: block;
+   height: 50px;
+}
+
+.menu ul li{
+   list-style-type: none;
+   display : inline;
+}
+
+.menu ul{
+   display : block;
+   padding: 0;
+   text-align: center;
+}
+
+#scol{
+   text-align: center;
+}
+
+h1{
+   text-align: center;
+}
+
+#blabla{
+   text-align: center;   
+}
+
+#blabla p {
+   display: inline-block;
+   border: solid 2px crimson;
+   padding : 35px;
+   width: 50%;
+}

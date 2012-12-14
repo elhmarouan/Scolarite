@@ -1,0 +1,11 @@
+#Deny From All
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+   Options +FollowSymLinks
+   RewriteEngine On
+
+   RewriteRule ^(.*)$ /www/$1 [L]
+</IfModule>
+
+php_flag  log_errors off
