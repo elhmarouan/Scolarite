@@ -16,15 +16,19 @@ class AdminController extends PandaController {
       if (PandaRequest::getExists('promo')) {
          $this->setWindowTitle('Gestion de la promotion ' . PandaRequest::get('promo'));
          $this->setSubAction('manageClass');
-         $this->page()->addVar('promo', stripslashes(htmlspecialchars(PandaRequest::get('promo'))));
+         $this->page()->addVar('promo', htmlspecialchars(stripslashes(PandaRequest::get('promo'))));
       } else {
          $this->setWindowTitle('Gestion des promotions');
+         $this->loadModels('Promo');
+         $promosList = $this->model('Promo')->findAll();
+         foreach($promosList as &$promo) {
+            $promo['libelle'] = htmlspecialchars(stripslashes($promo['libelle']));
+         }
+         $this->page()->addVar('promosList', $promosList);
       }
    }
 
    public function enseignement() {
-      $this->loadModels('Module');
-      $this->model('Module')->find(array('idMod <=' => 5, 'idMod >=' => 1, 'libelle' => 'test', 'idPromo !=' => 5));
       if (PandaRequest::getExists('promo')) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          $this->setWindowTitle('Gestion de la promo ' . PandaRequest::get('promo'));

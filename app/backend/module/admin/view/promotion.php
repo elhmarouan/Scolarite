@@ -7,7 +7,15 @@
 <?php else : ?>
    <h1>Gestion des promotions</h1>
    <ul>
-      <li><a href="/admin/cpi1">cpi1</a></li>
-      <li><a href="/admin/cpi2">cpi2</a></li>
+      <?php if (!empty($promosList)) :
+         foreach ($promosList as $promo) :
+            ?>
+            <li><a href="/admin/<?php echo $promo['libelle']; ?>"><?php echo $promo['libelle']; ?></a></li>
+            <?php
+         endforeach;
+      else :
+         ?>
+         <li>Aucune promotion disponible</li>
+   <?php endif; ?>
    </ul>
 <?php endif; ?>

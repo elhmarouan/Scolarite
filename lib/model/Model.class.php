@@ -10,6 +10,7 @@
  */
 abstract class Model {
 
+   protected $_tableName;
    protected $_errors = array();
    protected $_query;
    protected $_daoName;
@@ -21,13 +22,13 @@ abstract class Model {
    }
    
    protected function _tableName() {
-      return pluralize(strtolower(str_replace('Model', '', get_class($this))));
+      return (!empty($this->_tableName)) ? $this->_tableName : pluralize(strtolower(str_replace('Model', '', get_class($this))));
    }
    
    protected function _tableFields() {
       $fields = get_object_vars($this);
       foreach($fields as $key => $value) {
-         if(in_array($key, array('_errors', '_query', '_daoName'))) {
+         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName'))) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];
@@ -45,6 +46,10 @@ abstract class Model {
       return $this->_errors;
    }
 
+   public function first(array $conditions = array(), $field = '') {
+      
+   }
+   
    public function field($field, array $conditions = array()) {
       $modelAttributes = get_object_vars($this);
       if (!is_string($field) || empty($field) || !in_array('_' . $field, array_keys($modelAttributes))) {

@@ -101,17 +101,17 @@ class PandaController {
    }
 
    public function loadModels($models) {
-      if (!is_string($models) || empty($models)) {
-         throw new InvalidArgumentException(__('Invalid models: not-empty string required.'));
-      }
-      $models = explode(',', $models);
+      $models = (func_num_args() === 1) && is_string($models) ? explode(',', $models) : func_get_args();
       foreach ($models as $modelName) {
+         if (!is_string($modelName) || empty($modelName)) {
+            throw new InvalidArgumentException(__('Invalid model "%s": not-empty string needed', (string) $modelName));
+         }
          $modelName = ucfirst(trim($modelName));
          if (is_file(MODEL_DIR . $modelName . '.class.php')) {
             if (!isset($this->_models[$modelName])) {
-               PandaApplication::load('Model.Module');
+               PandaApplication::load('Model.' . $modelName);
                $modelClass = $modelName . 'Model';
-               $this->_models[$modelName] = new $modelClass();
+               $this->_models[$modelName] = new $modelClass;
             }
          } else {
             throw new InvalidArgumentException(__('Unknown model "%s"', $modelName));
@@ -123,7 +123,7 @@ class PandaController {
       if(isset($this->_models[$modelName]) && $this->_models[$modelName] instanceof Model) {
          return $this->_models[$modelName];
       } else {
-         throw new InvalidArgumentException(__('Unknown model "%s"', $modelName));
+         throw new InvalidArgumentException(__('Unknown or not-loaded model "%s"', $modelName));
       }
    }
 

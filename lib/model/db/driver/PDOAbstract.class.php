@@ -61,7 +61,7 @@ abstract class PDOAbstract implements DriverInterface {
             $outputFormat = PDO::FETCH_OBJ;
             break;
       }
-      $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
+      return $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
    }
 
    public function count(Query $query) {
