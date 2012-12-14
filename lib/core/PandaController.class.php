@@ -59,6 +59,10 @@ class PandaController {
       return $this->{$this->_action}();
    }
 
+   public function app() {
+      return $this->_app;
+   }
+   
    public function page() {
       return $this->_page;
    }
@@ -77,10 +81,10 @@ class PandaController {
 
    public function setAction($action) {
       if (is_string($action) && !empty($action)) {
-         if (!in_array($action, array('exec', 'page'))) {
+         if (!in_array($action, array('exec', 'app', 'page'))) {
             $this->_action = $action;
          } else {
-            throw new InvalidArgumentException(__('Invalid action: the action name can\'t be "exec" or "page".'));
+            throw new InvalidArgumentException(__('Invalid action: the action name can\'t be "exec", "app" or "page".'));
          }
       } else {
          throw new InvalidArgumentException(__('Invalid action: the action must be a not-empty string.'));

@@ -14,6 +14,8 @@
          </ul>
       </nav>
       <div id="content">
+         <div id="popup">
+         </div>
          <?php echo $content; ?>
       </div>
    </body>

@@ -13,13 +13,18 @@ class AdminController extends PandaController {
    }
 
    public function promotion() {
+      $this->loadModels('Promo');
       if (PandaRequest::getExists('promo')) {
-         $this->setWindowTitle('Gestion de la promotion ' . PandaRequest::get('promo'));
-         $this->setSubAction('manageClass');
-         $this->page()->addVar('promo', htmlspecialchars(stripslashes(PandaRequest::get('promo'))));
+         if($this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
+            $this->setWindowTitle('Gestion de la promotion ' . PandaRequest::get('promo'));
+            $this->setSubAction('manageClass');
+            $this->page()->addVar('promo', htmlspecialchars(stripslashes(PandaRequest::get('promo'))));
+         } else {
+            $this->app()->user()->addPopup('Désolé, la promo '. PandaRequest::get('promo') .' n\'existe pas.', Popup::ERROR);
+            PandaResponse::redirect('/admin/promos');
+         }
       } else {
          $this->setWindowTitle('Gestion des promotions');
-         $this->loadModels('Promo');
          $promosList = $this->model('Promo')->field('libelle');
          foreach($promosList as &$promo) {
             $promo = htmlspecialchars(stripslashes($promo));

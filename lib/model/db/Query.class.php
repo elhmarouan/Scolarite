@@ -12,8 +12,9 @@
 class Query {
 
    const SELECT = 1;
-   const UPDATE = 2;
-   const DELETE = 3;
+   const COUNT = 2;
+   const UPDATE = 3;
+   const DELETE = 4;
    
    const OUTPUT_ARRAY = 1;
    const OUTPUT_OBJECT = 2;
@@ -51,8 +52,8 @@ class Query {
       $this->_currentDao = $daoName;
    }
    
-   public function reset() {
-      $defaultAttributes = get_class_vars($this);
+   private function _reset() {
+      $defaultAttributes = get_class_vars(get_class($this));
       foreach ($defaultAttributes as $attribute => $defaultValue) {
          if(!in_array($attribute, array('_dao', '_currentDao'))) { 
             $this->$attribute = $defaultValue;
@@ -66,6 +67,11 @@ class Query {
          return $this;
       }
       $this->_sqlParts['select'] = is_array($fields) ? $fields : func_get_args();
+      return $this;
+   }
+   
+   public function count() {
+      $this->_type = self::COUNT;
       return $this;
    }
    
@@ -229,24 +235,28 @@ class Query {
       }
    }
    
-   public function getCount() {
-      
-   }
-   
    public function getResult($outputFormat = self::OUTPUT_ARRAY) {
       if (!empty($this->_type)) {
          if(!empty($this->_sqlParts['from'])) {
             switch ($this->_type) {
                case self::SELECT:
-                  return self::$_dao[$this->_currentDao]->select($this, $outputFormat);
+                  $result = self::$_dao[$this->_currentDao]->select($this, $outputFormat);
+                  break;
+               case self::COUNT:
+                  $result = self::$_dao[$this->_currentDao]->count($this);
                   break;
                case self::UPDATE:
-                  return self::$_dao[$this->_currentDao]->update($this);
+                  $result = self::$_dao[$this->_currentDao]->update($this);
                   break;
                case self::DELETE:
-                  return self::$_dao[$this->_currentDao]->delete($this);
+                  $result = self::$_dao[$this->_currentDao]->delete($this);
+                  break;
+               default:
+                  throw new ErrorException(__('Unable to get the result of the query: invalid query type.'));
                   break;
             }
+            $this->_reset();
+            return $result;
          } else {
             throw new ErrorException(__('Unable to execute the query: please specify at least one datasource to work on.'));
          }

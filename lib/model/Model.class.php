@@ -51,7 +51,7 @@ abstract class Model {
    }
    
    public function count(array $conditions = array()) {
-      return $this->_query->select()->from($this->_tableName())->where($conditions)->getCount();
+      return $this->_query->count()->from($this->_tableName())->where($conditions)->getResult();
    }
    
    public function exists(array $conditions = array()) {

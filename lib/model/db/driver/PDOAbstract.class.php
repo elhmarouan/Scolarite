@@ -73,14 +73,16 @@ abstract class PDOAbstract implements DriverInterface {
    }
 
    public function count(Query $query) {
-      if ($query->type() !== Query::SELECT) {
-         throw new InvalidArgumentException(__('Invalid query: select query required.'));
+      if ($query->type() !== Query::COUNT) {
+         throw new InvalidArgumentException(__('Invalid query: count query required.'));
       }
       $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
       $sql = '
-         SELECT COUNT(1)
+         SELECT COUNT(1) AS count
          FROM ' . implode(', ', $query->datasources()) . '
          ' . ( !empty($conditions) ? $conditions : '' );
+      $result = $this->fetchAll($this->query($sql, $query->tokensValues()));
+      return (int) $result[0]['count'];
    }
 
    public function update(Query $query) {
