@@ -12,7 +12,10 @@ class ProfController extends PandaController {
    }
    
    public function promo() {
-     $this->setWindowTitle('Promotions');
+      if (PandaRequest::getExists('promo')) {
+         $this->setWindowTitle('Promotions');
+         $this->page()->addVar('promo', PandaRequest::get('promo'));
+      }
    }
    
    public function modules() {
