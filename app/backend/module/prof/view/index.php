@@ -27,7 +27,7 @@ color: #1D5CBC; /* couleur des liens quand il y a le surlignage. On garde la mê
    <center><h1>Accueil professeurs</h1></center>
    <center>Veuillez sélectionner la promotion:</center>
    <center><ul id="menu">
-      <li><a href="http://www.scolarite.fr.nf/prof/promos">CPI 1</a></li>
-      <li><a href="http://www.scolarite.fr.nf/prof/promos">CPI 2</a></li>
+      <li><a href="/prof/cpi1">CPI 1</a></li>
+      <li><a href="/prof/cpi2">CPI 2</a></li>
    </ul></center>
   

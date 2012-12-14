@@ -32,6 +32,6 @@ color: #1D5CBC; /* couleur des liens quand il y a le surlignage. On garde la mê
    <center>Choisissez une action:</center>
    <center><ul id="menu">
       <li><a href="">Liste des étudiants</a></li>
-      <li<a href="http://www.scolarite.fr.nf/prof/cpi1/modules">Liste des modules</a></li>
+      <li><a href="/prof/<?php echo $promo; ?>/modules">Liste des modules</a></li>
    </ul></center>
    
