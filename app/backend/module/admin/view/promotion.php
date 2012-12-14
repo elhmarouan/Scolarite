@@ -18,4 +18,5 @@
          <li>Aucune promotion disponible</li>
    <?php endif; ?>
    </ul>
+   <p><a href="/admin/">Retour à l'accueil du panel d'administration</a></p>
 <?php endif; ?>

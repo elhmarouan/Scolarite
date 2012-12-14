@@ -50,6 +50,14 @@ abstract class Model {
       
    }
    
+   public function count(array $conditions = array()) {
+      return $this->_query->select()->from($this->_tableName())->where($conditions)->getCount();
+   }
+   
+   public function exists(array $conditions = array()) {
+      return $this->count($conditions) > 0 ? true : false; 
+   }
+   
    public function field($field, array $conditions = array()) {
       $modelAttributes = get_object_vars($this);
       if (!is_string($field) || empty($field) || !in_array('_' . $field, array_keys($modelAttributes))) {
