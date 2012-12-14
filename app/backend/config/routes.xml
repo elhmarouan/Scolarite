@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf8" ?>
+<routes>
+    <route url="/admin/" module="Admin" action="index" />
+    <route url="/admin/promos" module="Admin" action="promotion" />
+    <route url="/admin/(cpi1|cpi2)" module="Admin" action="promotion" vars="promo" />
+    <route url="/admin/(cpi1|cpi2)/modules" module="Admin" action="enseignement" vars="promo" />
+    <route url="/admin/(cpi1|cpi2)/modules/(ajouter)" module="Admin" action="enseignement" vars="promo,action" />
+    <route url="/admin/(cpi1|cpi2)/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module" />
+    <route url="/admin/(cpi1|cpi2)/([A-Za-zéèÉÈ' ]{1,})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module,matiere" />
+    <route url="/admin/(cpi1|cpi2)/etudiants" module="Admin" action="etudiant" vars="promo" />
+    
+    <route url="/prof/promos" module="Prof" action="index" />
+    <route url="/prof/(cpi1|cpi2)" module="Prof" action="promo" />
+    <route url="/prof/(cpi1|cpi2)/modules" module="Prof" action="modules" vars="promo" />
+    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})" module="Prof" action="modules" vars="promo" />
+    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/matiere" module="Prof" action="modules" vars="promo,module" />
+    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/([A-Za-z+]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
+    <!-- <route url="/prof/(cpi1|cpi2)/([0-9]{1,})/" module="Prof" action="student" vars="promo" /> -->
+    
+    <route url="/eleve/" module="Eleve" action="index" />
+    <route url="/eleve/perso" module="Eleve" action="perso" />
+    <route url="/eleve/promo" module="Eleve" action="promotion" />
+</routes>
