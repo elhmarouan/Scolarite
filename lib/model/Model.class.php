@@ -22,7 +22,7 @@ abstract class Model {
    }
    
    protected function _tableName() {
-      return (!empty($this->_tableName)) ? $this->_tablename : pluralize(strtolower(str_replace('Model', '', get_class($this))));
+      return (!empty($this->_tableName)) ? $this->_tableName : pluralize(strtolower(str_replace('Model', '', get_class($this))));
    }
    
    protected function _tableFields() {
@@ -82,7 +82,7 @@ abstract class Model {
       }
    }
 
-   public function delete() {
+   public function delete(array $conditions = array()) {
       
    }
 

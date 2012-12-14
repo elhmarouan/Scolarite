@@ -2,12 +2,12 @@
 <routes>
     <route url="/admin/" module="Admin" action="index" />
     <route url="/admin/promos" module="Admin" action="promotion" />
-    <route url="/admin/(cpi1|cpi2)" module="Admin" action="promotion" vars="promo" />
-    <route url="/admin/(cpi1|cpi2)/modules" module="Admin" action="enseignement" vars="promo" />
-    <route url="/admin/(cpi1|cpi2)/modules/(ajouter)" module="Admin" action="enseignement" vars="promo,action" />
-    <route url="/admin/(cpi1|cpi2)/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module" />
-    <route url="/admin/(cpi1|cpi2)/([A-Za-zéèÉÈ' ]{1,})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module,matiere" />
-    <route url="/admin/(cpi1|cpi2)/etudiants" module="Admin" action="etudiant" vars="promo" />
+    <route url="/admin/([a-z]{3}[1-3]{1})" module="Admin" action="promotion" vars="promo" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/modules" module="Admin" action="enseignement" vars="promo" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/modules/(ajouter)" module="Admin" action="enseignement" vars="promo,action" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module,matiere" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/etudiants" module="Admin" action="etudiant" vars="promo" />
     
     <route url="/prof/promos" module="Prof" action="index" />
     <route url="/prof/(cpi1|cpi2)" module="Prof" action="promo" />
