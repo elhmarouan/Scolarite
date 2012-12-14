@@ -111,7 +111,7 @@ class Query {
 
    public function where(array $conditions, $type = 'AND', $groupType = 'AND') {
       if (empty($conditions)) {
-         throw new InvalidArgumentException(__('Invalid conditions: not-empty array required.'));
+         return $this;
       }
       if (($type !== 'AND') &&  ($type !== 'OR')) {
          throw new InvalidArgumentException(__('Invalid type: "OR" or "AND" required.'));
