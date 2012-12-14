@@ -10,7 +10,7 @@
       <?php if (!empty($promosList)) :
          foreach ($promosList as $promo) :
             ?>
-            <li><a href="/admin/<?php echo $promo['libelle']; ?>"><?php echo $promo['libelle']; ?></a></li>
+            <li><a href="/admin/<?php echo $promo; ?>"><?php echo $promo; ?></a></li>
             <?php
          endforeach;
       else :

@@ -51,7 +51,7 @@ abstract class PDOAbstract implements DriverInterface {
       $sql = '
          SELECT ' . $this->_selectFields($query->fields()) . '
          FROM ' . implode(', ', $query->datasources()) . '
-         ' . ( !empty($conditions) ? $conditions : '' ) . '
+         ' . (!empty($conditions) ? $conditions : '' ) . '
          ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $query->limits()) : '');
       switch ($outputFormat) {
          case Query::OUTPUT_ARRAY:
@@ -61,7 +61,15 @@ abstract class PDOAbstract implements DriverInterface {
             $outputFormat = PDO::FETCH_OBJ;
             break;
       }
-      return $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
+      $result = $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
+      if (count($query->fields() === 1)) {
+         $rawResult = $result;
+         $result = array();
+         foreach ($rawResult as $resultRow) {
+            $result[] = $resultRow[implode('', $query->fields())];
+         }
+      }
+      return $result;
    }
 
    public function count(Query $query) {

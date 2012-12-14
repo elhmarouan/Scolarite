@@ -20,9 +20,9 @@ class AdminController extends PandaController {
       } else {
          $this->setWindowTitle('Gestion des promotions');
          $this->loadModels('Promo');
-         $promosList = $this->model('Promo')->findAll();
+         $promosList = $this->model('Promo')->field('libelle');
          foreach($promosList as &$promo) {
-            $promo['libelle'] = htmlspecialchars(stripslashes($promo['libelle']));
+            $promo = htmlspecialchars(stripslashes($promo));
          }
          $this->page()->addVar('promosList', $promosList);
       }
