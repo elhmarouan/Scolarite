@@ -10,11 +10,11 @@
     <route url="/admin/([a-z]{3}[1-3]{1})/etudiants" module="Admin" action="etudiant" vars="promo" />
     
     <route url="/prof/promos" module="Prof" action="index" />
-    <route url="/prof/(cpi1|cpi2)" module="Prof" action="promo" />
-    <route url="/prof/(cpi1|cpi2)/modules" module="Prof" action="modules" vars="promo" />
-    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})" module="Prof" action="modules" vars="promo" />
-    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/matiere" module="Prof" action="modules" vars="promo,module" />
-    <route url="/prof/(cpi1|cpi2)/([A-Za-z]{1,})/([A-Za-z+]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
+    <route url="/prof/([a-z]{3}[1-3]{1})" module="Prof" action="promo" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/modules" module="Prof" action="modules" vars="promo" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})" module="Prof" action="modules" vars="promo" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})/matiere" module="Prof" action="modules" vars="promo,module" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})/([A-Za-z+]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
     <!-- <route url="/prof/(cpi1|cpi2)/([0-9]{1,})/" module="Prof" action="student" vars="promo" /> -->
     
     <route url="/eleve/" module="Eleve" action="index" />
