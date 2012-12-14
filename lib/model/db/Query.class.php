@@ -229,6 +229,10 @@ class Query {
       }
    }
    
+   public function getCount() {
+      
+   }
+   
    public function getResult($outputFormat = self::OUTPUT_ARRAY) {
       if (!empty($this->_type)) {
          if(!empty($this->_sqlParts['from'])) {
