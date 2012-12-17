@@ -47,7 +47,11 @@ abstract class Model {
    }
 
    public function first(array $conditions = array(), $field = '') {
-      
+      if($field !== '') {
+         return $this->_query->select($field)->from($this->_tableName())->where($conditions)->limit(1)->getResult();
+      } else {
+         return $this->_query->select($this->_tableFields())->from($this->_tableName())->where($conditions)->limit(1)->getResult();
+      }
    }
    
    public function count(array $conditions = array()) {
@@ -72,14 +76,6 @@ abstract class Model {
    
    public function findAll() {
       return $this->_query->select($this->_tableFields())->from($this->_tableName())->getResult();
-   }
-
-   public function create() {
-      if ($this->isValid()) {
-         
-      } else {
-         return $this->errors();
-      }
    }
 
    public function save() {

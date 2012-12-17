@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class ModuleModel extends Model {
-   protected $_tameName = 'Module';
+   protected $_tableName = 'Module';
    
    //Champs
    protected $_idMod;

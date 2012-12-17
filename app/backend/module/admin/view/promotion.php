@@ -1,13 +1,21 @@
-<?php if ($manageClass) : ?>
+<?php if ($managePromo) : ?>
    <h1>Gestion de la promotion <?php echo $promo; ?></h1>
    <ul>
-      <li><a href="/admin/<?php echo $promo; ?>/etudiants">Gestion des étudiants</a></li>
+      <li><a href="/admin/<?php echo $promo; ?>/étudiants">Gestion des étudiants</a></li>
       <li><a href="/admin/<?php echo $promo; ?>/modules">Gestion des modules</a></li>
    </ul>
+<?php elseif ($addPromo) : ?>
+   <h1>Ajouter une promotion</h1>
+   <form method="post" action="">
+      <label>Intitulé</label> <input type="text" name="intitule" /><br />
+      <input type="submit" value="Ajouter" />
+   </form>
 <?php else : ?>
    <h1>Gestion des promotions</h1>
+   <p><a href="/admin/promo/ajouter">Ajouter une promotion</a></p>
    <ul>
-      <?php if (!empty($promosList)) :
+      <?php
+      if (!empty($promosList)) :
          foreach ($promosList as $promo) :
             ?>
             <li><a href="/admin/<?php echo $promo; ?>"><?php echo $promo; ?></a></li>

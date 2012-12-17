@@ -44,15 +44,16 @@ abstract class PDOAbstract implements DriverInterface {
    }
    
    public function select(Query $query, $outputFormat = Query::OUTPUT_ARRAY) {
-      if ($query->type() !== Query::SELECT) {
+      if ($query->type() !== Query::SELECT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
       $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $limits = $query->limits();
       $sql = '
          SELECT ' . $this->_selectFields($query->fields()) . '
          FROM ' . implode(', ', $query->datasources()) . '
          ' . (!empty($conditions) ? $conditions : '' ) . '
-         ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $query->limits()) : '');
+         ' . (($query->limits() !== array()) ? 'LIMIT ' . implode(',', $limits) : '');
       switch ($outputFormat) {
          case Query::OUTPUT_ARRAY:
             $outputFormat = PDO::FETCH_ASSOC;
@@ -62,18 +63,24 @@ abstract class PDOAbstract implements DriverInterface {
             break;
       }
       $result = $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
-      if (count($query->fields() === 1)) {
-         $rawResult = $result;
-         $result = array();
-         foreach ($rawResult as $resultRow) {
-            $result[] = $resultRow[implode('', $query->fields())];
+      if (count($query->fields()) === 1) {
+         if ($limits !== array() && $limits[0] === 1) {
+            $result = $result[0][implode('', $query->fields())];
+         } else {
+            $rawResult = $result;
+            $result = array();
+            foreach ($rawResult as $resultRow) {
+               $result[] = $resultRow[implode('', $query->fields())];
+            }
          }
+      } else if ($limits !== array() && $limits[0] === 1) {
+         $result = $result[0];
       }
       return $result;
    }
 
    public function count(Query $query) {
-      if ($query->type() !== Query::COUNT) {
+      if ($query->type() !== Query::COUNT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: count query required.'));
       }
       $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
@@ -86,7 +93,7 @@ abstract class PDOAbstract implements DriverInterface {
    }
 
    public function update(Query $query) {
-      if ($query->type() !== Query::UPDATE) {
+      if ($query->type() !== Query::UPDATE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: update query required.'));
       }
       $sql = '
@@ -96,7 +103,7 @@ abstract class PDOAbstract implements DriverInterface {
    }
 
    public function delete(Query $query) {
-      if ($query->type() !== Query::DELETE) {
+      if ($query->type() !== Query::DELETE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: delete query required.'));
       }
       $sql = '

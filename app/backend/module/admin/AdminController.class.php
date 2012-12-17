@@ -14,19 +14,27 @@ class AdminController extends PandaController {
 
    public function promotion() {
       $this->loadModels('Promo');
-      if (PandaRequest::getExists('promo')) {
-         if($this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
+      if (PandaRequest::getExists('action')) {
+         if (PandaRequest::get('action') === 'ajouter') {
+            $this->setWindowTitle('Ajouter une promotion');
+            $this->setSubAction('addPromo');
+         } else {
+            $this->app()->user()->addPopup('Désolé, cette action n\'existe pas.', Popup::ERROR);
+            PandaResponse::redirect('/admin/promos');
+         }
+      } else if (PandaRequest::getExists('promo')) {
+         if ($this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
             $this->setWindowTitle('Gestion de la promotion ' . PandaRequest::get('promo'));
-            $this->setSubAction('manageClass');
+            $this->setSubAction('managePromo');
             $this->page()->addVar('promo', htmlspecialchars(stripslashes(PandaRequest::get('promo'))));
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo '. PandaRequest::get('promo') .' n\'existe pas.', Popup::ERROR);
+            $this->app()->user()->addPopup('Désolé, la promo ' . PandaRequest::get('promo') . ' n\'existe pas.', Popup::ERROR);
             PandaResponse::redirect('/admin/promos');
          }
       } else {
          $this->setWindowTitle('Gestion des promotions');
          $promosList = $this->model('Promo')->field('libelle');
-         foreach($promosList as &$promo) {
+         foreach ($promosList as &$promo) {
             $promo = htmlspecialchars(stripslashes($promo));
          }
          $this->page()->addVar('promosList', $promosList);
@@ -34,9 +42,9 @@ class AdminController extends PandaController {
    }
 
    public function enseignement() {
+      $this->loadModels('Module', 'Promo');
       if (PandaRequest::getExists('promo')) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
-         $this->setWindowTitle('Gestion de la promo ' . PandaRequest::get('promo'));
          if (PandaRequest::getExists('module')) {
             $this->page()->addVar('module', PandaRequest::get('module'));
             $this->setWindowTitle('Gestion du module ' . PandaRequest::get('module'));
@@ -48,15 +56,22 @@ class AdminController extends PandaController {
                $this->setSubAction('manageModule');
             }
          } else {
-            if(PandaRequest::getExists('action') && PandaRequest::get('action') === 'ajouter') {
+            if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'ajouter') {
                $this->setSubAction('addModule');
                echo PandaRequest::post("NameModule");
             } else {
-               $modulesList = array(
-                   array('name' => 'Informatique'),
-                   array('name' => 'Mathématiques'),
-                   array('name' => 'Sciences de l\'ingénieur')
-               );
+               if (preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
+                  $prefixPromo = 'd\'';
+               } else {
+                  $prefixPromo = 'de ';
+               }
+               $this->page()->addVar('prefixPromo', $prefixPromo);
+               $this->setWindowTitle('Gestion des modules ' . $prefixPromo . PandaRequest::get('promo'));
+               //Récupèration de la liste des modules correspondants à la promo
+               $modulesList = $this->model('Module')->field('libelle', array('idPromo' => $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo')));
+               foreach ($modulesList as &$module) {
+                  $module = htmlspecialchars(stripslashes($module));
+               }
                $this->page()->addVar('listeDesModules', $modulesList);
             }
          }
@@ -68,6 +83,13 @@ class AdminController extends PandaController {
 
    public function etudiant() {
       if (PandaRequest::getExists('promo')) {
+         if(preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
+            $prefixPromo = 'd\'';
+         } else {
+            $prefixPromo = 'de ';
+         }
+         $this->setWindowTitle('Gestion des étudiants' . $prefixPromo . PandaRequest::get('promo'));
+         $this->page()->addVar('prefixPromo', $prefixPromo);
          $this->page()->addVar('promo', PandaRequest::get('promo'));
       } else {
          //TODO! Ajouter une notification d'erreur

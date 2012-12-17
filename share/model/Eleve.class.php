@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class EleveModel extends Model {
-   protected $_tameName = 'Eleve';
+   protected $_tableName = 'Eleve';
    
    //Champs
    protected $_numEtudiant;

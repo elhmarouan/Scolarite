@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class RoleModel extends Model {
-   protected $_tameName = 'Role';
+   protected $_tableName = 'Role';
    
    //Champs
    protected $_idRole;

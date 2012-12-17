@@ -1,1 +1,1 @@
-<h1>Gestion des étudiants de <?php echo $promo; ?></h1>
+<h1>Gestion des étudiants <?php echo $prefixPromo.$promo; ?></h1>

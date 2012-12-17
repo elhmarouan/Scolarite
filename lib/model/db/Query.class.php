@@ -11,10 +11,10 @@
  */
 class Query {
 
-   const SELECT = 1;
-   const COUNT = 2;
-   const UPDATE = 3;
-   const DELETE = 4;
+   const SELECT_QUERY = 1;
+   const COUNT_QUERY = 2;
+   const UPDATE_QUERY = 3;
+   const DELETE_QUERY = 4;
    
    const OUTPUT_ARRAY = 1;
    const OUTPUT_OBJECT = 2;
@@ -42,7 +42,11 @@ class Query {
       try {
          $daoDriverConfig = Config::read('datasources.list.' . $daoName);
       } catch (ErrorException $e) {
-         throw new InvalidArgumentException(__('Unknown dao name. Please check the configuration file.'));
+         if ($e->getCode() === Config::UNKNOWN_KEY) {
+            throw new InvalidArgumentException(__('Unknown dao name. Please check the configuration file.'));
+         } else {
+            throw $e;
+         }
       }
       if (!array_key_exists($daoName, self::$_dao)) {
          $driver = ucfirst($daoDriverConfig['driver']) . 'Driver';
@@ -61,8 +65,14 @@ class Query {
       }
    }
 
+   /**
+    * Set the current query type to SELECT and the fields to select if there is any.
+    * @param array $fields
+    * @param string $fields,...
+    * @return Query
+    */
    public function select($fields = null) {
-      $this->_type = self::SELECT;
+      $this->_type = self::SELECT_QUERY;
       if (empty($fields)) {
          return $this;
       }
@@ -70,13 +80,17 @@ class Query {
       return $this;
    }
    
+   /**
+    * Set the current query type to COUNT.
+    * @return Query
+    */
    public function count() {
-      $this->_type = self::COUNT;
+      $this->_type = self::COUNT_QUERY;
       return $this;
    }
    
    public function set($key, $value) {
-      if ($this->_type !== self::UPDATE) {
+      if ($this->_type !== self::UPDATE_QUERY) {
          throw new ErrorException(__('Unable to use the "set" method on this query: update query required.'));
       }
       if (!is_string($key) ||  empty($key)) {
@@ -90,7 +104,7 @@ class Query {
    }
 
    public function update($datasource = '') {
-      $this->_type = self::UPDATE;
+      $this->_type = self::UPDATE_QUERY;
       if (!empty($datasource)) {
          $this->from($datasource);
       }
@@ -98,7 +112,7 @@ class Query {
    }
 
    public function delete($datasource = '') {
-      $this->_type = self::DELETE;
+      $this->_type = self::DELETE_QUERY;
       if (!empty($datasource)) {
          $this->from($datasource);
       }
@@ -157,6 +171,7 @@ class Query {
       } else {
          throw new InvalidArgumentException(__('Invalid query limit "%s"', (string) $limit));
       }
+      return $this;
    }
 
    public function fields() {
@@ -224,7 +239,7 @@ class Query {
    
    public function getFirst($outputFormat = self::OUTPUT_ARRAY) {
       if(!empty($this->_type)) {
-         if($this->_type === self::SELECT) {
+         if($this->_type === self::SELECT_QUERY) {
             $this->limit(1);
             return $this->getResult($outputFormat);
          } else {
@@ -239,16 +254,16 @@ class Query {
       if (!empty($this->_type)) {
          if(!empty($this->_sqlParts['from'])) {
             switch ($this->_type) {
-               case self::SELECT:
+               case self::SELECT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->select($this, $outputFormat);
                   break;
-               case self::COUNT:
+               case self::COUNT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->count($this);
                   break;
-               case self::UPDATE:
+               case self::UPDATE_QUERY:
                   $result = self::$_dao[$this->_currentDao]->update($this);
                   break;
-               case self::DELETE:
+               case self::DELETE_QUERY:
                   $result = self::$_dao[$this->_currentDao]->delete($this);
                   break;
                default:

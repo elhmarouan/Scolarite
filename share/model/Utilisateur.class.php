@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class UtilisateurModel extends Model {
-   protected $_tameName = 'Utilisateur';
+   protected $_tableName = 'Utilisateur';
    
    //Champs
    protected $_idUtil;
