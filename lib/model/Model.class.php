@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Primary model class. Provide basic but useful tools
- * to create, validate, save and delete a model.
+ * Primary model class. Provides basic but useful tools
+ * to manage database data.
  * 
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * @package Panda.model
@@ -19,6 +19,18 @@ abstract class Model {
       PandaApplication::load('Panda.model.db.Query');
       $this->_daoName = $this->_daoName ? $this->_daoName : Config::read('datasources.default');
       $this->_query = new Query($this->_daoName);
+   }
+   
+   public function hydrate(array $modelData) {
+      if ($modelData !== array()) {
+         foreach ($modelData as $attribute => $value) {
+            $method = 'set' . ucfirst($attribute);
+
+            if (is_callable(array($this, $method))) {
+               $this->$method($value);
+            }
+         }
+      }
    }
    
    protected function _tableName() {
@@ -87,7 +99,7 @@ abstract class Model {
    }
 
    public function delete(array $conditions = array()) {
-      
+      return $this->_query->delete($this->_tableName())->where($conditions)->getResult();
    }
 
    protected function _customQuery($sql, $tokens) {

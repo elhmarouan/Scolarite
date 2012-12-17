@@ -237,19 +237,6 @@ class Query {
       }
    }
    
-   public function getFirst($outputFormat = self::OUTPUT_ARRAY) {
-      if(!empty($this->_type)) {
-         if($this->_type === self::SELECT_QUERY) {
-            $this->limit(1);
-            return $this->getResult($outputFormat);
-         } else {
-            throw new ErrorException(__('Unable to execute the query: please only use select statements with the getFirst method.'));
-         }
-      } else {
-         throw new ErrorException(__('Unable to execute the query: please use "select" method first.'));
-      }
-   }
-   
    public function getResult($outputFormat = self::OUTPUT_ARRAY) {
       if (!empty($this->_type)) {
          if(!empty($this->_sqlParts['from'])) {

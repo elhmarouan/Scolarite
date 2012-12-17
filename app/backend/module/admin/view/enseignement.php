@@ -12,8 +12,14 @@
    <h1>Gestion des modules <?php echo $prefixPromo . $promo; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/modules/ajouter">Ajouter un nouveau module</a></p>
    <ul>
-      <?php foreach ($listeDesModules as $module) : ?>
-         <li><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>"><?php echo $module; ?></a></li>
-      <?php endforeach; ?>
+      <?php if (!empty($listeDesModules)) :
+         foreach ($listeDesModules as $module) :
+            ?>
+            <li><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>"><?php echo $module; ?></a></li>
+         <?php endforeach;
+      else : ?>
+         <li>Aucun module disponible</li>
+   <?php endif; ?>
    </ul>
+   <p><a href="/admin/<?php echo $promo; ?>">Retour à la gestion de la promotion</a></p>
 <?php endif; ?>
