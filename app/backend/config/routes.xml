@@ -23,4 +23,12 @@
     <route url="/eleve/" module="Eleve" action="index" />
     <route url="/eleve/perso" module="Eleve" action="perso" />
     <route url="/eleve/promo" module="Eleve" action="promotion" />
+    <route url="/eleve/perso/notesm" module="Eleve" action="perso" vars="action" />
+    <route url="/eleve/perso/moyennesm" module="Eleve" action="perso" vars="action" />
+    <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="action" />
+    <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="action" />
+    
+    
+    
+    
 </routes>
