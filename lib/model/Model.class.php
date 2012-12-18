@@ -8,7 +8,7 @@
  * @package Panda.model
  * 
  */
-abstract class Model {
+abstract class Model implements ArrayAccess {
 
    protected $_tableName;
    protected $_errors = array();
@@ -104,6 +104,24 @@ abstract class Model {
 
    protected function _customQuery($sql, $tokens) {
       return $this->_query->customQuery($sql, $tokens);
+   }
+   
+   public function offsetExists($key) {
+      return isset($this->{'_' . $key}) && !in_array($key, array('_tableName', '_errors', '_query', '_daoName'));
+   }
+   
+   public function offsetGet($key) {
+      return $this->offsetExists($key) ? $this->{'_' . $key} : null;
+   }
+   
+   public function offsetSet($key, $value) {
+      if ($this->offsetExists($key)) {
+         return $this->{'_' . $key} = $value;
+      }
+   }
+   
+   public function offsetUnset($key) {
+      return null;
    }
 
 }
