@@ -43,22 +43,31 @@ class AdminController extends PandaController {
 
    public function enseignement() {
       $this->loadModels('Module', 'Promo');
-      if (PandaRequest::getExists('promo')) {
+      if (PandaRequest::getExists('promo') && $this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          if (PandaRequest::getExists('module')) {
-            $this->page()->addVar('module', PandaRequest::get('module'));
-            $this->setWindowTitle('Gestion du module ' . PandaRequest::get('module'));
-            if (PandaRequest::getExists('matiere')) {
-               $this->page()->addVar('matiere', PandaRequest::get('matiere'));
-               $this->setWindowTitle('Gestion de la matière ' . PandaRequest::get('matiere'));
-               $this->setSubAction('manageMatiere');
+            if ($this->model('Module')->exists(array('libelle' => PandaRequest::get('module'), 'idPromo' => $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo')))) {
+               $this->page()->addVar('module', PandaRequest::get('module'));
+               $this->setWindowTitle('Gestion du module ' . PandaRequest::get('module'));
+               if (PandaRequest::getExists('matiere')) {
+                  $this->page()->addVar('matiere', PandaRequest::get('matiere'));
+                  $this->setWindowTitle('Gestion de la matière ' . PandaRequest::get('matiere'));
+                  $this->setSubAction('manageMatiere');
+               } else {
+                  $this->setSubAction('manageModule');
+               }
             } else {
-               $this->setSubAction('manageModule');
+               //TODO! Ajouter une notification d'erreur
+               PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');
             }
          } else {
             if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'ajouter') {
                $this->setSubAction('addModule');
-               echo PandaRequest::post("NameModule");
+               $this->setWindowTitle('Ajouter un module');
+               if(PandaRequest::postExists('libelle')) {
+                  $this->model('Module')->hydrate(array('libelle' => PandaRequest::post('libelle')));
+                  debug($this->model('Module'));
+               }
             } else {
                if (preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
                   $prefixPromo = 'd\'';
@@ -77,7 +86,7 @@ class AdminController extends PandaController {
          }
       } else {
          //TODO! Ajouter une notification d'erreur
-         PandaResponse::redirect('admin/');
+         PandaResponse::redirect('/admin/');
       }
    }
 
@@ -93,7 +102,7 @@ class AdminController extends PandaController {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
       } else {
          //TODO! Ajouter une notification d'erreur
-         PandaResponse::redirect('admin/');
+         PandaResponse::redirect('/admin/');
       }
    }
 
