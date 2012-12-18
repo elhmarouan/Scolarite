@@ -24,7 +24,7 @@ color: #1D5CBC; /* couleur des liens quand il y a le surlignage. On garde la mê
 }
       </style>
    
-   <center><h1>Accueil professeurs</h1></center>
+   <h1>Accueil professeurs</h1>
    <center>Veuillez sélectionner la promotion:</center>
    <center><ul id="menu">
       <li><a href="/prof/cpi1">CPI 1</a></li>
