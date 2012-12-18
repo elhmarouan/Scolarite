@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class MatiereModel extends Model {
-   protected $_tableName = 'Matière';
+   protected $_tableName = 'Matiere';
    
    //Champs
    protected $_idMat;

@@ -42,7 +42,7 @@ class AdminController extends PandaController {
    }
 
    public function enseignement() {
-      $this->loadModels('Module', 'Promo');
+      $this->loadModels('Module', 'Promo', 'Matiere');
       if (PandaRequest::getExists('promo') && $this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          if (PandaRequest::getExists('module')) {
@@ -55,6 +55,11 @@ class AdminController extends PandaController {
                   $this->setSubAction('manageMatiere');
                } else {
                   $this->setSubAction('manageModule');
+                  $matieresList = $this->model('Matiere')->field('libelle', array('idMod' => $this->model('Module')->first(array('libelle' => PandaRequest::get('module')), 'idMod')));
+                  foreach ($matieresList as &$matiere) {
+                  $matiere = htmlspecialchars(stripslashes($matiere));
+               }
+               $this->page()->addVar('listeDesMatieres', $matieresList);
                }
             } else {
                //TODO! Ajouter une notification d'erreur

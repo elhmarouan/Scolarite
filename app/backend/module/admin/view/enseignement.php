@@ -9,16 +9,32 @@
 <?php elseif ($manageModule) : ?>
    <h1>Gestion du module <?php echo $module; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">Ajouter un nouvelle matière</a></p>
+   <ul>
+      <?php
+      if (!empty($listeDesMatieres)) :
+         foreach ($listeDesMatieres as $matiere) :
+            ?>
+            <li><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>"><?php echo $matiere; ?></a></li>
+            <?php
+         endforeach;
+      else :
+         ?>
+         <li>Aucune matière disponible</li>
+   <?php endif; ?>
+   </ul>
 <?php else : ?>
    <h1>Gestion des modules <?php echo $prefixPromo . $promo; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/modules/ajouter">Ajouter un nouveau module</a></p>
    <ul>
-      <?php if (!empty($listeDesModules)) :
+      <?php
+      if (!empty($listeDesModules)) :
          foreach ($listeDesModules as $module) :
             ?>
             <li><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>"><?php echo $module; ?></a></li>
-         <?php endforeach;
-      else : ?>
+         <?php
+         endforeach;
+      else :
+         ?>
          <li>Aucun module disponible</li>
    <?php endif; ?>
    </ul>
