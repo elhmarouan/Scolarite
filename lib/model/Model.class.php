@@ -10,6 +10,7 @@
  */
 abstract class Model implements ArrayAccess {
 
+   protected $_primaryKey;
    protected $_tableName;
    protected $_errors = array();
    protected $_query;
@@ -40,7 +41,7 @@ abstract class Model implements ArrayAccess {
    protected function _tableFields() {
       $fields = get_object_vars($this);
       foreach($fields as $key => $value) {
-         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName'))) {
+         if(in_array($key, array('_primaryKey', '_tableName', '_errors', '_query', '_daoName'))) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];
@@ -92,9 +93,14 @@ abstract class Model implements ArrayAccess {
 
    public function save() {
       if ($this->isValid()) {
-         
+         if ($this->_primaryKey !== false) {
+            $primaryKey = explode(',', $this->_primaryKey);
+            return true;
+         } else {
+            throw new ErrorException(__('Unable to save the model: please complete the _primaryKey attribute.'));
+         }
       } else {
-         return $this->errors();
+         return false;
       }
    }
 
@@ -107,7 +113,7 @@ abstract class Model implements ArrayAccess {
    }
    
    public function offsetExists($key) {
-      return isset($this->{'_' . $key}) && !in_array($key, array('_tableName', '_errors', '_query', '_daoName'));
+      return array_key_exists('_' . $key, get_object_vars($this)) && !in_array('_' . $key, array('_tableName', '_errors', '_query', '_daoName'));
    }
    
    public function offsetGet($key) {
@@ -121,7 +127,7 @@ abstract class Model implements ArrayAccess {
    }
    
    public function offsetUnset($key) {
-      return null;
+      throw new RuntimeException(__('Unable to unset "%s" attribute of "%s".', $key, get_class($this)));
    }
 
 }

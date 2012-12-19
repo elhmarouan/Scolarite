@@ -70,8 +70,13 @@ class AdminController extends PandaController {
                $this->setSubAction('addModule');
                $this->setWindowTitle('Ajouter un module');
                if(PandaRequest::postExists('libelle')) {
-                  $this->model('Module')->hydrate(array('libelle' => PandaRequest::post('libelle')));
-                  debug($this->model('Module'));
+                  $module = $this->model('Module');
+                  $module['libelle'] = PandaRequest::post('libelle');
+                  if ($module->save()) {
+                     echo 'ok';
+                  } else {
+                     //TODO! Affichage des erreurs
+                  }
                }
             } else {
                if (preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
