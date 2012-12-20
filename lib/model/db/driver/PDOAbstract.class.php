@@ -149,6 +149,8 @@ abstract class PDOAbstract implements DriverInterface {
       return $preparedQuery->fetchAll($mode);
    }
    
+   abstract public function primaryKeysOf($datasource);
+   
    public function lastInsertId() {
       return $this->_pdo()->lastInsertId();
    }

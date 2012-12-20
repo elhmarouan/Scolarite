@@ -10,7 +10,6 @@
  */
 abstract class Model implements ArrayAccess {
 
-   protected $_primaryKey;
    protected $_tableName;
    protected $_errors = array();
    protected $_query;
@@ -41,7 +40,7 @@ abstract class Model implements ArrayAccess {
    protected function _tableFields() {
       $fields = get_object_vars($this);
       foreach($fields as $key => $value) {
-         if(in_array($key, array('_primaryKey', '_tableName', '_errors', '_query', '_daoName'))) {
+         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName'))) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];
@@ -93,12 +92,8 @@ abstract class Model implements ArrayAccess {
 
    public function save() {
       if ($this->isValid()) {
-         if ($this->_primaryKey !== false) {
-            $primaryKey = explode(',', $this->_primaryKey);
-            return true;
-         } else {
-            throw new ErrorException(__('Unable to save the model: please complete the _primaryKey attribute.'));
-         }
+         $primaryKeys = $this->_query->getPrimaryKeys($this->_tableName());
+         debug($primaryKeys);
       } else {
          return false;
       }

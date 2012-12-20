@@ -202,6 +202,10 @@ class Query {
       self::$_dao[$this->_currentDao]->query($sql, $tokens);
    }
    
+   public function getPrimaryKeys($datasource) {
+      self::$_dao[$this->_currentDao]->primaryKeysOf($datasource);
+   }
+   
    private function _buildToken($field) {
       $field = explode('.', $field);
       $token = isset($field[1]) ? $field[1] : $field[0];
