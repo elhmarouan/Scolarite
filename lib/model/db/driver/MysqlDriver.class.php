@@ -41,7 +41,18 @@ class MysqlDriver extends PDOAbstract implements DriverInterface {
       }
       return $dsn;
    }
-
+   
+   public function primaryKeysOf($datasource) {
+      if(empty($datasource) || !is_string($datasource)) {
+         throw new InvalidArgumentException(__('Unable to get this table primary keys: invalid datasource.'));
+      }
+      $primaryKeysSchema = $this->fetchAll($this->query('SHOW KEYS FROM ' . $this->_escapeField($datasource) . ' WHERE Key_name = "PRIMARY"'));
+      $primaryKeys = array();
+      foreach($primaryKeysSchema as $primaryKey) {
+         $primaryKeys[] = $primaryKey['Column_name'];
+      }
+      return $primaryKeys;
+   }
    public function _escapeField($field) {
       return ($field === '*') ? $field : '`' . $field . '`';
    }

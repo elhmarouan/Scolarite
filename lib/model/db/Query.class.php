@@ -203,7 +203,7 @@ class Query {
    }
    
    public function getPrimaryKeys($datasource) {
-      self::$_dao[$this->_currentDao]->primaryKeysOf($datasource);
+      return self::$_dao[$this->_currentDao]->primaryKeysOf($datasource);
    }
    
    private function _buildToken($field) {
