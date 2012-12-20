@@ -93,7 +93,20 @@ abstract class Model implements ArrayAccess {
    public function save() {
       if ($this->isValid()) {
          $primaryKeys = $this->_query->getPrimaryKeys($this->_tableName());
-         debug($primaryKeys);
+         if (count($primaryKeys) > 1) {
+            foreach ($primaryKeys as $primaryKey) {
+               if (empty($this->{'_' . $primaryKey})) {
+                  throw new ErrorException(__('Invalid primary key "%s": the primary key can\'t be empty.', $primaryKey));
+               }
+            }
+         } else {
+            if (empty($this->{'_' . $primaryKeys[0]})) {
+               
+            } else {
+               
+            }
+         }
+         return true;
       } else {
          return false;
       }

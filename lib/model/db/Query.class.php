@@ -13,8 +13,9 @@ class Query {
 
    const SELECT_QUERY = 1;
    const COUNT_QUERY = 2;
-   const UPDATE_QUERY = 3;
-   const DELETE_QUERY = 4;
+   const INSERT_QUERY = 3;
+   const UPDATE_QUERY = 4;
+   const DELETE_QUERY = 5;
    
    const OUTPUT_ARRAY = 1;
    const OUTPUT_OBJECT = 2;
@@ -88,21 +89,15 @@ class Query {
       $this->_type = self::COUNT_QUERY;
       return $this;
    }
-   
-   public function set($key, $value) {
-      if ($this->_type !== self::UPDATE_QUERY) {
-         throw new ErrorException(__('Unable to use the "set" method on this query: update query required.'));
-      }
-      if (!is_string($key) ||  empty($key)) {
-         throw new InvalidArgumentException(__('Invalid key for the set query: not-empty string required.'));
-      }
-      if (!in_array($key, $this->_sqlParts['set'])) {
-         $token = $this->_buildToken($key);
-         $this->_sqlParts['set'][] = array($key => $token);
-         $this->_values[$token] = $value;
-      }
-   }
 
+   public function insert($datasource = '') {
+      $this->_type = self::INSERT_QUERY;
+      if (!empty($datasource)) {
+         $this->from($datasource);
+      }
+      return $this;
+   }
+   
    public function update($datasource = '') {
       $this->_type = self::UPDATE_QUERY;
       if (!empty($datasource)) {
@@ -117,6 +112,20 @@ class Query {
          $this->from($datasource);
       }
       return $this;
+   }
+   
+   public function set($key, $value) {
+      if ($this->_type !== self::UPDATE_QUERY) {
+         throw new ErrorException(__('Unable to use the "set" method on this query: update query required.'));
+      }
+      if (!is_string($key) ||  empty($key)) {
+         throw new InvalidArgumentException(__('Invalid key for the set query: not-empty string required.'));
+      }
+      if (!in_array($key, $this->_sqlParts['set'])) {
+         $token = $this->_buildToken($key);
+         $this->_sqlParts['set'][] = array($key => $token);
+         $this->_values[$token] = $value;
+      }
    }
 
    public function from($datasource) {
