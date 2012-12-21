@@ -28,4 +28,6 @@
     <route url="/eleve/perso/moyennesm" module="Eleve" action="perso" vars="action" />
     <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="action" />
     <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="action" />
+    
+        
 </routes>
