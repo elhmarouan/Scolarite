@@ -13,12 +13,32 @@ class PandaRequest {
       
    }
 
-   public static function getExists($key) {
-      return panda_array_key_exists($key, $_GET);
+   public static function getExists() {
+      if (func_num_args() > 0) {
+         $keys = func_get_args();
+         foreach ($keys as $key) {
+            if (!panda_array_key_exists($key, $_GET)) {
+               return false;
+            }
+         }
+         return true;
+      } else {
+         throw new InvalidArgumentException(__('Please use at least one argument with the getExists method.'));
+      }
    }
 
-   public static function postExists($key) {
-      return panda_array_key_exists($key, $_POST);
+   public static function postExists() {
+      if (func_num_args() > 0) {
+         $keys = func_get_args();
+         foreach ($keys as $key) {
+            if (!panda_array_key_exists($key, $_POST)) {
+               return false;
+            }
+         }
+         return true;
+      } else {
+         throw new InvalidArgumentException(__('Please use at least one argument with the postExists method.'));
+      }
    }
 
    public static function fileExists($key) {

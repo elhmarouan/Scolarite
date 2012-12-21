@@ -143,7 +143,7 @@ abstract class Model implements ArrayAccess {
    
    public function offsetSet($key, $value) {
       if ($this->offsetExists($key)) {
-         return $this->{'_' . $key} = $value;
+         return $this->{'set' . ucfirst($key)}($value);
       }
    }
    

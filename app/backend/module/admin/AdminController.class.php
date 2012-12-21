@@ -18,7 +18,21 @@ class AdminController extends PandaController {
          if (PandaRequest::get('action') === 'ajouter') {
             $this->setWindowTitle('Ajouter une promotion');
             $this->setSubAction('addPromo');
-         } else {
+            if (PandaRequest::postExists('libelle')) {
+                  $promo = $this->model('Promo');
+                  if (!$promo->exists(array('libelle' => PandaRequest::post('libelle')))) {
+                     $promo['libelle'] = PandaRequest::post('libelle');
+                     if ($promo->save()) {
+                        User::addPopup('La promotion a bien été ajoutée.', Popup::SUCCESS);
+                        PandaResponse::redirect('/admin/promos');
+                     } else {
+                        //TODO! Affichage des erreurs
+                     }
+                  } else {
+                     User::addPopup('Une autre promo porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
+                  }
+               }
+         } else  {
             $this->app()->user()->addPopup('Désolé, cette action n\'existe pas.', Popup::ERROR);
             PandaResponse::redirect('/admin/promos');
          }
@@ -28,7 +42,7 @@ class AdminController extends PandaController {
             $this->setSubAction('managePromo');
             $this->page()->addVar('promo', htmlspecialchars(stripslashes(PandaRequest::get('promo'))));
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo ' . PandaRequest::get('promo') . ' n\'existe pas.', Popup::ERROR);
+            $this->app()->user()->addPopup('Désolé, la promo « ' . PandaRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
             PandaResponse::redirect('/admin/promos');
          }
       } else {
@@ -56,11 +70,30 @@ class AdminController extends PandaController {
                   $this->setWindowTitle('Gestion de la matière ' . PandaRequest::get('matiere'));
                   $this->setSubAction('manageMatiere');
                } else if (PandaRequest::getExists('action')) {
-                  if (PandaRequest::get('action') === 'modifier') {
+                  $module = $this->model('Module');
+                  if (PandaRequest::get('action') === 'ajouter') {
+                     $this->setSubAction('addMatiere');
+                     $this->setWindowTitle('Ajouter une matière');
+                     if (PandaRequest::postExists('libelle', 'coef')) {
+                        $matiere = $this->model('Matiere');
+                        if (!$matiere->exists(array('idMod' => $idModule, 'libelle' => PandaRequest::post('libelle')))) {
+                           $matiere['idMod'] = $idModule;
+                           $matiere['libelle'] = PandaRequest::post('libelle');
+                           $matiere['coefMat'] = PandaRequest::post('coef');
+                           if ($matiere->save()) {
+                              User::addPopup('La matière a bien été ajoutée.', Popup::SUCCESS);
+                              PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/' . PandaRequest::get('module') . '/matières');
+                           } else {
+                              //TODO! Affichage des erreurs
+                           }
+                        } else {
+                           User::addPopup('Une autre matière porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
+                        }
+                     }
+                  } else if (PandaRequest::get('action') === 'modifier') {
                      $this->setSubAction('editModule');
                      $this->setWindowTitle('Modifier un module');
                      if (PandaRequest::postExists('libelle')) {
-                        $module = $this->model('Module');
                         $module['idMod'] = $idModule;
                         $module['libelle'] = PandaRequest::post('libelle');
                         if ($module->save()) {
@@ -70,6 +103,10 @@ class AdminController extends PandaController {
                            //TODO! Affichage des erreurs
                         }
                      }
+                  } else if (PandaRequest::get('action') === 'supprimer') {
+                     $module->delete(array('idMod' => $idModule));
+                     User::addPopup('Le module a bien été supprimé.', Popup::SUCCESS);
+                     PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');
                   }
                } else {
                   $this->setSubAction('manageModule');
@@ -80,7 +117,7 @@ class AdminController extends PandaController {
                   $this->page()->addVar('listeDesMatieres', $matieresList);
                }
             } else {
-               //TODO! Ajouter une notification d'erreur
+               User::addPopup('Le module « ' . PandaRequest::get('module') . ' » n\'existe pas.', Popup::ERROR);
                PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');
             }
          } else {
@@ -120,8 +157,8 @@ class AdminController extends PandaController {
             }
          }
       } else {
-         //TODO! Ajouter une notification d'erreur
-         PandaResponse::redirect('/admin/');
+         User::addPopup('Désolé, la promo « ' . PandaRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+         PandaResponse::redirect('/admin/promos');
       }
    }
 

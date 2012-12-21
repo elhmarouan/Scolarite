@@ -9,3 +9,4 @@ Options -Indexes
 </IfModule>
 
 php_flag  log_errors off
+php_flag magic_quotes_gpc off
