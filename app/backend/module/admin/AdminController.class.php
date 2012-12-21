@@ -7,7 +7,7 @@
  * 
  */
 class AdminController extends PandaController {
-   
+
    public function index() {
       $this->setWindowTitle('Accueil du panel d\'administration');
    }
@@ -57,9 +57,9 @@ class AdminController extends PandaController {
                   $this->setSubAction('manageModule');
                   $matieresList = $this->model('Matiere')->field('libelle', array('idMod' => $this->model('Module')->first(array('libelle' => PandaRequest::get('module')), 'idMod')));
                   foreach ($matieresList as &$matiere) {
-                  $matiere = htmlspecialchars(stripslashes($matiere));
-               }
-               $this->page()->addVar('listeDesMatieres', $matieresList);
+                     $matiere = htmlspecialchars(stripslashes($matiere));
+                  }
+                  $this->page()->addVar('listeDesMatieres', $matieresList);
                }
             } else {
                //TODO! Ajouter une notification d'erreur
@@ -69,13 +69,19 @@ class AdminController extends PandaController {
             if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'ajouter') {
                $this->setSubAction('addModule');
                $this->setWindowTitle('Ajouter un module');
-               if(PandaRequest::postExists('libelle')) {
+               if (PandaRequest::postExists('libelle')) {
                   $module = $this->model('Module');
-                  $module['libelle'] = PandaRequest::post('libelle');
-                  if ($module->save()) {
-                     echo 'ok';
+                  $idPromo = $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo');
+                  if (!$module->exists(array('idPromo' => $idPromo, 'libelle' => PandaRequest::post('libelle')))) {
+                     $module['libelle'] = PandaRequest::post('libelle');
+                     $module['idPromo'] = $idPromo;
+                     if ($module->save()) {
+                        echo 'ok';
+                     } else {
+                        //TODO! Affichage des erreurs
+                     }
                   } else {
-                     //TODO! Affichage des erreurs
+                     echo 'Un autre module porte déjà ce nom. Veuillez en choisir un autre.';
                   }
                }
             } else {
@@ -102,7 +108,7 @@ class AdminController extends PandaController {
 
    public function etudiant() {
       if (PandaRequest::getExists('promo')) {
-         if(preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
+         if (preg_match('#^[aeiouy]#', PandaRequest::get('promo'))) {
             $prefixPromo = 'd\'';
          } else {
             $prefixPromo = 'de ';

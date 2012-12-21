@@ -49,6 +49,19 @@ abstract class Model implements ArrayAccess {
       }
       return array_keys($fields);
    }
+   
+   protected function _tableValues() {
+      $fields = get_object_vars($this);
+      foreach($fields as $key => $value) {
+         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName'))) {
+            unset($fields[$key]);
+         } else {
+            $fields[ltrim($key, '_')] = $fields[$key];
+            unset($fields[$key]);
+         }
+      }
+      return $fields;
+   }
 
    public function isValid() {
       return empty($this->_errors);
@@ -100,10 +113,10 @@ abstract class Model implements ArrayAccess {
                }
             }
          } else {
-            if (empty($this->{'_' . $primaryKeys[0]})) {
-               
+            if (empty($this->{'_' . $primaryKeys[0]}) || !$this->exists(array($primaryKeys[0] => $this->{'_' . $primaryKeys[0]}))) {
+               $this->_query->insert($this->_tableName)->set($this->_tableValues())->getResult();
             } else {
-               
+               $this->_query->update($this->_tableName)->set($this->_tableValues())->where(array($primaryKeys[0] => $this->{'_' . $primaryKeys[0]}))->getResult();
             }
          }
          return true;

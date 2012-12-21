@@ -91,15 +91,31 @@ abstract class PDOAbstract implements DriverInterface {
       $result = $this->fetchAll($this->query($sql, $query->tokensValues()));
       return (int) $result[0]['count'];
    }
+   
+   public function insert(Query $query) {
+      if ($query->type() !== Query::INSERT_QUERY) {
+         throw new InvalidArgumentException(__('Invalid query: insert query required.'));
+      }
+      $datasources = $query->datasources();
+      $insertParts = $this->_insertParts($query->setValues());
+      $sql = '
+         INSERT INTO ' . $datasources[0] . '(' . $insertParts['fields'] . ')
+         VALUES(' . $insertParts['tokens'] . ')
+         ';
+      return $this->query($sql, $query->tokensValues());
+   }
 
    public function update(Query $query) {
       if ($query->type() !== Query::UPDATE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: update query required.'));
       }
+      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $updateStatement = $this->_updateStatement($query->setValues());
       $sql = '
          UPDATE ' . implode(', ', $query->datasources()) . '
-         SET
-         ';
+         SET ' . $updateStatement . '
+         ' . ( !empty($conditions) ? $conditions : '' );
+      return $this->query($sql, $query->tokensValues());
    }
 
    public function delete(Query $query) {
@@ -227,6 +243,34 @@ abstract class PDOAbstract implements DriverInterface {
    
    protected function _selectFields($fields) {
       return is_array($fields) ? implode(', ', array_map(array($this, '_escapeField'), $fields)) : '*';
+   }
+   
+   protected function _insertParts(array $setValues) {
+      if (empty($setValues)) {
+         throw new InvalidArgumentException(__('Please use at least one field to insert.'));
+      }
+      $fields = array();
+      $tokens = array();
+      foreach ($setValues as $value) {
+         foreach ($value as $key => $token) {
+            $fields[] = $key;
+            $tokens[] = ':' . $token;
+         }
+      }
+      return array('fields' => $this->_selectFields($fields), 'tokens' => implode(', ', $tokens));
+   }
+   
+   protected function _updateStatement(array $setValues) {
+      if (empty($setValues)) {
+         throw new InvalidArgumentException(__('Please use at least one field to set.'));
+      }
+      $placeHolders = array();
+      foreach ($setValues as $value) {
+         foreach ($value as $key => $token) {
+            $placeHolders[] = $this->_escapeField($key) . ' = :' . $token;
+         }
+      }
+      return implode(', ', $placeHolders);
    }
    
    protected function _buildConditions(array $conditions, array $tokenValues) {

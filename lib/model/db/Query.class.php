@@ -114,18 +114,35 @@ class Query {
       return $this;
    }
    
-   public function set($key, $value) {
-      if ($this->_type !== self::UPDATE_QUERY) {
-         throw new ErrorException(__('Unable to use the "set" method on this query: update query required.'));
+   public function set() {
+      if ($this->_type !== self::UPDATE_QUERY && $this->_type !== self::INSERT_QUERY) {
+         throw new ErrorException(__('Unable to use the "set" method on this query: update or insert query required.'));
       }
-      if (!is_string($key) ||  empty($key)) {
-         throw new InvalidArgumentException(__('Invalid key for the set query: not-empty string required.'));
+      if (func_num_args() === 1) {
+         $keys = func_get_arg(0);
+         if (is_array($keys) && count($keys) > 0) {
+            foreach ($keys as $key => $value) {
+               $token = $this->_buildToken($key);
+               $this->_sqlParts['set'][] = array($key => $token);
+               $this->_values[$token] = $value;
+            }
+         } else {
+            throw new InvalidArgumentException(__('Unable to use the "set" method: wrong first parameter, not-empty array expected.'));
+         }
+      } else if (func_num_args() === 2) {
+         $key = func_get_arg(0);
+         $value = func_get_arg(1);
+         if (is_string($key) && !empty($key)) {
+            $token = $this->_buildToken($key);
+            $this->_sqlParts['set'][] = array($key => $token);
+            $this->_values[$token] = $value;
+         } else {
+            throw new InvalidArgumentException(__('Unable to use the "set" method: wrong first parameter, not-empty string expected.'));
+         }
+      } else {
+         throw InvalidArgumentException(__('Unable to use the "set" method: too few or too many arguments'));
       }
-      if (!in_array($key, $this->_sqlParts['set'])) {
-         $token = $this->_buildToken($key);
-         $this->_sqlParts['set'][] = array($key => $token);
-         $this->_values[$token] = $value;
-      }
+      return $this;
    }
 
    public function from($datasource) {
@@ -133,7 +150,11 @@ class Query {
          throw new InvalidArgumentException(__('Invalid datasource name: expected not-empty string.'));
       }
       if (!in_array($datasource, $this->_sqlParts['from'])) {
-         $this->_sqlParts['from'][] = $datasource;
+         if ($this->_type !== self::INSERT_QUERY || count($this->_sqlParts['from']) === 0) {
+            $this->_sqlParts['from'][] = $datasource;
+         } else {
+            throw new ErrorException(__('Unable to use more than one datasource with an insert query.'));
+         }
       }
       return $this;
    }
@@ -203,6 +224,10 @@ class Query {
       return $this->_type;
    }
    
+   public function setValues() {
+      return $this->_sqlParts['set'];
+   }
+   
    public function tokensValues() {
       return $this->_values;
    }
@@ -259,6 +284,9 @@ class Query {
                   break;
                case self::COUNT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->count($this);
+                  break;
+               case self::INSERT_QUERY:
+                  $result = self::$_dao[$this->_currentDao]->insert($this);
                   break;
                case self::UPDATE_QUERY:
                   $result = self::$_dao[$this->_currentDao]->update($this);
