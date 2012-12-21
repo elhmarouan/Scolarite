@@ -25,11 +25,18 @@ class EleveController extends PandaController {
       }
    }
    
- 
-}
-/*public function notes () {
- * }
- *pubic function moyennes () {
- * }
- */
-
+   public function matieres() {
+       if(PandaRequest::getExists('promo') && PandaRequest::getExists('module') && PandaRequest::getExists('matiere')) {
+         $this->setWindowTitle('Gestion de ' . PandaRequest::get('matiere'));
+         $this->page()->addVar('matiere', PandaRequest::get('matiere'));
+   }
+   
+   public function notes () {
+      
+   } 
+   
+   
+   public function moyenness() {
+      
+   }
+   }
