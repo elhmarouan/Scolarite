@@ -53,7 +53,7 @@ abstract class Model implements ArrayAccess {
    protected function _tableValues() {
       $fields = get_object_vars($this);
       foreach($fields as $key => $value) {
-         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName'))) {
+         if(in_array($key, array('_tableName', '_errors', '_query', '_daoName')) || $fields[$key] === null) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];

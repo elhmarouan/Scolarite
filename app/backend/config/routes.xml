@@ -8,6 +8,7 @@
     <route url="/admin/([a-z]{3}[1-3]{1})/étudiants" module="Admin" action="etudiant" vars="promo" />
     <route url="/admin/([a-z]{3}[1-3]{1})/modules/(ajouter)" module="Admin" action="enseignement" vars="promo,action" />
     <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module" />
+    <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})/(modifier|supprimer)" module="Admin" action="enseignement" vars="promo,module,action" />
     <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})/matières/(ajouter)" module="Admin" action="enseignement" vars="promo,module,action" />
     <route url="/admin/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈ' ]{1,})/([A-Za-zéèÉÈ' ]{1,})" module="Admin" action="enseignement" vars="promo,module,matiere" />
     <route url="/admin/([a-z]{3}[1-3]{1})/etudiants" module="Admin" action="etudiant" vars="promo" />
@@ -27,8 +28,4 @@
     <route url="/eleve/perso/moyennesm" module="Eleve" action="perso" vars="action" />
     <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="action" />
     <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="action" />
-    
-    
-    
-    
 </routes>

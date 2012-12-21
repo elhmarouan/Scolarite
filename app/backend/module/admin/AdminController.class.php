@@ -48,6 +48,7 @@ class AdminController extends PandaController {
          if (PandaRequest::getExists('module')) {
             $idPromo = $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo');
             if ($this->model('Module')->exists(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo))) {
+               $idModule = $this->model('Module')->first(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
                $this->page()->addVar('module', PandaRequest::get('module'));
                $this->setWindowTitle('Gestion du module ' . PandaRequest::get('module'));
                if (PandaRequest::getExists('matiere')) {
@@ -56,11 +57,22 @@ class AdminController extends PandaController {
                   $this->setSubAction('manageMatiere');
                } else if (PandaRequest::getExists('action')) {
                   if (PandaRequest::get('action') === 'modifier') {
-                     echo 'test';
+                     $this->setSubAction('editModule');
+                     $this->setWindowTitle('Modifier un module');
+                     if (PandaRequest::postExists('libelle')) {
+                        $module = $this->model('Module');
+                        $module['idMod'] = $idModule;
+                        $module['libelle'] = PandaRequest::post('libelle');
+                        if ($module->save()) {
+                           User::addPopup('Le module a bien été modifié.', Popup::SUCCESS);
+                           PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');
+                        } else {
+                           //TODO! Affichage des erreurs
+                        }
+                     }
                   }
                } else {
                   $this->setSubAction('manageModule');
-                  $idModule = $this->model('Module')->first(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
                   $matieresList = $this->model('Matiere')->field('libelle', array('idMod' => $idModule));
                   foreach ($matieresList as &$matiere) {
                      $matiere = htmlspecialchars(stripslashes($matiere));

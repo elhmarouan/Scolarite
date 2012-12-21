@@ -4,7 +4,13 @@
       Nom du module : <input type="text" name="libelle" placeholder="ex: Informatique" /><br />
       <input type="submit" value="Ajouter !" />
    </form>
-<?php elseif ($manageMatiere) : ?>
+<?php elseif ($editModule) : ?>
+   <h1>Modifier un module</h1>
+   <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier">
+      Nom du module : <input type="text" name="libelle" value="<?php echo $module; ?>" /><br />
+      <input type="submit" value="Modifier !" />
+   </form>
+   <?php elseif ($manageMatiere) : ?>
    <h1>Gestion de la matière <?php echo $matiere; ?></h1>
 <?php elseif ($manageModule) : ?>
    <h1>Gestion du module <?php echo $module; ?></h1>
