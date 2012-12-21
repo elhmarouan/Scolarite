@@ -15,6 +15,7 @@
       </nav>
       <div id="content">
          <div id="popup">
+            <?php debug(User::getPopups()); ?>
          </div>
          <?php echo $content; ?>
       </div>

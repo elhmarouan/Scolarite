@@ -15,12 +15,12 @@ class User {
    protected $_email;
    protected $_lang;
    protected $_key;
-   protected $_popups;
+   protected static $_popups;
    
    public function __construct() {
       PandaApplication::load('Panda.user.component.Popup');
       $this->_getSession();
-      $this->_popups = new Popup;
+      self::$_popups = new Popup;
    }
    
    public function id() {
@@ -81,11 +81,15 @@ class User {
       
    }
    
-   public function addPopup($message, $type = Popup::INFORMATION, $contentIsHtml = false) {
-      $this->_popups->send($message, $type, $contentIsHtml);
+   public static function addPopup($message, $type = Popup::INFORMATION, $contentIsHtml = false) {
+      self::$_popups->send($message, $type, $contentIsHtml);
    }
    
-   public function getPopups() {
-      return $this->_popups->popupList();
+   public static function hasPopups() {
+      return self::$_popups->popupsExist();
+   } 
+   
+   public static function getPopups() {
+      self::$_popups->popupList();
    }
 }

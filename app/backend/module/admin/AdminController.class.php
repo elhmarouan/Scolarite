@@ -76,7 +76,7 @@ class AdminController extends PandaController {
                      $module['libelle'] = PandaRequest::post('libelle');
                      $module['idPromo'] = $idPromo;
                      if ($module->save()) {
-                        echo 'ok';
+                        User::addPopup('Ok');
                      } else {
                         //TODO! Affichage des erreurs
                      }

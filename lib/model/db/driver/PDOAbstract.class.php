@@ -122,9 +122,11 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::DELETE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: delete query required.'));
       }
+      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
       $sql = '
          DELETE FROM ' . implode(', ', $query->datasources()) . '
-         ';
+         ' . (!empty($conditions) ? $conditions : '' );
+      return $this->query($sql, $query->tokensValues());
    }
 
    public function createDatasource(Query $query) {
