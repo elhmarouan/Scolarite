@@ -46,16 +46,22 @@ class AdminController extends PandaController {
       if (PandaRequest::getExists('promo') && $this->model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          if (PandaRequest::getExists('module')) {
-            if ($this->model('Module')->exists(array('libelle' => PandaRequest::get('module'), 'idPromo' => $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo')))) {
+            $idPromo = $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo');
+            if ($this->model('Module')->exists(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo))) {
                $this->page()->addVar('module', PandaRequest::get('module'));
                $this->setWindowTitle('Gestion du module ' . PandaRequest::get('module'));
                if (PandaRequest::getExists('matiere')) {
                   $this->page()->addVar('matiere', PandaRequest::get('matiere'));
                   $this->setWindowTitle('Gestion de la matière ' . PandaRequest::get('matiere'));
                   $this->setSubAction('manageMatiere');
+               } else if (PandaRequest::getExists('action')) {
+                  if (PandaRequest::get('action') === 'modifier') {
+                     echo 'test';
+                  }
                } else {
                   $this->setSubAction('manageModule');
-                  $matieresList = $this->model('Matiere')->field('libelle', array('idMod' => $this->model('Module')->first(array('libelle' => PandaRequest::get('module')), 'idMod')));
+                  $idModule = $this->model('Module')->first(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
+                  $matieresList = $this->model('Matiere')->field('libelle', array('idMod' => $idModule));
                   foreach ($matieresList as &$matiere) {
                      $matiere = htmlspecialchars(stripslashes($matiere));
                   }
@@ -76,12 +82,13 @@ class AdminController extends PandaController {
                      $module['libelle'] = PandaRequest::post('libelle');
                      $module['idPromo'] = $idPromo;
                      if ($module->save()) {
-                        User::addPopup('Ok');
+                        User::addPopup('Le module a bien été ajouté.', Popup::SUCCESS);
+                        PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');
                      } else {
                         //TODO! Affichage des erreurs
                      }
                   } else {
-                     echo 'Un autre module porte déjà ce nom. Veuillez en choisir un autre.';
+                     User::addPopup('Un autre module porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
                   }
                }
             } else {

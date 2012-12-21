@@ -38,6 +38,34 @@ nav ul li a:hover {
    padding: 10px 20px;
 }
 
+#content #popup {
+   margin: 5px 10px;
+}
+
+#content #popup div {
+   border-radius: 5px;
+   color: #FFF;
+   margin-bottom: 8px;
+   padding: 10px;
+}
+
+#content #popup .popupErreur {
+   background: #CB4444;
+}
+
+#content #popup .popupInfo {
+   background: #465C7F;
+}
+
+#content #popup .popupSucces {
+   background: #349C34;
+}
+
+#content #popup .popupAttention {
+   background: #F07C2F;
+   color: #333;
+}
+
 #content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
    color: black;
    font-family: "Rambla", sans-serif;

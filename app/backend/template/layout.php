@@ -15,7 +15,31 @@
       </nav>
       <div id="content">
          <div id="popup">
-            <?php debug(User::getPopups()); ?>
+            <?php
+            if (!empty($popupsList)) :
+               foreach ($popupsList as $popup) :
+                  switch ($popup['type']) :
+                     case Popup::ERROR:
+                        $class = 'popupErreur';
+                        break;
+                     case Popup::INFORMATION:
+                        $class = 'popupInfo';
+                        break;
+                     case Popup::SUCCESS:
+                        $class = 'popupSucces';
+                        break;
+                     case Popup::WARNING:
+                        $class = 'popupAttention';
+                        break;
+                  endswitch;
+                  ?>
+                  <div class="<?php echo $class; ?>">
+                  <?php echo $popup['message']; ?>
+                  </div>
+                  <?php
+               endforeach;
+            endif;
+            ?>
          </div>
          <?php echo $content; ?>
       </div>
