@@ -49,6 +49,7 @@ class Page {
    public function build() {
       extract($this->vars());
       $windowTitle = isset($windowTitle) ? $windowTitle : 'Undefined';
+      $popupsList = User::getPopups();
       try {
          $root = Config::read('root.default');
       } catch(ErrorException $e) {

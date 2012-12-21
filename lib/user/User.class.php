@@ -85,11 +85,7 @@ class User {
       self::$_popups->send($message, $type, $contentIsHtml);
    }
    
-   public static function hasPopups() {
-      return self::$_popups->popupsExist();
-   } 
-   
    public static function getPopups() {
-      self::$_popups->popupList();
+      return self::$_popups->popupList();
    }
 }
