@@ -232,7 +232,7 @@ class Query {
       return $this->_values;
    }
 
-   public function customQuery($sql, $tokens) {
+   public function customQuery($sql, array $tokens) {
       self::$_dao[$this->_currentDao]->query($sql, $tokens);
    }
    

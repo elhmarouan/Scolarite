@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class RoleModel extends Model {
-   protected $_tableName = 'Role';
+   protected $_datasourceName = 'Role';
    
    //Champs
    protected $_idRole;

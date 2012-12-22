@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class PromoModel extends Model {
-   protected $_tableName = 'Promo';
+   protected $_datasourceName = 'Promo';
    
    //Champs
    protected $_idPromo;

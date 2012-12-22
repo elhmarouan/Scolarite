@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class TypeExamModel extends Model {
-   protected $_tableName = 'Typexam';
+   protected $_datasourceName = 'Typexam';
    
    //Champs
    protected $_idType;

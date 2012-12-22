@@ -61,6 +61,7 @@ class AdminController extends PandaController {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
          if (PandaRequest::getExists('module')) {
             $idPromo = $this->model('Promo')->first(array('libelle' => PandaRequest::get('promo')), 'idPromo');
+            //Si le module existe (le libelle existe et correspond à la promo actuelle)
             if ($this->model('Module')->exists(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo))) {
                $idModule = $this->model('Module')->first(array('libelle' => PandaRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
                $this->page()->addVar('module', PandaRequest::get('module'));
@@ -72,10 +73,15 @@ class AdminController extends PandaController {
                } else if (PandaRequest::getExists('action')) {
                   $module = $this->model('Module');
                   if (PandaRequest::get('action') === 'ajouter') {
+                     /**
+                     * Ajout d'une matière
+                     */
                      $this->setSubAction('addMatiere');
                      $this->setWindowTitle('Ajouter une matière');
+                     //Si le formulaire a été bien été envoyé
                      if (PandaRequest::postExists('libelle', 'coef')) {
                         $matiere = $this->model('Matiere');
+                        //On vérifie si une autre matière ne porte pas déjà le même nom dans le module concerné
                         if (!$matiere->exists(array('idMod' => $idModule, 'libelle' => PandaRequest::post('libelle')))) {
                            $matiere['idMod'] = $idModule;
                            $matiere['libelle'] = PandaRequest::post('libelle');
@@ -91,8 +97,12 @@ class AdminController extends PandaController {
                         }
                      }
                   } else if (PandaRequest::get('action') === 'modifier') {
+                     /**
+                     * Modification d'un module
+                     */
                      $this->setSubAction('editModule');
                      $this->setWindowTitle('Modifier un module');
+                     //Si le formulaire a été bien été envoyé
                      if (PandaRequest::postExists('libelle')) {
                         $module['idMod'] = $idModule;
                         $module['libelle'] = PandaRequest::post('libelle');
@@ -104,6 +114,9 @@ class AdminController extends PandaController {
                         }
                      }
                   } else if (PandaRequest::get('action') === 'supprimer') {
+                     /**
+                     * Suppression d'un module
+                     */
                      $module->delete(array('idMod' => $idModule));
                      User::addPopup('Le module a bien été supprimé.', Popup::SUCCESS);
                      PandaResponse::redirect('/admin/' . PandaRequest::get('promo') . '/modules');

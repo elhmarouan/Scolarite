@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class ProfModel extends Model {
-   protected $_tableName = 'Prof';
+   protected $_datasourceName = 'Prof';
    
    //Champs
    protected $_idProf;

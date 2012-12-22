@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class ExamenModel extends Model {
-   protected $_tableName = 'Examen';
+   protected $_datasourceName = 'Examen';
    
    //Champs
    protected $_idExam;

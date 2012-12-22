@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  */
 class EleveModel extends Model {
-   protected $_tableName = 'Eleve';
+   protected $_datasourceName = 'Eleve';
    
    //Champs
    protected $_numEtudiant;
