@@ -11,6 +11,7 @@
 abstract class Model implements ArrayAccess {
 
    protected $_datasourceName;
+   protected $_relations = array();
    protected $_errors = array();
    protected $_query;
    protected $_daoName;
@@ -55,7 +56,7 @@ abstract class Model implements ArrayAccess {
    protected function _datasourceFields() {
       $fields = get_object_vars($this);
       foreach ($fields as $key => $value) {
-         if (in_array($key, array('_datasourceName', '_errors', '_query', '_daoName'))) {
+         if (in_array($key, array('_datasourceName', '_relations', '_errors', '_query', '_daoName'))) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];
@@ -63,6 +64,28 @@ abstract class Model implements ArrayAccess {
          }
       }
       return array_keys($fields);
+   }
+   
+   /**
+    * Gives the datasource relations.
+    * @return array
+    */
+   protected function _datasourceRelations() {
+      $datasourceRelations = array();
+      foreach ($this->_relations as $attribute => $foreignAttribute) {
+         $foreignAttribute = explode('.', $foreignAttribute);
+         if (count($foreignAttribute) === 2) {
+            $model = PandaController::model($foreignAttribute[0]);
+            if (array_key_exists($foreignAttribute[1], get_object_vars($model))) {
+               $datasourceRelations[] = array('field' => ltrim($attribute, '_'), 'foreign' => array('datasource' => $model->_datasourceName(), 'field' => ltrim($foreignAttribute[1], '_')));
+            } else {
+               throw new ErrorException(__('Unable to load model relations: invalid %s foreign attribute', $foreignAttribute[1]));
+            }
+         } else {
+            throw new ErrorException(__('Unable to load model relations: invalid %s relation', $attribute));
+         }
+      }
+      return $datasourceRelations;
    }
 
    /**
@@ -72,7 +95,7 @@ abstract class Model implements ArrayAccess {
    protected function _datasourceValues() {
       $fields = get_object_vars($this);
       foreach ($fields as $key => $value) {
-         if (in_array($key, array('_datasourceName', '_errors', '_query', '_daoName')) || $fields[$key] === null) {
+         if (in_array($key, array('_datasourceName', '_relations', '_errors', '_query', '_daoName')) || $fields[$key] === null) {
             unset($fields[$key]);
          } else {
             $fields[ltrim($key, '_')] = $fields[$key];
@@ -156,11 +179,22 @@ abstract class Model implements ArrayAccess {
    }
 
    /**
-    * Gets all models
+    * Gets all or part of all models attributes.
+    * @param string $conditions,...
     * @return array
     */
    public function findAll() {
-      return $this->_query->select($this->_datasourceFields())->from($this->_datasourceName())->getResult();
+      $fields = func_num_args() > 0 ? func_get_args() : array();
+      foreach ($fields as $field) {
+         if (!is_string($field) || empty($field) || !in_array($field, $this->_datasourceFields())) {
+            throw new InvalidArgumentException(__('Invalid or unknown field %s', $field));
+         }
+      }
+      if ($fields !== array()) {
+         return $this->_query->select($fields)->from($this->_datasourceName())->getResult();
+      } else {
+         return $this->_query->select($this->_datasourceFields())->from($this->_datasourceName())->getResult();
+      }
    }
 
    /**
@@ -170,6 +204,11 @@ abstract class Model implements ArrayAccess {
     * @throws ErrorException
     */
    public function save() {
+      foreach (get_object_vars($this) as $attribute => $value) {
+         if ($value === null) {
+            $this->{'set' . ucfirst(ltrim($attribute, '_'))}(false);
+         }
+      }
       if ($this->isValid()) {
          $primaryKeys = $this->_query->getPrimaryKeys($this->_datasourceName());
          if (count($primaryKeys) > 1) {
@@ -220,7 +259,7 @@ abstract class Model implements ArrayAccess {
     * @return boolean
     */
    public function offsetExists($key) {
-      return array_key_exists('_' . $key, get_object_vars($this)) && !in_array('_' . $key, array('_datasourceName', '_errors', '_query', '_daoName'));
+      return array_key_exists('_' . $key, get_object_vars($this)) && !in_array('_' . $key, array('_datasourceName', '_relations', '_errors', '_query', '_daoName'));
    }
 
    /**

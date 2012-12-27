@@ -158,6 +158,14 @@ class Query {
       }
       return $this;
    }
+   
+   public function join(array $joinData, $type = 'left') {
+      $this->_sqlParts['join'][] = array(
+          'type' => $type,
+          'data' => $joinData
+          );
+      return $this;
+   }
 
    public function where(array $conditions, $type = 'AND', $groupType = 'AND') {
       if (empty($conditions)) {
@@ -214,6 +222,10 @@ class Query {
    
    public function limits() {
       return $this->_sqlParts['limit'];
+   }
+   
+   public function joinList() {
+      return $this->_sqlParts['join'];
    }
 
    public function datasources() {

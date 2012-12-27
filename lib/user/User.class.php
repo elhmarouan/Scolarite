@@ -16,11 +16,15 @@ class User {
    protected $_lang;
    protected $_key;
    protected static $_popups;
-   
+   protected static $_acl;
+
+
    public function __construct() {
       PandaApplication::load('Panda.user.component.Popup');
+      PandaApplication::load('Panda.user.component.Acl');
       $this->_getSession();
       self::$_popups = new Popup;
+      self::$_acl = new Acl;
    }
    
    public function id() {
@@ -77,8 +81,16 @@ class User {
       }
    }
    
-   private function __getUserData() {
+   private function _getUserData() {
       
+   }
+   
+   public static function isAllowedTo($rightKey) {
+      self::$_acl->isAllowedTo($rightKey);
+   }
+
+   public static function isMemberOf($groupKey) {
+      self::$_acl->isMemberOf($groupKey);
    }
    
    public static function addPopup($message, $type = Popup::INFORMATION, $contentIsHtml = false) {

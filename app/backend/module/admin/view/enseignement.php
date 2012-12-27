@@ -3,6 +3,16 @@
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">
       Nom de la matière : <input type="text" name="libelle" placeholder="ex: Physique" /><br />
       Coefficient : <input type="number" name="coef" /><br />
+      Professeur responsable : 
+      <?php if (!empty($listeProfsResponsables)) : ?>
+         <select name="profResponsable">
+            <?php foreach ($listeProfsResponsables as $prof) : ?>
+               <option value=""><?php echo $prof['idProf']; ?></option>
+            <?php endforeach; ?>
+         </select>
+      <?php else : ?>
+         Aucun professeur disponible
+      <?php endif; ?><br />
       <input type="submit" value="Ajouter !" />
    </form>
 <?php elseif ($editMatiere) : ?>
@@ -26,6 +36,7 @@
    </form>
 <?php elseif ($manageMatiere) : ?>
    <h1>Gestion de la matière <?php echo $matiere; ?></h1>
+   <p><strong>Coefficient</strong> : <?php echo $coef; ?></p>
 <?php elseif ($manageModule) : ?>
    <h1>Gestion du module <?php echo $module; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">Ajouter un nouvelle matière</a> - <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier">Modifier ce module</a> - <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/supprimer">Supprimer ce module</a></p>

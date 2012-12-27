@@ -14,7 +14,7 @@ class PandaController {
    protected $_action = '';
    protected $_view = '';
    protected $_page = null;
-   protected $_models = array();
+   protected static $_models = array();
 
    public function __construct(PandaApplication $app, $module, $action) {
       $this->setApp($app);
@@ -104,31 +104,27 @@ class PandaController {
       $this->_page = $page;
    }
 
-   public function loadModels($models) {
-      $models = (func_num_args() === 1) && is_string($models) ? explode(',', $models) : func_get_args();
-      foreach ($models as $modelName) {
-         if (!is_string($modelName) || empty($modelName)) {
-            throw new InvalidArgumentException(__('Invalid model "%s": not-empty string needed', (string) $modelName));
+   protected static function _loadModel($model) {
+      if (!is_string($model) || empty($model)) {
+         throw new InvalidArgumentException(__('Invalid model "%s": not-empty string needed', (string) $model));
+      }
+      $model = ucfirst(trim($model));
+      if (is_file(MODEL_DIR . $model . '.class.php')) {
+         if (!isset(self::$_models[$model])) {
+            PandaApplication::load('Model.' . $model);
+            $modelClass = $model . 'Model';
+            self::$_models[$model] = new $modelClass;
          }
-         $modelName = ucfirst(trim($modelName));
-         if (is_file(MODEL_DIR . $modelName . '.class.php')) {
-            if (!isset($this->_models[$modelName])) {
-               PandaApplication::load('Model.' . $modelName);
-               $modelClass = $modelName . 'Model';
-               $this->_models[$modelName] = new $modelClass;
-            }
-         } else {
-            throw new InvalidArgumentException(__('Unknown model "%s"', $modelName));
-         }
+      } else {
+         throw new InvalidArgumentException(__('Unknown model "%s"', $model));
       }
    }
-   
-   public function model($modelName) {
-      if(isset($this->_models[$modelName]) && $this->_models[$modelName] instanceof Model) {
-         return $this->_models[$modelName];
-      } else {
-         throw new InvalidArgumentException(__('Unknown or not-loaded model "%s"', $modelName));
+
+   public static function model($modelName) {
+      if (!isset(self::$_models[$modelName])) {
+         self::_loadModel($modelName);
       }
+      return self::$_models[$modelName];
    }
 
 }

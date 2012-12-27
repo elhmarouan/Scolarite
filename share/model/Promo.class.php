@@ -26,7 +26,7 @@ class PromoModel extends Model {
    }
    
    public function setLibelle($libelle) {
-      if(!empty($libelle) && is_string($libelle)) {
+      if (!empty($libelle) && is_string($libelle) && !is_numeric($libelle)) {
          $this->_libelle = $libelle;
       } else {
          $this->_errors[] = self::BAD_LIBELLE_ERROR;
