@@ -81,7 +81,6 @@ abstract class PandaApplication {
 
    /**
     * Return the application name.
-    * Warning! Don't use this method in a static context. 
     * @return string
     */
    public function name() {
@@ -90,7 +89,7 @@ abstract class PandaApplication {
 
    /**
     * Return the application current user.
-    * Warning! Don't use this method in a static context. 
+    * @see Panda.user.User
     * @return User
     */
    public function user() {
@@ -99,7 +98,6 @@ abstract class PandaApplication {
 
    /**
     * Set the application name, in an object context.
-    * Warning! Don't use this method in a static context. 
     * @param string $name
     * @throws InvalidArgumentException
     */
@@ -147,6 +145,7 @@ abstract class PandaApplication {
     * in the application. Please use a controller specific
     * method if you want to control the access more particulary.
     * 
+    * @see PandaController::accessFilter
     * @return bool|PandaController
     */
    public function accessFilter() {

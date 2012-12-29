@@ -43,5 +43,9 @@
          </div>
          <?php echo $content; ?>
       </div>
+      <footer>
+         <p>Projet réalisé par Soheil Dahmani, Céline Lepicard, Stanislas Michalak et Vincent Simon.</p>
+         <p><a href="http://creativecommons.org/licenses/by-sa/3.0/deed.fr"><img src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" title="Cette oeuvre est sous licence creative commons BY-SA" alt="creative commons BY-SA" /></a></p>
+      </footer>
    </body>
 </html>

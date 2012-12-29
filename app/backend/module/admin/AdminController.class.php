@@ -3,11 +3,18 @@
 /**
  * Admin controller
  *
+ * Contrôleur du module réservé aux administrateurs
+ * 
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  *
  */
 class AdminController extends PandaController {
 
+   /**
+    * Vérifie si l'utilisateur connecté est un administrateur,
+    * et autorise ou non l'accès au module.
+    * @return boolean
+    */
    public function accessFilter() {
       if (User::isMemberOf('Administrateur')) {
          return true;
@@ -17,20 +24,80 @@ class AdminController extends PandaController {
       }
    }
    
+   /**
+    * Page d'accueil du module admin
+    */
    public function index() {
       $this->setWindowTitle('Accueil du panel d\'administration');
    }
 
+   /**
+    * Gestion des utilisateurs
+    */
    public function utilisateur() {
+      //Si l'on demande à ajouter un utilisateur
       if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'ajouter') {
+         //Si le formulaire d'ajout a été posté
+         if (PandaRequest::postExists('nom', 'prenom', 'role', 'login', 'password', 'passwordConfirm')) {
+            if (self::model('Role')->exists(array('idRole' => PandaRequest::post('role')))) {
+               $utilisateur = self::model('Utilisateur');
+               //On vérifie que le login n'est pas déjà utilisé
+               if (!$utilisateur->exists(array('login' => PandaRequest::post('login')))) {
+                  if (PandaRequest::post('password') === PandaRequest::post('passwordConfirm')) {
+                     $utilisateur['login'] = PandaRequest::post('login');
+                     $utilisateur['pass'] = __hash(PandaRequest::post('password'), Config::read('salt.user.prefix'), Config::read('salt.user.suffix'));
+                     $utilisateur['nom'] = PandaRequest::post('nom');
+                     $utilisateur['prenom'] = PandaRequest::post('prenom');
+                     $utilisateur['idRole'] = PandaRequest::post('role');
+                     if ($utilisateur->save()) {
+                        User::addPopup('L\'utilisateur a bien été ajouté.', Popup::SUCCESS);
+                        PandaResponse::redirect('/admin/utilisateurs');
+                     } else {
+                        //Récupération et affichage des erreurs
+                        $erreurs = $utilisateur->errors();
+                        foreach ($erreurs as $erreurId) {
+                           switch ($erreurId) {
+                              case UtilisateurModel::BAD_LOGIN_ERROR:
+                                 User::addPopup('Login incorrect.', Popup::ERROR);
+                                 break;
+                              case UtilisateurModel::BAD_PASS_ERROR:
+                                 User::addPopup('Mot de passe incorrect (7 caractères minimum).', Popup::ERROR);
+                                 break;
+                              case UtilisateurModel::BAD_NOM_ERROR:
+                                 User::addPopup('Nom incorrect.', Popup::ERROR);
+                                 break;
+                              case UtilisateurModel::BAD_PRENOM_ERROR:
+                                 User::addPopup('Prenom incorrect.', Popup::ERROR);
+                                 break;
+                           }
+                        }
+                     }
+                  } else {
+                     User::addPopup('Les deux mots de passe renseignés ne correspondent pas.', Popup::ERROR);
+                  }
+               } else {
+                  User::addPopup('Le login renseigné appartient déjà à un autre utilisateur.', Popup::ERROR);
+               }
+            } else {
+               User::addPopup('Le rôle renseigné n\'existe pas.', Popup::ERROR);
+            }
+         }
          $this->setSubAction('addUser');
          $this->setWindowTitle('Ajouter un utilisateur');
+         $listeDesRoles = self::model('Role')->findAll();
+         foreach ($listeDesRoles as &$role) {
+            $role['libelle'] = htmlspecialchars(stripslashes($role['libelle']));
+         }
+         $this->page()->addVar('listeDesRoles', $listeDesRoles);
       } else {
          $this->setWindowTitle('Gestion des utilisateurs');
          $this->page()->addVar('listeDesUtilisateurs', self::model('Utilisateur')->findAll('login', 'nom', 'prenom'));
       }
    }
    
+   /**
+    * Gestion des promotions
+    */
    public function promotion() {
       if (PandaRequest::getExists('action')) {
          if (PandaRequest::get('action') === 'ajouter') {
@@ -83,6 +150,10 @@ class AdminController extends PandaController {
       }
    }
 
+   /**
+    * Gestion des enseignements rattachés à un promotion
+    * @see promotion
+    */
    public function enseignement() {
       if (PandaRequest::getExists('promo') && self::model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
          $this->page()->addVar('promo', PandaRequest::get('promo'));
@@ -240,6 +311,10 @@ class AdminController extends PandaController {
       }
    }
 
+   /**
+    * Gestion des étudiants rattachés à une promotion.
+    * @see promotion
+    */
    public function etudiant() {
       if (PandaRequest::getExists('promo')) {
          if (self::model('Promo')->exists(array('libelle' => PandaRequest::get('promo')))) {
@@ -266,6 +341,9 @@ class AdminController extends PandaController {
       }
    }
 
+   /**
+    * Gestion des professeurs
+    */
    public function prof() {
 
    }

@@ -37,6 +37,11 @@ class PandaController {
       $this->page()->addVar('windowTitle', $windowTitle);
    }
 
+   /**
+    * Convenient shortcut to set the current sub-action in the view 
+    * @param string $subAction
+    * @throws InvalidArgumentException
+    */
    public function setSubAction($subAction) {
       if (!is_string($subAction) || empty($subAction)) {
          throw new InvalidArgumentException(__('The sub-action must be a not-empty string.'));
@@ -48,7 +53,7 @@ class PandaController {
    }
 
    /**
-    * Execute an action from the current controller
+    * Executes an action from the current controller
     * @return void
     * @throws RuntimeException
     */
@@ -131,6 +136,21 @@ class PandaController {
       return self::$_models[$modelName];
    }
    
+   /**
+    * Use this method to allow the controller access
+    * to a group of users only. By default, this method
+    * is empty and allow the access to everyone.
+    * 
+    * Unlike the PandaApplication accessFilter method,
+    * it can only return a boolean : true if the access
+    * is granted, false else. The return value is optional
+    * if you handle the cases by yourself (for instance, you
+    * can redirect an user to a specific page, if the access isn't
+    * granted, instead of displaying a HTTP 403 error).
+    * 
+    * @see PandaApplication::accessFilter
+    * @return bool|void
+    */
    public function accessFilter() {
       return true;
    }

@@ -5,6 +5,16 @@ body {
    margin: auto;
 }
 
+a {
+   color: rgb(17, 102, 153);
+   text-decoration: none;
+}
+
+a:hover {
+   color: rgb(153, 17, 17);
+   text-decoration: underline;
+}
+
 nav {
    background: #394c73;
    border-bottom: solid 4px #cfcfcf;
@@ -34,8 +44,14 @@ nav ul li a:hover {
 }
 
 #content {
+   background: white;
+   box-shadow: 0 1px 4px #aaa;
+   -moz-box-shadow: 0 1px 4px #aaa;
+   -webkit-box-shadow: 0 1px 4px #aaa;
+   color: rgb(72,72,72);
    font-family: "Open Sans", sans-serif;
-   padding: 10px 20px;
+   margin: 0 30px;
+   padding: 10px;
 }
 
 #content #popup {
@@ -67,14 +83,14 @@ nav ul li a:hover {
 }
 
 #content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
-   color: black;
+   color:#111;
    font-family: "Rambla", sans-serif;
 }
 
-#content a {
-   color: black;
-}
-
-#content a:hover {
-   text-decoration: none;
+footer {
+   color:#111;
+   font-size:13px;
+   font-family: "Open Sans", sans-serif;
+   margin: 15px 0;
+   text-align: center;
 }

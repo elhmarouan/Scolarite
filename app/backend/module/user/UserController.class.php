@@ -16,6 +16,7 @@ class UserController extends PandaController {
                $idUtil = $utilisateur->first(array('login' => PandaRequest::post('login')), 'idUtil');
                $this->app()->user()->login($idUtil, PandaRequest::post('login'));
                User::addPopup('Connexion réussie !', Popup::SUCCESS);
+               PandaResponse::redirect(PandaRequest::requestURI());
             } else {
                User::addPopup('Mot de passe erroné.', Popup::ERROR);
             }

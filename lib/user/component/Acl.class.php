@@ -13,6 +13,11 @@ class Acl extends UserComponent {
    private $_rights = array();
    private $_groups = array();
    
+   /**
+    * Checks if the user is allowed to do something
+    * @param string $rightKey
+    * @return boolean
+    */
    public function isAllowedTo($rightKey) {
       $rights = $this->_getUserRights();
       if (!empty($rights)) {
@@ -25,6 +30,11 @@ class Acl extends UserComponent {
       return false;
    }
    
+   /**
+    * Checks if the user is a member of a given group
+    * @param string $groupKey
+    * @return boolean
+    */
    public function isMemberOf($groupKey) {
       $groups = $this->_getUserGroups();
       if (!empty($groups)) {
@@ -65,7 +75,7 @@ class Acl extends UserComponent {
          $userRights = $this->user()->model()->getRightsOf($this->user()->id());
 
          $rights = array_merge($groupRights, $userRights);
-         $this->_rights = empty($rights) ? array() : $this->_model()->getRightsData($rights);
+         $this->_rights = empty($rights) ? array() : $this->model()->getRightsData($rights);
       }
       return $this->_rights;
    }
