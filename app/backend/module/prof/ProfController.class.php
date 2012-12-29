@@ -7,6 +7,16 @@
  * 
  */
 class ProfController extends PandaController {
+   
+   public function accessFilter() {
+      if (User::isMemberOf('Professeur')) {
+         return true;
+      } else {
+         User::addPopup('Vous n\'êtes pas autorisé à accéder à la section professeur.', Popup::ERROR);
+         PandaResponse::redirect('/');
+      }
+   }
+   
    public function index() {
       $this->setWindowTitle('Accueil professeurs');
    }

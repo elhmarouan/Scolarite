@@ -24,6 +24,10 @@ class UtilisateurModel extends Model {
    
    public function getGroupsOf($idUtil) {
       $role = PandaController::model('Role')->first(array('idRole' => $this->first(array('idUtil' => $idUtil), 'idRole')), 'libelle');
-      return array('key' => $role);
+      return empty($role) ? array() : array(array('key' => $role));
+   }
+   
+   public function userExists($idUtil, $login) {
+      return $this->exists(array('idUtil' => $idUtil, 'login' => $login));
    }
 }

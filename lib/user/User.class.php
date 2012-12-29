@@ -7,97 +7,146 @@
  * @package Panda.user
  * 
  */
-
 session_start();
 
 class User {
-   protected $_id;
-   protected $_email;
-   protected $_lang;
-   protected $_key;
-   protected static $_popups;
-   protected static $_acl;
 
+   protected static $_id;
+   protected static $_username;
+   protected static $_key;
+   protected static $_model;
+   protected static $_components = array();
 
    public function __construct() {
+      PandaApplication::load('Panda.user.component.UserComponent');
       PandaApplication::load('Panda.user.component.Popup');
       PandaApplication::load('Panda.user.component.Acl');
       $this->_getSession();
-      self::$_popups = new Popup;
-      self::$_acl = new Acl;
+      self::$_components['popup'] = new Popup($this);
+      self::$_components['acl'] = new Acl($this);
    }
-   
-   public function id() {
-      return $this->_id;
-   }
-   
-   public function email() {
-      return $this->_email;
-   }
-   
-   public function lang() {
-      return $this->_lang;
-   }
-   
-   public function key() {
-      return $this->_key;
-   }
-   
-   public function setId($userId) {
-      if(is_int($userId) && $userId !== 0) {
-         $this->_id = $userId;
-      }
-   }
-   
-   public function setEmail($userEmail) {
-      if(!empty($userEmail) && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-         $this->_email = $userEmail;
-      }
-   }
-   
-   public function setLang($userLang) {
-      //TODO!
-   }
-   
-   public function setKey($userKey) {
-      if(is_string($userKey) && !empty($userKey)) {
-         $this->_key = $userKey;
-      }
-   }
-   
-   protected function _getSession() {
-      if (PandaRequest::sessionExists('user')) {
-         if (PandaRequest::session('user') === null || !is_array(PandaRequest::session('user'))) {
-            PandaResponse::setSession('user', array(
-                'id' => null,
-                'email' => null,
-                'key' => null
-            ));
+
+   /**
+    * Gets an instance of the User class model.
+    * @return Model
+    * @throws RuntimeException
+    */
+   public function model() {
+      if (self::$_model === null) {
+         try {
+            $modelName = Config::read('user.model');
+         } catch (Exception $e) {
+            if ($e->getCode() === Config::UNKNOWN_KEY) {
+               throw new RuntimeException(__('Unable to use the User component: please set the user.model key in the configuration file.'));
+            }
          }
-         $userSessionData = PandaRequest::session('user');
-         $this->setId($userSessionData['id']);
-         $this->setEmail($userSessionData['email']);
-         $this->setKey($userSessionData['key']);
+         PandaApplication::load('Model.' . $modelName);
+         $modelName .= 'Model';
+         self::$_model = new $modelName;
+      }
+      return self::$_model;
+   }
+
+   /**
+    * Returns the id of the current user.
+    * @return int
+    */
+   public static function id() {
+      return self::$_id;
+   }
+
+   /**
+    * Returns the username of the current user.
+    * @return string
+    */
+   public static function username() {
+      return self::$_username;
+   }
+
+   public function setId($userId) {
+      if ((is_int($userId) && $userId !== 0) || (is_numeric($userId) && $userId !== '0')) {
+         self::$_id = (int) $userId;
+      }
+   }
+
+   public function setUsername($username) {
+      if (is_string($username) && !empty($username)) {
+         self::$_username = $username;
+      }
+   }
+
+   protected function _buildKey($userId, $username) {
+      if ($userId === null && $username === null) {
+         return null;
+      } else {
+         try {
+            return __hash($userId . '_' . $username, Config::read('salt.session.prefix'), Config::read('salt.session.suffix'));
+         } catch (Exception $e) {
+            if ($e->getCode() === Config::UNKNOWN_KEY) {
+               throw new RuntimeException(__('Unable to build the session key: please set the "salt.session" key in the configuration file.'));
+            }
+         }
       }
    }
    
-   private function _getUserData() {
-      
+   protected function _verifKey($key, $id, $username) {
+      if ($id === null && $username === null && $key === null) {
+         return true;
+      } else {
+         if ($this->_buildKey($id, $username) === $key) {
+            return true;
+         } else {
+            return false;
+         }
+      }
+   }
+
+   protected function _getSession() {
+      if (!PandaRequest::sessionExists('user') || PandaRequest::session('user') === null || !is_array(PandaRequest::session('user')) || !$this->_verifKey(PandaRequest::session('user.key'), PandaRequest::session('user.id'), PandaRequest::session('user.username')) || !$this->model()->userExists(PandaRequest::session('user.id'), PandaRequest::session('user.username'))) {
+         PandaResponse::setSession('user', array(
+             'id' => null,
+             'username' => null,
+             'key' => null
+         ));
+      }
+      $userSessionData = PandaRequest::session('user');
+      $this->setId($userSessionData['id']);
+      $this->setUsername($userSessionData['username']);
+      self::$_key = $this->_buildKey(self::id(), self::username());
    }
    
+   public function login($userId, $username) {
+      PandaResponse::setSession('user', array(
+          'id' => $userId,
+          'username'=> $username,
+          'key' => $this->_buildKey($userId, $username)
+      ));
+      $this->_getSession();
+   }
+   
+   public function logout() {
+      PandaResponse::setSession('user', null);
+      $this->_getSession();
+   }
+   
+   public static function isOnline() {
+      return PandaRequest::session('user') === array('id' => null, 'username' => null, 'key' => null) ? false : true; 
+   }
+
    public static function isAllowedTo($rightKey) {
-      self::$_acl->isAllowedTo($rightKey);
+      return self::$_components['acl']->isAllowedTo($rightKey);
    }
 
    public static function isMemberOf($groupKey) {
-      self::$_acl->isMemberOf($groupKey);
+      return self::$_components['acl']->isMemberOf($groupKey);
    }
-   
+
    public static function addPopup($message, $type = Popup::INFORMATION, $contentIsHtml = false) {
-      self::$_popups->send($message, $type, $contentIsHtml);
+      self::$_components['popup']->send($message, $type, $contentIsHtml);
    }
-   
+
    public static function getPopups() {
-      return self::$_popups->popupList();
+      return self::$_components['popup']->popupList();
    }
+
 }

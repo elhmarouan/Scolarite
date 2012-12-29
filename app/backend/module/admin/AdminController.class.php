@@ -8,6 +8,15 @@
  */
 class AdminController extends PandaController {
 
+   public function accessFilter() {
+      if (User::isMemberOf('Administrateur')) {
+         return true;
+      } else {
+         User::addPopup('Vous n\'êtes pas autorisé à accéder à la section administrateur.', Popup::ERROR);
+         PandaResponse::redirect('/');
+      }
+   }
+   
    public function index() {
       $this->setWindowTitle('Accueil du panel d\'administration');
    }

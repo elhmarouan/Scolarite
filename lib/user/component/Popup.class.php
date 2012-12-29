@@ -7,7 +7,7 @@
  * @package Panda.user.component
  * 
  */
-class Popup {
+class Popup extends UserComponent {
 
    const ERROR = 1;
    const INFORMATION = 2;

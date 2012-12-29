@@ -1,6 +1,6 @@
 <?php
 
-function __hash($string, $saltPrefix = HASH_GLOBAL_PREFIX, $saltSuffix = HASH_GLOBAL_SUFFIX, $hashAlgo = 'whirlpool'){
+function __hash($string, $saltPrefix = '', $saltSuffix = '', $hashAlgo = 'whirlpool'){
     if(in_array($hashAlgo, hash_algos())){
         return hash($hashAlgo, $saltPrefix . $string . $saltSuffix);
     }

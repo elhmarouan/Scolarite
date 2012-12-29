@@ -10,7 +10,7 @@
    <body>
       <nav>
          <ul>
-            <li><a href="/">Retour à l'accueil</a></li>
+            <li><a href="/deconnexion">Déconnexion</a></li>
          </ul>
       </nav>
       <div id="content">

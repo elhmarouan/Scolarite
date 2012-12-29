@@ -8,6 +8,15 @@
  */
 class EleveController extends PandaController {
 
+   public function accessFilter() {
+      if (User::isMemberOf('Élève')) {
+         return true;
+      } else {
+         User::addPopup('Vous n\'êtes pas autorisé à accéder à la section élève.', Popup::ERROR);
+         PandaResponse::redirect('/');
+      }
+   }
+
    public function index() {
       $this->setWindowTitle('Accueil élève');
    }

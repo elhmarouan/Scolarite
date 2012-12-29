@@ -9,26 +9,9 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
-class Acl {
+class Acl extends UserComponent {
    private $_rights = array();
    private $_groups = array();
-   private $_model;
-   
-   private function _model() {
-      if ($this->_model === null) {
-         try {
-            $modelName = Config::read('user.acl.model');
-         } catch (Exception $e) {
-            if ($e->getCode() === Config::UNKNOWN_KEY) {
-               throw new RuntimeException(__('Unable to use the Acl component: please set the user.model key in the configuration file.'));
-            }
-         }
-         PandaApplication::load('Model.' . $modelName);
-         $modelName .= 'Model';
-         $this->_model = new $modelName;
-      }
-      return $this->_model;
-   }
    
    public function isAllowedTo($rightKey) {
       $rights = $this->_getUserRights();
@@ -56,7 +39,7 @@ class Acl {
    
    private function _getUserGroups() {
       if (empty($this->_groups)) {
-         $this->_groups = $this->_model()->getGroupsOf(PandaRequest::session('user.id'));
+         $this->_groups = $this->user()->model()->getGroupsOf($this->user()->id());
       }
       return $this->_groups;
    }
@@ -79,7 +62,7 @@ class Acl {
          }
 
          //Get user rights
-         $userRights = $this->_model()->getRightsOf(PandaRequest::session('user.id'));
+         $userRights = $this->user()->model()->getRightsOf($this->user()->id());
 
          $rights = array_merge($groupRights, $userRights);
          $this->_rights = empty($rights) ? array() : $this->_model()->getRightsData($rights);

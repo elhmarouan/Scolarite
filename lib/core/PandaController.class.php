@@ -53,10 +53,14 @@ class PandaController {
     * @throws RuntimeException
     */
    public function exec() {
-      if (!is_callable(array($this, $this->_action))) {
-         throw new RuntimeException(__('"%s" action isn\'t defined for this module.', $this->_action));
+      if ($this->accessFilter()) {
+         if (!is_callable(array($this, $this->_action))) {
+            throw new RuntimeException(__('"%s" action isn\'t defined for this module.', $this->_action));
+         }
+         return $this->{$this->_action}();
+      } else {
+         PandaResponse::redirect403($this->app());
       }
-      return $this->{$this->_action}();
    }
 
    public function app() {
@@ -125,6 +129,10 @@ class PandaController {
          self::_loadModel($modelName);
       }
       return self::$_models[$modelName];
+   }
+   
+   public function accessFilter() {
+      return true;
    }
 
 }

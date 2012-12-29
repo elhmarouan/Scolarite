@@ -1,6 +1,5 @@
 <?php
 require_once 'core/const/dir.php';
-require_once 'core/const/hash.php';
 require_once 'core/function/debug.php';
 require_once 'core/function/lang.php';
 require_once 'core/function/lack.php';
