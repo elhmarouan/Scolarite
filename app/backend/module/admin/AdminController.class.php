@@ -89,9 +89,33 @@ class AdminController extends PandaController {
             $role['libelle'] = htmlspecialchars(stripslashes($role['libelle']));
          }
          $this->page()->addVar('listeDesRoles', $listeDesRoles);
+      } else if (PandaRequest::getExists('idUtil')) {
+         $utilisateur = self::model('Utilisateur');
+         if ($utilisateur->exists(array('idUtil' => PandaRequest::get('idUtil')))) {
+            if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'modifier') {
+               //TODO! Formulaire de modification
+            } else if (PandaRequest::getExists('action') && PandaRequest::get('action') === 'supprimer') {
+               $utilisateur->delete(array('idUtil' => PandaRequest::get('idUtil')));
+               User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);
+               PandaResponse::redirect('/admin/utilisateurs');
+            } else {
+               User::addPopup('Cette action n\'existe pas.', Popup::ERROR);
+               PandaResponse::redirect('/admin/utilisateurs');
+            }
+         } else {
+            User::addPopup('Cet utilisateur n\'existe pas.', Popup::ERROR);
+            PandaResponse::redirect('/admin/utilisateurs');
+         }
       } else {
          $this->setWindowTitle('Gestion des utilisateurs');
-         $this->page()->addVar('listeDesUtilisateurs', self::model('Utilisateur')->findAll('login', 'nom', 'prenom'));
+         $listeDesUtilisateurs = self::model('Utilisateur')->findAll('idUtil', 'login', 'nom', 'prenom', 'idRole');
+         foreach ($listeDesUtilisateurs as &$utilisateur) {
+            $utilisateur['login'] = htmlspecialchars(stripslashes($utilisateur['login']));
+            $utilisateur['nom'] = htmlspecialchars(stripslashes($utilisateur['nom']));
+            $utilisateur['prenom'] = htmlspecialchars(stripslashes($utilisateur['prenom']));
+            $utilisateur['role'] = htmlspecialchars(stripslashes(self::model('Role')->first(array('idRole' => $utilisateur['idRole']), 'libelle')));
+         }
+         $this->page()->addVar('listeDesUtilisateurs', $listeDesUtilisateurs);
       }
    }
    

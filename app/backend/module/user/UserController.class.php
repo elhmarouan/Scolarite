@@ -26,14 +26,4 @@ class UserController extends PandaController {
       }
       $this->setWindowTitle('Connexion');
    }
-   
-   public function deconnexion() {
-      if (!User::isOnline()) {
-         User::addPopup('Vous êtes déjà déconnecté.', Popup::ERROR);
-      } else {
-         $this->app()->user()->logout();
-         User::addPopup('Déconnexion réussie !', Popup::SUCCESS);
-      }
-      PandaResponse::redirect('/');
-   }
 }

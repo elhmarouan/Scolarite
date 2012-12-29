@@ -11,11 +11,11 @@
             <select name="role">
                <?php foreach ($listeDesRoles as $role) : ?>
                   <option value="<?php echo $role['idRole']; ?>"><?php echo $role['libelle']; ?></option>
-                  <?php endforeach; ?>
+               <?php endforeach; ?>
             </select>
-               <?php
-            else :
-               ?>
+            <?php
+         else :
+            ?>
             Aucun rôle disponible
          <?php
          endif;
@@ -43,18 +43,18 @@
          </tr>
       </thead>
       <tbody>
-   <?php
-   if (!empty($listeDesUtilisateurs)) :
-      foreach ($listeDesUtilisateurs as $utilisateur) :
-         ?>
+         <?php
+         if (!empty($listeDesUtilisateurs)) :
+            foreach ($listeDesUtilisateurs as $utilisateur) :
+               ?>
                <tr>
                   <td><?php echo $utilisateur['login']; ?></td>
                   <td><?php echo $utilisateur['nom']; ?></td>
                   <td><?php echo $utilisateur['prenom']; ?></td>
-                  <td></td>
-                  <td>-</td>
+                  <td><?php echo $utilisateur['role']; ?></td>
+                  <td><a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier"><img src="/img/admin/user_edit.png" alt="modifier" title="Modifier cet utilisateur" /></a> <a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/supprimer"><img src="/img/admin/user_delete.png" alt="supprimer"  title="Supprimer cet utilisateur" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');" /></a></td>
                </tr>
-            <?php
+               <?php
             endforeach;
          else :
             ?>

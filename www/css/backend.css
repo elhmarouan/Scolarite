@@ -83,13 +83,55 @@ nav ul li a:hover {
 }
 
 #content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
-   color:#111;
+   color: #111;
    font-family: "Rambla", sans-serif;
 }
 
+/**
+* Formulaires
+*/
+
+#content form label {
+   display: inline-block;
+   width: 150px;
+}
+
+#content form input {
+   margin-bottom: 5px;
+}
+
+/**
+* Tableaux
+*/
+
+#content table {
+   border-collapse: collapse;
+   margin: auto;
+   width: 90%;
+}
+
+#content table thead tr {
+   background: #333;
+   border: solid 1px #333;
+   color: #eee;
+   font-size: 13px;
+}
+
+#content table thead tr th, #content table tbody tr td {
+   padding: 5px 10px;
+   text-align: center;
+}
+
+#content table tbody {
+   background: rgb(247, 247, 247);
+   border : solid 1px #bfbfbf;
+   border-top: none;
+   color: #222;
+}
+
 footer {
-   color:#111;
-   font-size:13px;
+   color: #111;
+   font-size: 13px;
    font-family: "Open Sans", sans-serif;
    margin: 15px 0;
    text-align: center;
