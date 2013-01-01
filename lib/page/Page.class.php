@@ -4,7 +4,7 @@
  * Page
  * 
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
- * @package Panda.core
+ * @package Panda.page
  * 
  */
 class Page {

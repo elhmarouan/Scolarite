@@ -17,7 +17,7 @@ abstract class Model implements ArrayAccess {
    protected $_daoName;
 
    public function __construct() {
-      PandaApplication::load('Panda.model.db.Query');
+      Application::load('Panda.model.db.Query');
       $this->_daoName = $this->_daoName ? $this->_daoName : Config::read('datasources.default');
       $this->_query = new Query($this->_daoName);
    }
@@ -75,7 +75,7 @@ abstract class Model implements ArrayAccess {
       foreach ($this->_relations as $attribute => $foreignAttribute) {
          $foreignAttribute = explode('.', $foreignAttribute);
          if (count($foreignAttribute) === 2) {
-            $model = PandaController::model($foreignAttribute[0]);
+            $model = Controller::model($foreignAttribute[0]);
             if (array_key_exists($foreignAttribute[1], get_object_vars($model))) {
                $datasourceRelations[] = array('field' => ltrim($attribute, '_'), 'foreign' => array('datasource' => $model->_datasourceName(), 'field' => ltrim($foreignAttribute[1], '_')));
             } else {

@@ -6,14 +6,14 @@
  * @author Soheil Dahmani <dahmanisou@eisti.eu>
  * 
  */
-class ProfController extends PandaController {
+class ProfController extends Controller {
    
    public function accessFilter() {
       if (User::isMemberOf('Professeur')) {
          return true;
       } else {
          User::addPopup('Vous n\'êtes pas autorisé à accéder à la section professeur.', Popup::ERROR);
-         PandaResponse::redirect('/');
+         HTTPResponse::redirect('/');
       }
    }
    
@@ -22,23 +22,23 @@ class ProfController extends PandaController {
    }
    
    public function promo() {
-      if (PandaRequest::getExists('promo')) {
+      if (HTTPRequest::getExists('promo')) {
          $this->setWindowTitle('Promotions');
-         $this->page()->addVar('promo', PandaRequest::get('promo'));
+         $this->addVar('promo', HTTPRequest::get('promo'));
       }
    }
    
    public function modules() {
-      if (PandaRequest::getExists('promo') && PandaRequest::getExists('module')) {
-         $this->setWindowTitle('Gestion des modules de ' . PandaRequest::get('promo'));
-         $this->page()->addVar('module', PandaRequest::get('module'));
+      if (HTTPRequest::getExists('promo') && HTTPRequest::getExists('module')) {
+         $this->setWindowTitle('Gestion des modules de ' . HTTPRequest::get('promo'));
+         $this->addVar('module', HTTPRequest::get('module'));
       }
    }
 
    public function matiere() {
-      if(PandaRequest::getExists('promo') && PandaRequest::getExists('module') && PandaRequest::getExists('matiere')) {
-         $this->setWindowTitle('Gestion de ' . PandaRequest::get('matiere'));
-         $this->page()->addVar('matiere', PandaRequest::get('matiere'));
+      if(HTTPRequest::getExists('promo') && HTTPRequest::getExists('module') && HTTPRequest::getExists('matiere')) {
+         $this->setWindowTitle('Gestion de ' . HTTPRequest::get('matiere'));
+         $this->addVar('matiere', HTTPRequest::get('matiere'));
       }
    }
    

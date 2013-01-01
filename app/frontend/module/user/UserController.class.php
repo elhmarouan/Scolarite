@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
-class UserController extends PandaController {
+class UserController extends Controller {
    public function deconnexion() {
       if (!User::isOnline()) {
          User::addPopup('Vous êtes déjà déconnecté.', Popup::ERROR);
@@ -14,6 +14,6 @@ class UserController extends PandaController {
          $this->app()->user()->logout();
          User::addPopup('Déconnexion réussie !', Popup::SUCCESS);
       }
-      PandaResponse::redirect('/');
+      HTTPResponse::redirect('/');
    }
 }

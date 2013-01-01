@@ -14,7 +14,7 @@ class Router {
    const NO_ROUTE_FOUND = 1;
 
    public function __construct() {
-      PandaApplication::load('Panda.router.Route');
+      Application::load('Panda.router.Route');
       try {
          $domains = Config::read('roots.list');
       } catch (ErrorException $e) {
@@ -26,8 +26,8 @@ class Router {
       }
       if ($domains !== null) {
          foreach ($domains as $domain => $params) {
-            if ($domain === PandaRequest::serverName() && $params['redirect'] !== false) {
-               PandaResponse::redirect('http://' . $params['redirect'] . PandaRequest::requestURI());
+            if ($domain === HTTPRequest::serverName() && $params['redirect'] !== false) {
+               HTTPResponse::redirect('http://' . $params['redirect'] . HTTPRequest::requestURI());
             }
          }
       }

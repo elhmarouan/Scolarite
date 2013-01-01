@@ -81,7 +81,7 @@ class UtilisateurModel extends Model {
    //Méthodes propres au composant Panda.user.User
    
    public function getGroupsOf($idUtil) {
-      $role = PandaController::model('Role')->first(array('idRole' => $this->first(array('idUtil' => $idUtil), 'idRole')), 'libelle');
+      $role = Controller::model('Role')->first(array('idRole' => $this->first(array('idUtil' => $idUtil), 'idRole')), 'libelle');
       return empty($role) ? array() : array(array('key' => $role));
    }
    

@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
-class AccueilController extends PandaController {
+class AccueilController extends Controller {
    public function index() {
       $this->setWindowTitle('Scolarité');
    }

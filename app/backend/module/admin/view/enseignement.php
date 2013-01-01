@@ -1,9 +1,9 @@
 <?php if ($addMatiere) : ?>
    <h1>Ajouter une matière</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">
-      Nom de la matière : <input type="text" name="libelle" placeholder="ex: Physique" /><br />
-      Coefficient : <input type="number" name="coef" /><br />
-      Professeur responsable : 
+      <label>Nom de la matière :</label> <input type="text" name="libelle" placeholder="ex: Physique" /><br />
+      <label>Coefficient :</label> <input type="number" name="coef" /><br />
+      <label>Professeur responsable :</label> 
       <?php if (!empty($listeProfsResponsables)) : ?>
          <select name="profResponsable">
             <?php foreach ($listeProfsResponsables as $prof) : ?>

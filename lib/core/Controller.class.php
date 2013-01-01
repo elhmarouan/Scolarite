@@ -7,7 +7,7 @@
  * @package Panda.core
  * 
  */
-class PandaController {
+class Controller {
 
    protected $_app = null;
    protected $_module = '';
@@ -16,11 +16,11 @@ class PandaController {
    protected $_page = null;
    protected static $_models = array();
 
-   public function __construct(PandaApplication $app, $module, $action) {
+   public function __construct(Application $app, $module, $action) {
       $this->setApp($app);
       $this->setModule($module);
       $this->setAction($action);
-      PandaApplication::load('Panda.core.Page');
+      Application::load('Panda.page.Page');
       $this->setPage(new Page($app));
       $this->setView($action);
    }
@@ -51,6 +51,10 @@ class PandaController {
       }
       $this->page()->addVar($subAction);
    }
+   
+   public function addVar($varName, $var) {
+      $this->page()->addVar($varName, $var);
+   }
 
    /**
     * Executes an action from the current controller
@@ -64,7 +68,7 @@ class PandaController {
          }
          return $this->{$this->_action}();
       } else {
-         PandaResponse::redirect403($this->app());
+         HTTPResponse::redirect403($this->app());
       }
    }
 
@@ -76,7 +80,7 @@ class PandaController {
       return $this->_page;
    }
 
-   public function setApp(PandaApplication $app) {
+   public function setApp(Application $app) {
       $this->_app = $app;
    }
 
@@ -120,7 +124,7 @@ class PandaController {
       $model = ucfirst(trim($model));
       if (is_file(MODEL_DIR . $model . '.class.php')) {
          if (!isset(self::$_models[$model])) {
-            PandaApplication::load('Model.' . $model);
+            Application::load('Model.' . $model);
             $modelClass = $model . 'Model';
             self::$_models[$model] = new $modelClass;
          }
@@ -141,14 +145,14 @@ class PandaController {
     * to a group of users only. By default, this method
     * is empty and allow the access to everyone.
     * 
-    * Unlike the PandaApplication accessFilter method,
+    * Unlike the Application accessFilter method,
     * it can only return a boolean : true if the access
     * is granted, false else. The return value is optional
     * if you handle the cases by yourself (for instance, you
     * can redirect an user to a specific page, if the access isn't
     * granted, instead of displaying a HTTP 403 error).
     * 
-    * @see PandaApplication::accessFilter
+    * @see Application::accessFilter
     * @return bool|void
     */
    public function accessFilter() {

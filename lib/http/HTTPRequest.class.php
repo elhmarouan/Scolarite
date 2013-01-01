@@ -1,13 +1,13 @@
 <?php
 
 /**
- * PandaRequest
+ * HTTPRequest
  * 
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * @package Panda
  * 
  */
-class PandaRequest {
+class HTTPRequest {
 
    private function __construct() {
       

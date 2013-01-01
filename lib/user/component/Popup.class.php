@@ -17,20 +17,20 @@ class Popup extends UserComponent {
    private $_popups = array();
    
    private function _getSession() {
-      if (PandaRequest::sessionExists('user.popups')) {
-         if (PandaRequest::session('user.popups') !== null && is_array(PandaRequest::session('user.popups'))) {
-            $this->_popups = PandaRequest::session('user.popups');
+      if (HTTPRequest::sessionExists('user.popups')) {
+         if (HTTPRequest::session('user.popups') !== null && is_array(HTTPRequest::session('user.popups'))) {
+            $this->_popups = HTTPRequest::session('user.popups');
          }
-         PandaResponse::unsetSession('user.popups');
+         HTTPResponse::unsetSession('user.popups');
       }
    }
    
    public function send($message, $type = self::INFORMATION, $contentIsHtml = false) {
       if(is_string($message) && is_int($type) && is_bool($contentIsHtml)) {
          $message = $contentIsHtml ? $message : htmlspecialchars($message);
-         $oldPopupList = PandaRequest::session('user.popups');
+         $oldPopupList = HTTPRequest::session('user.popups');
          $oldPopupList[] = array('message' => $message, 'type' => $type);
-         PandaResponse::setSession('user.popups', $oldPopupList, true);
+         HTTPResponse::setSession('user.popups', $oldPopupList, true);
       }
    }
    

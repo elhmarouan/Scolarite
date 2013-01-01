@@ -13,7 +13,7 @@
  * 
  */
 
-PandaApplication::load('Panda.model.db.driver.PDOAbstract');
+Application::load('Panda.model.db.driver.PDOAbstract');
 
 class MysqlDriver extends PDOAbstract implements DriverInterface {
 

@@ -8,14 +8,14 @@ require_once 'core/function/hash.php';
 
 function autoload($className) {
     if(preg_match('#Application$#', $className) ) {
-       if($className === 'PandaApplication') {
-          require_once CORE_DIR . 'PandaApplication.class.php';
+       if($className === 'Application') {
+          require_once CORE_DIR . 'Application.class.php';
        } else {
           require_once APP_DIR . strtolower(rtrim($className, 'Application')) . '/' . $className . '.class.php';
        }
     } else if(preg_match('#Controller$#', $className)) {
-       if($className === 'PandaController') {
-          require_once CORE_DIR . 'PandaController.class.php';
+       if($className === 'Controller') {
+          require_once CORE_DIR . 'Controller.class.php';
        }
     } else if(preg_match('#Model$#', $className)) {
        if($className === 'Model') {

@@ -7,15 +7,15 @@
  * @package Panda.core
  * 
  */
-abstract class PandaApplication {
+abstract class Application {
 
    protected $_name;
    protected $_user;
 
    public function __construct($appName) {
       self::load('Panda.core.Config');
-      self::load('Panda.http.PandaRequest');
-      self::load('Panda.http.PandaResponse');
+      self::load('Panda.http.HTTPRequest');
+      self::load('Panda.http.HTTPResponse');
       $this->setName($appName);
       Config::setAppName($appName);
       self::load('Panda.user.User');
@@ -24,7 +24,7 @@ abstract class PandaApplication {
 
    /**
     * Get, if it exists, the controller matching with the current url
-    * @return PandaController
+    * @return Controller
     */
    public function getController() {
       self::load('Panda.router.Router');
@@ -33,10 +33,10 @@ abstract class PandaApplication {
 
       //Try to find a matching route
       try {
-         $matchedRoute = $router->getRoute(PandaRequest::requestURI());
+         $matchedRoute = $router->getRoute(HTTPRequest::requestURI());
       } catch (RuntimeException $error) {
          if ($error->getCode() === Router::NO_ROUTE_FOUND) {
-            PandaResponse::redirect404($this);
+            HTTPResponse::redirect404($this);
          }
       }
 
@@ -115,7 +115,7 @@ abstract class PandaApplication {
     */
    public function run() {
       $accessFilterResult = $this->accessFilter();
-      if ($accessFilterResult instanceof PandaController) {
+      if ($accessFilterResult instanceof Controller) {
          //Use the custom given controller
          $controller = $accessFilterResult;
       } else if ($accessFilterResult === true) {
@@ -123,12 +123,12 @@ abstract class PandaApplication {
       } else {
          /* If the access isn't granted and the proccess is still
           * running, then generate a "403 Forbidden" HTTP error. */
-         PandaResponse::redirect403($this);
+         HTTPResponse::redirect403($this);
       }
       $controller->exec();
 
-      PandaResponse::setPage($controller->page());
-      PandaResponse::sendRenderedPage();
+      HTTPResponse::setPage($controller->page());
+      HTTPResponse::sendRenderedPage();
    }
 
    /**
@@ -137,7 +137,7 @@ abstract class PandaApplication {
     * is empty and allow the access to everyone.
     * 
     * It can return either a boolean (true if the access is granted,
-    * false else) or an instance of PandaController if you want to
+    * false else) or an instance of Controller if you want to
     * use a custom controller (if the login is required, you can return
     * the user/member controller, and specify the login action for instance).
     * 
@@ -145,8 +145,8 @@ abstract class PandaApplication {
     * in the application. Please use a controller specific
     * method if you want to control the access more particulary.
     * 
-    * @see PandaController::accessFilter
-    * @return bool|PandaController
+    * @see Controller::accessFilter
+    * @return bool|Controller
     */
    public function accessFilter() {
       return true;

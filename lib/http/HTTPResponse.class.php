@@ -1,13 +1,13 @@
 <?php
 
 /**
- * PandaResponse
+ * HTTPResponse
  * 
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * @package Panda
  * 
  */
-class PandaResponse {
+class HTTPResponse {
 
    private static $_page = null;
 
@@ -25,7 +25,7 @@ class PandaResponse {
    }
 
    public static function redirect404($app) {
-      PandaApplication::load('Panda.core.Page');
+      Application::load('Panda.core.Page');
       self::setPage(new Page($app));
       self::page()->setError();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/404.php');
@@ -35,7 +35,7 @@ class PandaResponse {
    }
 
    public static function redirect403($app) {
-      PandaApplication::load('Panda.core.Page');
+      Application::load('Panda.core.Page');
       self::setPage(new Page($app));
       self::page()->setError();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/403.php');

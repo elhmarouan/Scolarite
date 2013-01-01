@@ -18,9 +18,9 @@ class User {
    protected static $_components = array();
 
    public function __construct() {
-      PandaApplication::load('Panda.user.component.UserComponent');
-      PandaApplication::load('Panda.user.component.Popup');
-      PandaApplication::load('Panda.user.component.Acl');
+      Application::load('Panda.user.component.UserComponent');
+      Application::load('Panda.user.component.Popup');
+      Application::load('Panda.user.component.Acl');
       $this->_getSession();
       self::$_components['popup'] = new Popup($this);
       self::$_components['acl'] = new Acl($this);
@@ -40,7 +40,7 @@ class User {
                throw new RuntimeException(__('Unable to use the User component: please set the user.model key in the configuration file.'));
             }
          }
-         PandaApplication::load('Model.' . $modelName);
+         Application::load('Model.' . $modelName);
          $modelName .= 'Model';
          self::$_model = new $modelName;
       }
@@ -102,21 +102,21 @@ class User {
    }
 
    protected function _getSession() {
-      if (!PandaRequest::sessionExists('user') || PandaRequest::session('user') === null || !is_array(PandaRequest::session('user')) || !$this->_verifKey(PandaRequest::session('user.key'), PandaRequest::session('user.id'), PandaRequest::session('user.username')) || !$this->model()->userExists(PandaRequest::session('user.id'), PandaRequest::session('user.username'))) {
-         PandaResponse::setSession('user', array(
+      if (!HTTPRequest::sessionExists('user') || HTTPRequest::session('user') === null || !is_array(HTTPRequest::session('user')) || !$this->_verifKey(HTTPRequest::session('user.key'), HTTPRequest::session('user.id'), HTTPRequest::session('user.username')) || !$this->model()->userExists(HTTPRequest::session('user.id'), HTTPRequest::session('user.username'))) {
+         HTTPResponse::setSession('user', array(
              'id' => null,
              'username' => null,
              'key' => null
          ));
       }
-      $userSessionData = PandaRequest::session('user');
+      $userSessionData = HTTPRequest::session('user');
       $this->setId($userSessionData['id']);
       $this->setUsername($userSessionData['username']);
       self::$_key = $this->_buildKey(self::id(), self::username());
    }
    
    public function login($userId, $username) {
-      PandaResponse::setSession('user', array(
+      HTTPResponse::setSession('user', array(
           'id' => $userId,
           'username'=> $username,
           'key' => $this->_buildKey($userId, $username)
@@ -125,12 +125,12 @@ class User {
    }
    
    public function logout() {
-      PandaResponse::setSession('user', null);
+      HTTPResponse::setSession('user', null);
       $this->_getSession();
    }
    
    public static function isOnline() {
-      return PandaRequest::session('user') === array('id' => null, 'username' => null, 'key' => null) ? false : true; 
+      return HTTPRequest::session('user') === array('id' => null, 'username' => null, 'key' => null) ? false : true; 
    }
 
    public static function isAllowedTo($rightKey) {

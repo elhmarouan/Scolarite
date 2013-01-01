@@ -10,7 +10,7 @@
  * 
  */
 
-PandaApplication::load('Panda.model.db.driver.DriverInterface');
+Application::load('Panda.model.db.driver.DriverInterface');
 
 abstract class PDOAbstract implements DriverInterface {
 

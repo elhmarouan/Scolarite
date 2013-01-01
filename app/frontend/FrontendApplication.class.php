@@ -6,7 +6,7 @@
  * @author Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
-class FrontendApplication extends PandaApplication {
+class FrontendApplication extends Application {
 
    public function __construct() {
       parent::__construct('Frontend');

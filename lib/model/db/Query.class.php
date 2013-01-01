@@ -51,7 +51,7 @@ class Query {
       }
       if (!array_key_exists($daoName, self::$_dao)) {
          $driver = ucfirst($daoDriverConfig['driver']) . 'Driver';
-         PandaApplication::load('Panda.model.db.driver.' . $driver);
+         Application::load('Panda.model.db.driver.' . $driver);
          self::$_dao[$daoName] = new $driver($daoDriverConfig);
       }
       $this->_currentDao = $daoName;
