@@ -182,35 +182,30 @@ class AdminController extends Controller {
     * Gestion des promotions
     */
    public function promotion() {
-      if (HTTPRequest::getExists('action')) {
-         if (HTTPRequest::get('action') === 'ajouter') {
-            $this->setWindowTitle('Ajouter une promotion');
-            $this->setSubAction('addPromo');
-            if (HTTPRequest::postExists('libelle')) {
-               $promo = self::model('Promo');
-               if (!$promo->exists(array('libelle' => HTTPRequest::post('libelle')))) {
-                  $promo['libelle'] = HTTPRequest::post('libelle');
-                  if ($promo->save()) {
-                     User::addPopup('La promotion a bien été ajoutée.', Popup::SUCCESS);
-                     HTTPResponse::redirect('/admin/promos');
-                  } else {
-                     //Récupération et affichage des erreurs
-                     $erreurs = $promo->errors();
-                     foreach ($erreurs as $erreurId) {
-                        switch ($erreurId) {
-                           case PromoModel::BAD_LIBELLE_ERROR:
-                              User::addPopup('Le nom de la promotion est invalide.', Popup::ERROR);
-                              break;
-                        }
+      if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
+         $this->setWindowTitle('Ajouter une promotion');
+         $this->setSubAction('addPromo');
+         if (HTTPRequest::postExists('libelle')) {
+            $promo = self::model('Promo');
+            if (!$promo->exists(array('libelle' => HTTPRequest::post('libelle')))) {
+               $promo['libelle'] = HTTPRequest::post('libelle');
+               if ($promo->save()) {
+                  User::addPopup('La promotion a bien été ajoutée.', Popup::SUCCESS);
+                  HTTPResponse::redirect('/admin/promos');
+               } else {
+                  //Récupération et affichage des erreurs
+                  $erreurs = $promo->errors();
+                  foreach ($erreurs as $erreurId) {
+                     switch ($erreurId) {
+                        case PromoModel::BAD_LIBELLE_ERROR:
+                           User::addPopup('Le nom de la promotion est invalide.', Popup::ERROR);
+                           break;
                      }
                   }
-               } else {
-                  User::addPopup('Une autre promo porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
                }
+            } else {
+               User::addPopup('Une autre promo porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
             }
-         } else {
-            $this->app()->user()->addPopup('Désolé, cette action n\'existe pas.', Popup::ERROR);
-            HTTPResponse::redirect('/admin/promos');
          }
       } else if (HTTPRequest::getExists('promo')) {
          //Si la promotion existe
@@ -309,9 +304,10 @@ class AdminController extends Controller {
                      if (HTTPRequest::postExists('libelle')) {
                         $module['idMod'] = $idModule;
                         $module['libelle'] = HTTPRequest::post('libelle');
+                        $module['idPromo'] = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
                         if ($module->save()) {
                            User::addPopup('Le module a bien été modifié.', Popup::SUCCESS);
-                           HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/modules');
+                           HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . $module['libelle'] . '/matières');
                         } else {
                            //Récupération et affichage des erreurs
                            $erreurs = $module->errors();

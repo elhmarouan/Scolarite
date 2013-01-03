@@ -39,7 +39,7 @@
    <p><strong>Coefficient</strong> : <?php echo $coef; ?></p>
 <?php elseif ($manageModule) : ?>
    <h1>Gestion du module <?php echo $module; ?></h1>
-   <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">Ajouter un nouvelle matière</a> - <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier">Modifier ce module</a> - <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/supprimer">Supprimer ce module</a></p>
+   <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter" class="button greenButton">Ajouter un nouvelle matière</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier" class="button orangeButton">Modifier ce module</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/supprimer" class="button redButton">Supprimer ce module</a></p>
    <ul>
       <?php
       if (!empty($listeDesMatieres)) :
@@ -56,7 +56,7 @@
    <p><a href="/admin/<?php echo $promo; ?>/modules">Retour à la gestion des modules</a></p>
 <?php else : ?>
    <h1>Gestion des modules <?php echo $prefixPromo . $promo; ?></h1>
-   <p><a href="/admin/<?php echo $promo; ?>/modules/ajouter">Ajouter un nouveau module</a></p>
+   <p><a href="/admin/<?php echo $promo; ?>/modules/ajouter" class="button greenButton">Ajouter un nouveau module</a></p>
    <ul>
       <?php
       if (!empty($listeDesModules)) :

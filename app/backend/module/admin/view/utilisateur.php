@@ -1,12 +1,12 @@
 <?php if ($addUser) : ?>
    <h1>Ajouter un utilisateur</h1>
-   <p>Veuillez remplir les champs ci-dessous pour créer un nouvel utilisateur</p>
+   <p>Veuillez remplir les champs ci-dessous pour créer un nouvel utilisateur :</p>
    <form method="post" action="/admin/utilisateurs/ajouter">
       <fieldset>
          <legend>Identité réelle</legend>
-         Nom : <input type="text" name="nom" /><br />
-         Prénom : <input type="text" name="prenom" /><br />
-         Rôle :
+         <label>Nom :</label> <input type="text" name="nom" /><br />
+         <label>Prénom :</label> <input type="text" name="prenom" /><br />
+         <label>Rôle :</label>
          <?php if (!empty($listeDesRoles)) : ?>
             <select name="role">
                <?php foreach ($listeDesRoles as $role) : ?>
@@ -23,21 +23,22 @@
       </fieldset>
       <fieldset>
          <legend>Identité virtuelle</legend>
-         Login : <input type="text" name="login" /><br />
-         Mot de passe : <input type="password" name="password" /><br />
-         Confirmer : <input type="password" name="passwordConfirm" />
+         <label>Login :</label> <input type="text" name="login" /><br />
+         <label>Mot de passe :</label> <input type="password" name="password" /><br />
+         <label>Confirmer :</label> <input type="password" name="passwordConfirm" />
       </fieldset>
       <input type="submit" value="Ajouter !" />
    </form>
+   <p><a href="/admin/utilisateurs">Retour à la liste des utilisateurs</a></p>
    <?php elseif ($editUser) : ?>
    <h1>Modifier un utilisateur</h1>
    <p>Veuillez remplir les champs ci-dessous pour créer un nouvel utilisateur</p>
    <form method="post" action="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier">
       <fieldset>
          <legend>Identité réelle</legend>
-         Nom : <input type="text" name="nom" value="<?php echo $utilisateur['nom']; ?>" /><br />
-         Prénom : <input type="text" name="prenom" value="<?php echo $utilisateur['prenom']; ?>" /><br />
-         Rôle :
+         <label>Nom :</label> <input type="text" name="nom" value="<?php echo $utilisateur['nom']; ?>" /><br />
+         <label>Prénom :</label> <input type="text" name="prenom" value="<?php echo $utilisateur['prenom']; ?>" /><br />
+         <label>Rôle :</label>
          <?php if (!empty($listeDesRoles)) : ?>
             <select name="role">
                <?php foreach ($listeDesRoles as $role) : ?>
@@ -54,15 +55,16 @@
       </fieldset>
       <fieldset>
          <legend>Identité virtuelle</legend>
-         Login : <input type="text" name="login" value="<?php echo $utilisateur['login']; ?>" /><br />
-         Mot de passe : <input type="password" name="password" /> (laisser vide pour ne pas changer)<br />
-         Confirmer : <input type="password" name="passwordConfirm" />
+         <label>Login :</label> <input type="text" name="login" value="<?php echo $utilisateur['login']; ?>" /> (s'il s'agit du vôtre, vous devrez vous reconnecter)<br />
+         <label>Mot de passe :</label> <input type="password" name="password" /> (laissez vide pour ne pas changer)<br />
+         <label>Confirmer :</label> <input type="password" name="passwordConfirm" />
       </fieldset>
       <input type="submit" value="Modifier !" />
    </form>
+   <p><a href="/admin/utilisateurs">Retour à la liste des utilisateurs</a></p>
 <?php else : ?>
    <h1>Gestion des utilisateurs</h1>
-   <p><a href="/admin/utilisateurs/ajouter">Ajouter un utilisateur</a></p>
+   <p><a href="/admin/utilisateurs/ajouter" class="button greenButton">Ajouter un utilisateur</a></p>
    <table>
       <thead>
          <tr>

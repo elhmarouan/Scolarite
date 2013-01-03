@@ -12,6 +12,7 @@
    </form>
 <?php elseif ($managePromo) : ?>
    <h1>Gestion de la promotion <?php echo $promo; ?></h1>
+   <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton">Supprimer cette promotion</a></p>
    <ul>
       <li><a href="/admin/<?php echo $promo; ?>/étudiants">Gestion des étudiants</a></li>
       <li><a href="/admin/<?php echo $promo; ?>/modules">Gestion des modules</a></li>
@@ -19,7 +20,7 @@
    <p><a href="/admin/promos">Retour à la gestion des promotions</a></p>
 <?php else : ?>
    <h1>Gestion des promotions</h1>
-   <p><a href="/admin/promo/ajouter">Ajouter une promotion</a></p>
+   <p><a href="/admin/promo/ajouter" class="button greenButton">Ajouter une promotion</a></p>
    <ul>
       <?php
       if (!empty($promosList)) :
