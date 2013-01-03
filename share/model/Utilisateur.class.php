@@ -49,7 +49,7 @@ class UtilisateurModel extends Model {
    public function setPass($pass) {
       if (!empty($pass) && is_string($pass) && strlen($pass) >= 7) {
          $this->_pass = $pass;
-      } else {
+      } else if (!($pass === false && $this->_idUtil !== null)) {
          $this->_errors[] = self::BAD_PASS_ERROR;
       }
    }

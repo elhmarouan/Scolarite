@@ -23,7 +23,7 @@ class AdminController extends Controller {
          HTTPResponse::redirect('/');
       }
    }
-   
+
    /**
     * Page d'accueil du module admin
     */
@@ -93,7 +93,66 @@ class AdminController extends Controller {
          $utilisateur = self::model('Utilisateur');
          if ($utilisateur->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
-               //TODO! Formulaire de modification
+               //Si le formulaire de modification a été posté
+               if (HTTPRequest::postExists('nom', 'prenom', 'role', 'login', 'password', 'passwordConfirm')) {
+                  if (self::model('Role')->exists(array('idRole' => HTTPRequest::post('role')))) {
+                     $utilisateur = self::model('Utilisateur');
+                     //On vérifie que le login est identique à l'actuel, ou qu'il n'est pas déjà utilisé.
+                     if ($utilisateur->exists(array('idUtil' => HTTPRequest::get('idUtil'), 'login' => HTTPRequest::post('login'))) || !$utilisateur->exists(array('login' => HTTPRequest::post('login')))) {
+                        $utilisateur['idUtil'] = HTTPRequest::get('idUtil');
+                        $utilisateur['login'] = HTTPRequest::post('login');
+                        $utilisateur['nom'] = HTTPRequest::post('nom');
+                        $utilisateur['prenom'] = HTTPRequest::post('prenom');
+                        $utilisateur['idRole'] = HTTPRequest::post('role');
+                        if (HTTPRequest::post('password') !== '') {
+                           if (HTTPRequest::post('password') === HTTPRequest::post('passwordConfirm')) {
+                              $utilisateur['pass'] = __hash(HTTPRequest::post('password'), Config::read('salt.user.prefix'), Config::read('salt.user.suffix'));
+                           } else {
+                              User::addPopup('Les deux mots de passe renseignés ne correspondent pas.', Popup::ERROR);
+                              $badPassword = true;
+                           }
+                        }
+                        if (!$badPassword && $utilisateur->save()) {
+                           User::addPopup('L\'utilisateur a bien été modifié.', Popup::SUCCESS);
+                           HTTPResponse::redirect('/admin/utilisateurs');
+                        } else {
+                           //Récupération et affichage des erreurs
+                           $erreurs = $utilisateur->errors();
+                           foreach ($erreurs as $erreurId) {
+                              switch ($erreurId) {
+                                 case UtilisateurModel::BAD_LOGIN_ERROR:
+                                    User::addPopup('Login incorrect.', Popup::ERROR);
+                                    break;
+                                 case UtilisateurModel::BAD_PASS_ERROR:
+                                    User::addPopup('Mot de passe incorrect (7 caractères minimum).', Popup::ERROR);
+                                    break;
+                                 case UtilisateurModel::BAD_NOM_ERROR:
+                                    User::addPopup('Nom incorrect.', Popup::ERROR);
+                                    break;
+                                 case UtilisateurModel::BAD_PRENOM_ERROR:
+                                    User::addPopup('Prenom incorrect.', Popup::ERROR);
+                                    break;
+                              }
+                           }
+                        }
+                     } else {
+                        User::addPopup('Le login renseigné est déjà utilisé.', Popup::ERROR);
+                     }
+                  } else {
+                     User::addPopup('Le rôle renseigné n\'existe pas.', Popup::ERROR);
+                  }
+               }
+               $this->setWindowTitle('Modifier un utilisateur');
+               $this->setSubAction('editUser');
+               $listeDesRoles = self::model('Role')->findAll();
+               foreach ($listeDesRoles as &$role) {
+                  $role['libelle'] = htmlspecialchars(stripslashes($role['libelle']));
+               }
+               $this->addVar('listeDesRoles', $listeDesRoles);
+               $utilisateur = self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil')));
+               $utilisateur['nom'] = htmlspecialchars(stripslashes($utilisateur['nom']));
+               $utilisateur['prenom'] = htmlspecialchars(stripslashes($utilisateur['prenom']));
+               $this->addVar('utilisateur', $utilisateur);
             } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
                $utilisateur->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);
@@ -118,7 +177,7 @@ class AdminController extends Controller {
          $this->addVar('listeDesUtilisateurs', $listeDesUtilisateurs);
       }
    }
-   
+
    /**
     * Gestion des promotions
     */
@@ -128,28 +187,28 @@ class AdminController extends Controller {
             $this->setWindowTitle('Ajouter une promotion');
             $this->setSubAction('addPromo');
             if (HTTPRequest::postExists('libelle')) {
-                  $promo = self::model('Promo');
-                  if (!$promo->exists(array('libelle' => HTTPRequest::post('libelle')))) {
-                     $promo['libelle'] = HTTPRequest::post('libelle');
-                     if ($promo->save()) {
-                        User::addPopup('La promotion a bien été ajoutée.', Popup::SUCCESS);
-                        HTTPResponse::redirect('/admin/promos');
-                     } else {
-                        //Récupération et affichage des erreurs
-                        $erreurs = $promo->errors();
-                        foreach ($erreurs as $erreurId) {
-                           switch ($erreurId) {
-                              case PromoModel::BAD_LIBELLE_ERROR:
-                                 User::addPopup('Le nom de la promotion est invalide.', Popup::ERROR);
-                                 break;
-                           }
+               $promo = self::model('Promo');
+               if (!$promo->exists(array('libelle' => HTTPRequest::post('libelle')))) {
+                  $promo['libelle'] = HTTPRequest::post('libelle');
+                  if ($promo->save()) {
+                     User::addPopup('La promotion a bien été ajoutée.', Popup::SUCCESS);
+                     HTTPResponse::redirect('/admin/promos');
+                  } else {
+                     //Récupération et affichage des erreurs
+                     $erreurs = $promo->errors();
+                     foreach ($erreurs as $erreurId) {
+                        switch ($erreurId) {
+                           case PromoModel::BAD_LIBELLE_ERROR:
+                              User::addPopup('Le nom de la promotion est invalide.', Popup::ERROR);
+                              break;
                         }
                      }
-                  } else {
-                     User::addPopup('Une autre promo porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
                   }
+               } else {
+                  User::addPopup('Une autre promo porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
                }
-         } else  {
+            }
+         } else {
             $this->app()->user()->addPopup('Désolé, cette action n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/admin/promos');
          }
@@ -190,7 +249,7 @@ class AdminController extends Controller {
                $this->setWindowTitle('Gestion du module ' . HTTPRequest::get('module'));
                if (HTTPRequest::getExists('matiere')) {
                   //Si la matière existe (le libelle existe et correspond au module actuel)
-                  if(self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
+                  if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
                      $this->addVar('matiere', HTTPRequest::get('matiere'));
                      $this->addVar('coef', number_format(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'), 2, ',', ' '));
                      $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
@@ -203,8 +262,8 @@ class AdminController extends Controller {
                   $module = self::model('Module');
                   if (HTTPRequest::get('action') === 'ajouter') {
                      /**
-                     * Ajout d'une matière
-                     */
+                      * Ajout d'une matière
+                      */
                      $this->setSubAction('addMatiere');
                      $this->setWindowTitle('Ajouter une matière');
                      $this->addVar('listeProfsResponsables', self::model('Prof')->findAll());
@@ -242,8 +301,8 @@ class AdminController extends Controller {
                      }
                   } else if (HTTPRequest::get('action') === 'modifier') {
                      /**
-                     * Modification d'un module
-                     */
+                      * Modification d'un module
+                      */
                      $this->setSubAction('editModule');
                      $this->setWindowTitle('Modifier un module');
                      //Si le formulaire a été bien été envoyé
@@ -257,7 +316,7 @@ class AdminController extends Controller {
                            //Récupération et affichage des erreurs
                            $erreurs = $module->errors();
                            foreach ($erreurs as $erreurId) {
-                              switch($erreurId) {
+                              switch ($erreurId) {
                                  case ModuleModel::BAD_LIBELLE_ERROR:
                                     User::addPopup('Le nom du module est invalide.', Popup::ERROR);
                                     break;
@@ -267,8 +326,8 @@ class AdminController extends Controller {
                      }
                   } else if (HTTPRequest::get('action') === 'supprimer') {
                      /**
-                     * Suppression d'un module
-                     */
+                      * Suppression d'un module
+                      */
                      $module->delete(array('idMod' => $idModule));
                      User::addPopup('Le module a bien été supprimé.', Popup::SUCCESS);
                      HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/modules');
@@ -302,7 +361,7 @@ class AdminController extends Controller {
                         //Récupération et affichage des erreurs
                         $erreurs = $module->errors();
                         foreach ($erreurs as $erreurId) {
-                           switch($erreurId) {
+                           switch ($erreurId) {
                               case ModuleModel::BAD_LIBELLE_ERROR:
                                  User::addPopup('Le nom du module est invalide.', Popup::ERROR);
                                  break;
@@ -369,7 +428,7 @@ class AdminController extends Controller {
     * Gestion des professeurs
     */
    public function prof() {
-
+      
    }
 
 }

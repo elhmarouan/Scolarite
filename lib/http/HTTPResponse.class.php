@@ -25,7 +25,7 @@ class HTTPResponse {
    }
 
    public static function redirect404($app) {
-      Application::load('Panda.core.Page');
+      Application::load('Panda.page.Page');
       self::setPage(new Page($app));
       self::page()->setError();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/404.php');
@@ -35,7 +35,7 @@ class HTTPResponse {
    }
 
    public static function redirect403($app) {
-      Application::load('Panda.core.Page');
+      Application::load('Panda.page.Page');
       self::setPage(new Page($app));
       self::page()->setError();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/403.php');

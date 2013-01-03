@@ -29,6 +29,37 @@
       </fieldset>
       <input type="submit" value="Ajouter !" />
    </form>
+   <?php elseif ($editUser) : ?>
+   <h1>Modifier un utilisateur</h1>
+   <p>Veuillez remplir les champs ci-dessous pour créer un nouvel utilisateur</p>
+   <form method="post" action="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier">
+      <fieldset>
+         <legend>Identité réelle</legend>
+         Nom : <input type="text" name="nom" value="<?php echo $utilisateur['nom']; ?>" /><br />
+         Prénom : <input type="text" name="prenom" value="<?php echo $utilisateur['prenom']; ?>" /><br />
+         Rôle :
+         <?php if (!empty($listeDesRoles)) : ?>
+            <select name="role">
+               <?php foreach ($listeDesRoles as $role) : ?>
+                  <option value="<?php echo $role['idRole']; ?>"<?php if($role['idRole'] === $utilisateur['idRole']) : ?> selected<?php endif; ?>><?php echo $role['libelle']; ?></option>
+               <?php endforeach; ?>
+            </select>
+            <?php
+         else :
+            ?>
+            Aucun rôle disponible
+         <?php
+         endif;
+         ?>
+      </fieldset>
+      <fieldset>
+         <legend>Identité virtuelle</legend>
+         Login : <input type="text" name="login" value="<?php echo $utilisateur['login']; ?>" /><br />
+         Mot de passe : <input type="password" name="password" /> (laisser vide pour ne pas changer)<br />
+         Confirmer : <input type="password" name="passwordConfirm" />
+      </fieldset>
+      <input type="submit" value="Modifier !" />
+   </form>
 <?php else : ?>
    <h1>Gestion des utilisateurs</h1>
    <p><a href="/admin/utilisateurs/ajouter">Ajouter un utilisateur</a></p>
