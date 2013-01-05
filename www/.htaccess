@@ -4,6 +4,7 @@ Allow From All
    Options +FollowSymLinks
    RewriteEngine On
 
+   RewriteRule ^connexion$ backend.php [QSA,L]
    RewriteRule ^(admin|prof|eleve)/ backend.php [QSA,L]
    RewriteRule ^sandbox/ sandbox.php [QSA,L]
 

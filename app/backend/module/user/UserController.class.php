@@ -14,9 +14,21 @@ class UserController extends Controller {
             $passwordToCheck = __hash(HTTPRequest::post('password'), Config::read('salt.user.prefix'), Config::read('salt.user.suffix'));
             if ($utilisateur->exists(array('login' => HTTPRequest::post('login'), 'pass' => $passwordToCheck))) {
                $idUtil = $utilisateur->first(array('login' => HTTPRequest::post('login')), 'idUtil');
+               $role = self::model('Role')->first(array('idRole' => $utilisateur->first(array('login' => HTTPRequest::post('login')), 'idRole')), 'libelle');
                $this->app()->user()->login($idUtil, HTTPRequest::post('login'));
                User::addPopup('Connexion réussie !', Popup::SUCCESS);
-               HTTPResponse::redirect(HTTPRequest::requestURI());
+               switch ($role) {
+                  case 'Administrateur' :
+                     HTTPResponse::redirect('/admin/');
+                     break;
+                  case 'Professeur' :
+                     HTTPResponse::redirect('/prof/');
+                     break;
+                  case 'Élève' :
+                     HTTPResponse::redirect('/eleve/');
+                     break;
+               }
+               
             } else {
                User::addPopup('Mot de passe erroné.', Popup::ERROR);
             }

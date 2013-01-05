@@ -4,3 +4,4 @@
    <li><a href="/admin/utilisateurs">Gestion des utilisateurs</a></li>
    <li><a href="/admin/promos">Gestion des promotions</a></li>
 </ul>
+<p><a href="/">Retour à l'accueil</a></p>

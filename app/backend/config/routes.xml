@@ -33,5 +33,6 @@
     <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="action" />
     <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="action" />
     
+    <route url="/connexion" module="User" action="connexion" />
     <route url="/deconnexion" module="User" action="deconnexion" />    
 </routes>

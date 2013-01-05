@@ -15,43 +15,32 @@ a:hover {
    text-decoration: underline;
 }
 
-nav {
-   background: #394c73;
-   border-bottom: solid 4px #cfcfcf;
-   display: block;
-   height: 50px;
+a img {
+   border: none;
 }
 
-nav ul {
-   margin: 0;
-   margin-left: 20px;
-   padding: 0;
-}
-
-nav ul li {
-   display: inline;
-   font-size: 16px;
-   line-height: 50px;
-}
-
-nav ul li a {
-   color: #bfbfbf;
-   text-decoration: none;
-}
-
-nav ul li a:hover {
-   color: #fff;
+header {
+   background: #002a53;
+   height: 115px;
 }
 
 #content {
    background: white;
-   box-shadow: 0 1px 4px #aaa;
-   -moz-box-shadow: 0 1px 4px #aaa;
-   -webkit-box-shadow: 0 1px 4px #aaa;
+   box-shadow: 0 2px 4px #aaa;
+   -moz-box-shadow: 0 2px 4px #aaa;
+   -webkit-box-shadow: 0 2px 4px #aaa;
    color: rgb(72,72,72);
    font-family: "Open Sans", sans-serif;
    margin: 0 30px;
    padding: 10px;
+}
+
+#content a img {
+   opacity: 0.6;
+}
+
+#content a img:hover {
+   opacity: 1;
 }
 
 #content #popup {

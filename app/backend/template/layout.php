@@ -8,11 +8,9 @@
       <link href="http://fonts.googleapis.com/css?family=Rambla:700|Open+Sans" rel="stylesheet" type="text/css">
    </head>
    <body>
-      <nav>
-         <ul>
-            <li><a href="/déconnexion">Déconnexion</a></li>
-         </ul>
-      </nav>
+      <header>
+         <a href="/"><img src="/img/scol.png" alt="scol.png"/></a>
+      </header>
       <div id="content">
          <div id="popup">
             <?php
