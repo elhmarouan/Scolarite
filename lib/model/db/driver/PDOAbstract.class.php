@@ -275,7 +275,7 @@ abstract class PDOAbstract implements DriverInterface {
       return implode(', ', $placeHolders);
    }
    
-   protected function _buildConditions(array $conditions, array $tokenValues) {
+   protected function _buildConditions(array $conditions, array $tokensValues) {
       if ($conditions !== array()) {
          $whereStatement = 'WHERE ';
          $firstCondition = true;
@@ -295,8 +295,22 @@ abstract class PDOAbstract implements DriverInterface {
                   if(!array_key_exists($subCondition['operator'], $this->_operators)) {
                      throw new ErrorException(__('Unable to build the WHERE statement: invalid operator "%s"', $subCondition['operator']));
                   }
-                  //TODO! IN and NOT IN statements
-                  $subWhereStatement .= $this->_operators[$subCondition['operator']] . ' :' . $subCondition['token'] . ') ';
+                  //IN and NOT IN conditions
+                  if (is_array($tokensValues[$subCondition['token']])) {
+                     if ($subCondition['operator'] === 'eq') {
+                        $subWhereStatement .= 'IN (';
+                        for ($i = 0 ; $i < count($tokensValues[$subCondition['token']]) ; ++$i) {
+                           $subWhereStatement .= $this->_escapeValue($tokensValues[$subCondition['token']][$i]) . ', ';
+                        } 
+                        $subWhereStatement = rtrim($subWhereStatement, ', ') . ') ) ';
+                     } else if ($subCondition['operator'] === 'neq') {
+                        //TODO! NOT IN
+                     } else {
+                        throw new ErrorException(__('Unable to build the WHERE statement: "eq" and "neq" are the only supported operators for array tokens.'));
+                     }
+                  } else {
+                     $subWhereStatement .= $this->_operators[$subCondition['operator']] . ' :' . $subCondition['token'] . ') ';
+                  }
                }
                $whereStatement .= ltrim($subWhereStatement, $currentType) . ')';
             }

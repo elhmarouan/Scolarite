@@ -9,11 +9,6 @@ class ModuleModel extends Model {
 
    protected $_datasourceName = 'Module';
    
-   //Relations
-   protected $_relations = array(
-       '_idPromo' => 'Promo._idPromo'
-   );
-   
    //Champs
    protected $_idMod;
    protected $_libelle;

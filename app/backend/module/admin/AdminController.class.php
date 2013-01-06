@@ -154,8 +154,12 @@ class AdminController extends Controller {
                $utilisateur['prenom'] = htmlspecialchars(stripslashes($utilisateur['prenom']));
                $this->addVar('utilisateur', $utilisateur);
             } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
-               $utilisateur->delete(array('idUtil' => HTTPRequest::get('idUtil')));
-               User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);
+               if ((int) HTTPRequest::get('idUtil') !== User::id()) {
+                  $utilisateur->delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                  User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);
+               } else {
+                  User::addPopup('Impossible de supprimer votre propre compte. Si vous voulez vraiment le faire, faîtes-en la demande à un autre administrateur.', Popup::ERROR);
+               }
                HTTPResponse::redirect('/admin/utilisateurs');
             } else {
                User::addPopup('Cette action n\'existe pas.', Popup::ERROR);

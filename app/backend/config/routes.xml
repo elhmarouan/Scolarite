@@ -20,10 +20,9 @@
     <route url="/prof/" module="Prof" action="index" />
     <route url="/prof/promos" module="Prof" action="index" />
     <route url="/prof/([a-z]{3}[1-3]{1})" module="Prof" action="promo" vars="promo" />
-    <route url="/prof/([a-z]{3}[1-3]{1})/modules" module="Prof" action="modules" vars="promo" />
-    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})" module="Prof" action="modules" vars="promo" />
-    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})/matiere" module="Prof" action="modules" vars="promo,module" />
-    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-z]{1,})/([A-Za-z+]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/modules" module="Prof" action="module" vars="promo" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/étudiants" module="Prof" action="etudiant" vars="promo" />
+    <route url="/prof/([a-z]{3}[1-3]{1})/([A-Za-zéèÉÈç' -]{1,})/matières" module="Prof" action="module" vars="promo,module" />
        
     <route url="/eleve/" module="Eleve" action="index" />
     <route url="/eleve/perso" module="Eleve" action="perso" />

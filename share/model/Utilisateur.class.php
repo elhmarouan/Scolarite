@@ -9,11 +9,6 @@ class UtilisateurModel extends Model {
    
    protected $_datasourceName = 'Utilisateur';
    
-   //Relations
-   protected $_relations = array(
-       '_idRole' => 'Role._idRole'
-   );
-   
    //Champs
    protected $_idUtil;
    protected $_login;

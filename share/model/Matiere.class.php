@@ -9,12 +9,6 @@ class MatiereModel extends Model {
 
    protected $_datasourceName = 'Matiere';
    
-   //Relations
-   protected $_relations = array(
-       '_idMod' => 'Module._idMod',
-       '_idProf' => 'Prof._idProf'  
-   );
-   
    //Champs
    protected $_idMat;
    protected $_libelle;
