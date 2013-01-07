@@ -205,7 +205,7 @@ abstract class Model implements ArrayAccess {
     */
    public function save() {
       foreach (get_object_vars($this) as $attribute => $value) {
-         if ($value === null) {
+         if ($value === null && !in_array($attribute, array('_datasourceName', '_relations', '_errors', '_query', '_daoName'))) {
             $this->{'set' . ucfirst(ltrim($attribute, '_'))}(false);
          }
       }
@@ -220,15 +220,15 @@ abstract class Model implements ArrayAccess {
                $where[$primaryKey] = $this->{'_' . $primaryKey};
             }
             if (!$this->exists($where)) {
-               $this->_query->insert($this->_datasourceName)->set($this->_datasourceValues())->getResult();
+               $this->_query->insert($this->_datasourceName())->set($this->_datasourceValues())->getResult();
             } else {
-               $this->_query->update($this->_datasourceName)->set($this->_datasourceValues())->where($where)->getResult();
+               $this->_query->update($this->_datasourceName())->set($this->_datasourceValues())->where($where)->getResult();
             }
          } else {
             if (empty($this->{'_' . $primaryKeys[0]}) || !$this->exists(array($primaryKeys[0] => $this->{'_' . $primaryKeys[0]}))) {
-               $this->_query->insert($this->_datasourceName)->set($this->_datasourceValues())->getResult();
+               $this->_query->insert($this->_datasourceName())->set($this->_datasourceValues())->getResult();
             } else {
-               $this->_query->update($this->_datasourceName)->set($this->_datasourceValues())->where(array($primaryKeys[0] => $this->{'_' . $primaryKeys[0]}))->getResult();
+               $this->_query->update($this->_datasourceName())->set($this->_datasourceValues())->where(array($primaryKeys[0] => $this->{'_' . $primaryKeys[0]}))->getResult();
             }
          }
          return true;

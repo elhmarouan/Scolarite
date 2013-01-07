@@ -98,11 +98,12 @@ abstract class PDOAbstract implements DriverInterface {
       }
       $datasources = $query->datasources();
       $insertParts = $this->_insertParts($query->setValues());
+      $tokensValues = $this->_tokensValues($query->tokensValues());
       $sql = '
          INSERT INTO ' . $datasources[0] . '(' . $insertParts['fields'] . ')
          VALUES(' . $insertParts['tokens'] . ')
          ';
-      return $this->query($sql, $query->tokensValues());
+      return $this->query($sql, $tokensValues);
    }
 
    public function update(Query $query) {
@@ -111,11 +112,12 @@ abstract class PDOAbstract implements DriverInterface {
       }
       $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
       $updateStatement = $this->_updateStatement($query->setValues());
+      $tokensValues = $this->_tokensValues($query->tokensValues());
       $sql = '
          UPDATE ' . implode(', ', $query->datasources()) . '
          SET ' . $updateStatement . '
          ' . ( !empty($conditions) ? $conditions : '' );
-      return $this->query($sql, $query->tokensValues());
+      return $this->query($sql, $tokensValues);
    }
 
    public function delete(Query $query) {
@@ -275,6 +277,25 @@ abstract class PDOAbstract implements DriverInterface {
       return implode(', ', $placeHolders);
    }
    
+   protected function _tokensValues(array $tokensValues) {
+      foreach ($tokensValues as &$value) {
+         if (is_object($value)) {
+            if ($value instanceof DateTime) {
+               $value = (string) $value->format($this->dateTimeFormat());
+            } else {
+               $value = serialize($value);
+            }
+         } else if (is_array($value)) {
+            $value = serialize($value);
+         } else if (is_bool($value)) {
+            $value = (int) $value;
+         } else {
+            continue;
+         }
+      }
+      return $tokensValues;
+   }
+
    protected function _buildConditions(array $conditions, array $tokensValues) {
       if ($conditions !== array()) {
          $whereStatement = 'WHERE ';
@@ -297,14 +318,12 @@ abstract class PDOAbstract implements DriverInterface {
                   }
                   //IN and NOT IN conditions
                   if (is_array($tokensValues[$subCondition['token']])) {
-                     if ($subCondition['operator'] === 'eq') {
-                        $subWhereStatement .= 'IN (';
+                     if ($subCondition['operator'] === 'eq' || $subCondition['operator'] === 'neq') {
+                        $subWhereStatement .= $subCondition['operator'] === 'eq' ? 'IN (' : 'NOT IN (';
                         for ($i = 0 ; $i < count($tokensValues[$subCondition['token']]) ; ++$i) {
                            $subWhereStatement .= $this->_escapeValue($tokensValues[$subCondition['token']][$i]) . ', ';
                         } 
                         $subWhereStatement = rtrim($subWhereStatement, ', ') . ') ) ';
-                     } else if ($subCondition['operator'] === 'neq') {
-                        //TODO! NOT IN
                      } else {
                         throw new ErrorException(__('Unable to build the WHERE statement: "eq" and "neq" are the only supported operators for array tokens.'));
                      }
