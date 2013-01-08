@@ -88,6 +88,26 @@ class ProfController extends Controller {
       }
    }
 
+   public function matiere() {
+      if (HTTPRequest::get('promo')) {
+         //Si la promotion existe
+         if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            $this->addVar('promo', HTTPRequest::get('promo'));
+            if (HTTPRequest::getExists('module')) {
+               //Si le module existe 
+               if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module')))) {
+                  $this->addVar('module', HTTPRequest::get('module'));
+                  if (HTTPRequest::get('matiere')) {
+                     //Si la matiere existe
+                     $this->setWindowTitle('Examens de la matière' . HTTPRequest::get('matiere'));
+                     
+                  }
+               }
+            }            
+         }
+      }
+   }
+
    public function etudiant() {
       if (HTTPRequest::get('promo')) {
          //Si la promotion existe
