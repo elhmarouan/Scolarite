@@ -317,7 +317,7 @@ abstract class PDOAbstract implements DriverInterface {
                      throw new ErrorException(__('Unable to build the WHERE statement: invalid operator "%s"', $subCondition['operator']));
                   }
                   //IN and NOT IN conditions
-                  if (is_array($tokensValues[$subCondition['token']])) {
+                  if (is_array($tokensValues[$subCondition['token']]) && !empty($tokensValues[$subCondition['token']])) {
                      if ($subCondition['operator'] === 'eq' || $subCondition['operator'] === 'neq') {
                         $subWhereStatement .= $subCondition['operator'] === 'eq' ? 'IN (' : 'NOT IN (';
                         for ($i = 0 ; $i < count($tokensValues[$subCondition['token']]) ; ++$i) {

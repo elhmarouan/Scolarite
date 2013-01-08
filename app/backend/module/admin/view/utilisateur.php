@@ -27,7 +27,7 @@
          <label>Année de redoublement :</label>
          <select name="anneeRedouble">
             <option value="0">Aucune</option>
-            <?php for ($i = (int) date('Y') - 10 ; $i <= (int) date('Y') - 1 ; $i++) : ?>
+            <?php for ($i = (int) date('Y') - 5 ; $i <= (int) date('Y') - 1 ; $i++) : ?>
             <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
             <?php endfor; ?>
          </select>         

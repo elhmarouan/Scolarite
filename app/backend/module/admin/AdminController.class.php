@@ -50,16 +50,20 @@ class AdminController extends Controller {
                      $utilisateur['prenom'] = HTTPRequest::post('prenom');
                      $utilisateur['idRole'] = HTTPRequest::post('role');
                      if ($utilisateur->save()) {
+                        $idUtil = $utilisateur->lastInsertId();
+                        //Si le nouvel utilisateur est un professeur
                         if ((int) HTTPRequest::post('role') === 2) {
                            $prof = self::model('Prof');
-                           $idUtil = $utilisateur->lastInsertId();
+                           //On vérifie que les champs nécessaires existent
                            if (HTTPRequest::postExists('numBureau', 'telBureau')) {
                               $prof['idUtil'] = $idUtil;
                               $prof['numBureau'] = HTTPRequest::post('numBureau');
                               $prof['telBureau'] = HTTPRequest::post('telBureau');
+                              //Si la création du prof échoue
                               if (!$prof->save()) {
+                                 //On supprime la nouvelle fiche utilisateur
                                  $utilisateur->delete(array('idUtil' => $idUtil));
-                                 //Récupération et affichage des erreurs
+                                 //Et on récupère les erreurs
                                  $erreurs = $prof->errors();
                                  foreach ($erreurs as $erreurId) {
                                     switch ($erreurId) {
@@ -74,10 +78,36 @@ class AdminController extends Controller {
                               }  
                            } else {
                               $utilisateur->delete(array('idUtil' => $idUtil));
-                              User::addPopup('Les informations nécessaires à la création du profil sont inexistantes.', Popup::ERROR);
+                              User::addPopup('Les informations nécessaires à la création du profil n\'ont pas été renseignées.', Popup::ERROR);
                            }
                         } else if ((int) HTTPRequest::post('role') === 3) {
                            $eleve = self::model('Eleve');
+                           //On vérifie que les champs nécessaires existent
+                           if (HTTPRequest::postExists('numEtudiant', 'anneeRedouble')) {
+                              $eleve['idUtil'] = $idUtil;
+                              $eleve['numEtudiant'] = HTTPRequest::post('numEtudiant');
+                              $eleve['anneeRedouble'] = HTTPRequest::post('anneeRedouble');
+                              //Si la création de l'élève échoue
+                              if (!$eleve->save()) {
+                                 //On supprime la nouvelle fiche utilisateur
+                                 $utilisateur->delete(array('idUtil' => $idUtil));
+                                 //Et on récupère les erreurs
+                                 $erreurs = $eleve->errors();
+                                 foreach ($erreurs as $erreurId) {
+                                    switch ($erreurId) {
+                                       case EleveModel::BAD_NUM_ETUDIANT_ERROR:
+                                          User::addPopup('Numéro d\'étudiant invalide.', Popup::ERROR);
+                                          break;
+                                       case EleveModel::BAD_ANNEE_REDOUBLE_ERROR;
+                                          User::addPopup('Année de redoublement invalide.', Popup::ERROR);
+                                          break;
+                                    }
+                                 }
+                              } 
+                           } else {
+                              $utilisateur->delete(array('idUtil' => $idUtil));
+                              User::addPopup('Les informations nécessaires à la création du profil n\'ont pas été renseignées.', Popup::ERROR);
+                           }
                         }
                         User::addPopup('L\'utilisateur a bien été ajouté.', Popup::SUCCESS);
                         HTTPResponse::redirect('/admin/utilisateurs');
@@ -184,6 +214,13 @@ class AdminController extends Controller {
                $this->addVar('utilisateur', $utilisateur);
             } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
                if ((int) HTTPRequest::get('idUtil') !== User::id()) {
+                  $idRole = (int) $utilisateur->first(array('idUtil' => HTTPRequest::get('idUtil')), 'idRole');
+                  //Si l'utilisateur était un prof ou un élève, on supprime l'entrée associée
+                  if ($idRole === 2) {
+                     self::model('Prof')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                  } else if ($idRole === 3) {
+                     self::model('Eleve')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                  }
                   $utilisateur->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                   User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);
                } else {
@@ -293,16 +330,15 @@ class AdminController extends Controller {
                       * Ajout d'une matière
                       */
                      $this->setSubAction('addMatiere');
-                     $this->setWindowTitle('Ajouter une matière');
-                     $this->addVar('listeProfsResponsables', self::model('Prof')->findAll());
                      //Si le formulaire a été bien été envoyé
-                     if (HTTPRequest::postExists('libelle', 'coef')) {
+                     if (HTTPRequest::postExists('libelle', 'coef', 'idProf')) {
                         $matiere = self::model('Matiere');
                         //On vérifie si une autre matière ne porte pas déjà le même nom dans le module concerné
                         if (!$matiere->exists(array('idMod' => $idModule, 'libelle' => HTTPRequest::post('libelle')))) {
                            $matiere['idMod'] = $idModule;
                            $matiere['libelle'] = HTTPRequest::post('libelle');
                            $matiere['coefMat'] = HTTPRequest::post('coef');
+                           $matiere['idProf'] = HTTPRequest::post('idProf');
                            if ($matiere->save()) {
                               User::addPopup('La matière a bien été ajoutée.', Popup::SUCCESS);
                               HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/matières');
@@ -327,6 +363,17 @@ class AdminController extends Controller {
                            User::addPopup('Une autre matière porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
                         }
                      }
+                     $this->setWindowTitle('Ajouter une matière');
+                     $listeDesProfs = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->findAll('idUtil')));
+                     $idProfs = self::model('Prof')->findAll('idProf');
+                     //Fusion des ids prof et de la liste de profs
+                     for ($i = 0 ; $i < count($listeDesProfs) ; ++$i) {
+                        $listeDesProfs[$i]['idProf'] = $idProfs[$i];
+                        $listeDesProfs[$i]['login'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['login']));
+                        $listeDesProfs[$i]['nom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['nom']));
+                        $listeDesProfs[$i]['prenom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['prenom']));
+                     }
+                     $this->addVar('listeProfsResponsables', $listeDesProfs);
                   } else if (HTTPRequest::get('action') === 'modifier') {
                      /**
                       * Modification d'un module
@@ -430,16 +477,34 @@ class AdminController extends Controller {
    public function etudiant() {
       if (HTTPRequest::getExists('promo')) {
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
             $this->addVar('promo', HTTPRequest::get('promo'));
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
                $this->setSubAction('addStudent');
+               //TODO! Traitement du formulaire
                $this->setWindowTitle('Ajouter un étudiant');
+               $idsEtudiants = self::model('Eleve')->field('idUtil');
+               $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiants));
+               foreach ($listeDesEtudiants as &$etudiant) {
+                  $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+                  $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+                  $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+               }
+               $this->addVar('listeDesEtudiants', $listeDesEtudiants);
             } else {
                if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
                   $prefixPromo = 'd\'';
                } else {
                   $prefixPromo = 'de ';
                }
+               $idsEtudiantsPromo = self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo));
+               $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiantsPromo));
+               foreach ($listeDesEtudiants as &$etudiant) {
+                  $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+                  $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+                  $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+               }
+               $this->addVar('listeDesEtudiants', $listeDesEtudiants);
                $this->setWindowTitle('Gestion des étudiants ' . $prefixPromo . HTTPRequest::get('promo'));
                $this->addVar('prefixPromo', $prefixPromo);
             }

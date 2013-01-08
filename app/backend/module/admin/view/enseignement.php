@@ -5,9 +5,9 @@
       <label>Coefficient :</label> <input type="number" name="coef" /><br />
       <label>Professeur responsable :</label> 
       <?php if (!empty($listeProfsResponsables)) : ?>
-         <select name="profResponsable">
+         <select name="idProf">
             <?php foreach ($listeProfsResponsables as $prof) : ?>
-               <option value=""><?php echo $prof['idProf']; ?></option>
+               <option value="<?php echo $prof['idProf']; ?>"><?php echo $prof['prenom']; ?> <?php echo $prof['nom']; ?> (<?php echo $prof['login']; ?>)</option>
             <?php endforeach; ?>
          </select>
       <?php else : ?>
