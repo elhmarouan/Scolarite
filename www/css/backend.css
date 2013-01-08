@@ -143,6 +143,10 @@ header {
    font-weight: bold;
 }
 
+#content form #profilEtudiant, #content form #profilProf {
+   display: none;
+} 
+
 /**
 * Tableaux
 */

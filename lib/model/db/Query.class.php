@@ -287,6 +287,10 @@ class Query {
       }
    }
    
+   public function getLastInsertId() {
+      return self::$_dao[$this->_currentDao]->lastInsertId();
+   }
+   
    public function getResult($outputFormat = self::OUTPUT_ARRAY) {
       if (!empty($this->_type)) {
          if(!empty($this->_sqlParts['from'])) {

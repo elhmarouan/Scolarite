@@ -50,6 +50,35 @@ class AdminController extends Controller {
                      $utilisateur['prenom'] = HTTPRequest::post('prenom');
                      $utilisateur['idRole'] = HTTPRequest::post('role');
                      if ($utilisateur->save()) {
+                        if ((int) HTTPRequest::post('role') === 2) {
+                           $prof = self::model('Prof');
+                           $idUtil = $utilisateur->lastInsertId();
+                           if (HTTPRequest::postExists('numBureau', 'telBureau')) {
+                              $prof['idUtil'] = $idUtil;
+                              $prof['numBureau'] = HTTPRequest::post('numBureau');
+                              $prof['telBureau'] = HTTPRequest::post('telBureau');
+                              if (!$prof->save()) {
+                                 $utilisateur->delete(array('idUtil' => $idUtil));
+                                 //Récupération et affichage des erreurs
+                                 $erreurs = $prof->errors();
+                                 foreach ($erreurs as $erreurId) {
+                                    switch ($erreurId) {
+                                       case ProfModel::BAD_NUM_BUREAU_ERROR:
+                                          User::addPopup('Numéro de bureau invalide.', Popup::ERROR);
+                                          break;
+                                       case ProfModel::BAD_TEL_BUREAU_ERROR;
+                                          User::addPopup('Numéro de téléphone invalide.', Popup::ERROR);
+                                          break;
+                                    }
+                                 }
+                              }  
+                           } else {
+                              $utilisateur->delete(array('idUtil' => $idUtil));
+                              User::addPopup('Les informations nécessaires à la création du profil sont inexistantes.', Popup::ERROR);
+                           }
+                        } else if ((int) HTTPRequest::post('role') === 3) {
+                           $eleve = self::model('Eleve');
+                        }
                         User::addPopup('L\'utilisateur a bien été ajouté.', Popup::SUCCESS);
                         HTTPResponse::redirect('/admin/utilisateurs');
                      } else {

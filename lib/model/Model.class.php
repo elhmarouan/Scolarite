@@ -104,6 +104,10 @@ abstract class Model implements ArrayAccess {
       }
       return $fields;
    }
+   
+   public function lastInsertId() {
+      return $this->_query->getLastInsertId();
+   }
 
    /**
     * Checks if the current model is ready to be saved.

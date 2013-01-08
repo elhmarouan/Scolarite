@@ -6,6 +6,7 @@
       <base href="<?php echo $root; ?>" />
       <link rel="stylesheet" type="text/css" href="css/backend.css" />
       <link href="http://fonts.googleapis.com/css?family=Rambla:700|Open+Sans" rel="stylesheet" type="text/css">
+      <script language="javascript" src="/js/profil.js"></script>
    </head>
    <body>
       <header>

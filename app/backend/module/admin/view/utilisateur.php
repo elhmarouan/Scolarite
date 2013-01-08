@@ -8,7 +8,7 @@
          <label>Prénom :</label> <input type="text" name="prenom" /><br />
          <label>Rôle :</label>
          <?php if (!empty($listeDesRoles)) : ?>
-            <select name="role">
+            <select name="role" onChange="display_profil(this[this.selectedIndex].value);">
                <?php foreach ($listeDesRoles as $role) : ?>
                   <option value="<?php echo $role['idRole']; ?>"><?php echo $role['libelle']; ?></option>
                <?php endforeach; ?>
@@ -20,6 +20,22 @@
          <?php
          endif;
          ?>
+      </fieldset>
+      <fieldset id="profilEtudiant">
+         <legend>Profil étudiant</legend>
+         <label>Numéro d'étudiant :</label><input type="text" name="numEtudiant" /> <br />
+         <label>Année de redoublement :</label>
+         <select name="anneeRedouble">
+            <option value="0">Aucune</option>
+            <?php for ($i = (int) date('Y') - 10 ; $i <= (int) date('Y') - 1 ; $i++) : ?>
+            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+            <?php endfor; ?>
+         </select>         
+      </fieldset>
+      <fieldset id="profilProf">
+         <legend>Profil professeur</legend>
+         <label>Numéro du bureau :</label><input type="text" name="numBureau" /><br />
+         <label>Téléphone :</label><input type="tel" name="telBureau" /><br/>
       </fieldset>
       <fieldset>
          <legend>Identité virtuelle</legend>

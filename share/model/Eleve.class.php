@@ -13,4 +13,43 @@ class EleveModel extends Model {
    protected $_anneeRedouble;
    protected $_idPromo;
    protected $_idUtil;
+   
+   //Erreurs
+   const BAD_NUM_ETUDIANT_ERROR = 1;
+   const BAD_ANNEE_REDOUBLE_ERROR = 2;
+   const BAD_ID_PROMO_ERROR = 3;
+   const BAD_ID_UTIL_ERROR = 4;
+   
+   public function setNumEtudiant($numEtudiant) {
+      if (is_numeric($numEtudiant) && (int) $numEtudiant > 0) {
+         $this->_numEtudiant = (int) $numEtudiant;
+      } else {
+         $this->_errors[] = self::BAD_NUM_ETUDIANT_ERROR;
+      }
+   }
+   
+   public function setAnneeRedouble($anneeRedouble) {
+      if (empty($anneeRedouble) || checkdate(1, 1, $anneeRedouble)) {
+         $this->_anneeRedouble = $anneeRedouble;
+         } else{
+         $this->_errors[] = self::BAD_ANNEE_REDOUBLE_ERROR;
+      }
+   }
+   
+   public function setIdPromo($idPromo) {
+      if (empty($idPromo) || (is_numeric($idPromo) && (int) $idPromo > 0)) {
+         $this->_idPromo = (int) $idPromo;
+      } else {
+         $this->_errors[] = self::BAD_ID_PROMO_ERROR;
+      }
+   }
+   
+   public function setIdUtil($idUtil) {
+      if (empty($idUtil) || (is_numeric($idUtil) && (int) $idUtil > 0)) {
+         $this->_idUtil = (int) $idUtil;
+      } else {
+         $this->_errors[] = self::BAD_ID_UTIL_ERROR;
+      }
+   }
+   
 }
