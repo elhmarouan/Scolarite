@@ -56,7 +56,7 @@
          <label>Prénom :</label> <input type="text" name="prenom" value="<?php echo $utilisateur['prenom']; ?>" /><br />
          <label>Rôle :</label>
          <?php if (!empty($listeDesRoles)) : ?>
-            <select name="role">
+            <select name="role" onChange="display_profil(this[this.selectedIndex].value);">
                <?php foreach ($listeDesRoles as $role) : ?>
                   <option value="<?php echo $role['idRole']; ?>"<?php if($role['idRole'] === $utilisateur['idRole']) : ?> selected<?php endif; ?>><?php echo $role['libelle']; ?></option>
                <?php endforeach; ?>
@@ -68,6 +68,26 @@
          <?php
          endif;
          ?>
+      </fieldset>
+      <fieldset id="profilEtudiant"<?php if ($utilisateur['idRole'] === '3') echo ' style="display:block;"' ; ?>>
+         <legend>Profil étudiant</legend>
+         <label>Numéro d'étudiant :</label><input type="text" name="numEtudiant" value="<?php echo $utilisateur['numEtudiant']; ?>" /> <br />
+         <label>Année de redoublement :</label>
+         <select name="anneeRedouble">
+            <option value="0">Aucune</option>
+            <?php for ($i = (int) date('Y') - 5 ; $i <= (int) date('Y') - 1 ; $i++) :
+               if ((int) $utilisateur['anneeRedouble'] === $i) : ?>
+                  <option value="<?php echo $i; ?>" selected><?php echo $i; ?></option>
+               <?php else : ?>
+                  <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+               <?php endif; ?>
+            <?php endfor; ?>
+         </select>         
+      </fieldset>
+      <fieldset id="profilProf"<?php if ($utilisateur['idRole'] === '2') echo ' style="display:block;"' ; ?>>
+         <legend>Profil professeur</legend>
+         <label>Numéro du bureau :</label><input type="text" name="numBureau" value="<?php echo $utilisateur['numBureau']; ?>" /><br />
+         <label>Téléphone :</label><input type="tel" name="telBureau" value="<?php echo $utilisateur['telBureau']; ?>" /><br/>
       </fieldset>
       <fieldset>
          <legend>Identité virtuelle</legend>

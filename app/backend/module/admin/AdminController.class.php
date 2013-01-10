@@ -151,6 +151,7 @@ class AdminController extends Controller {
       } else if (HTTPRequest::getExists('idUtil')) {
          $utilisateur = self::model('Utilisateur');
          if ($utilisateur->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            //Si l'on demande à modifier un utilisateur
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
                //Si le formulaire de modification a été posté
                if (HTTPRequest::postExists('nom', 'prenom', 'role', 'login', 'password', 'passwordConfirm')) {
@@ -172,6 +173,7 @@ class AdminController extends Controller {
                            }
                         }
                         if (!$badPassword && $utilisateur->save()) {
+                           //TODO! Traitement des cas particuliers (prof et élève)
                            User::addPopup('L\'utilisateur a bien été modifié.', Popup::SUCCESS);
                            HTTPResponse::redirect('/admin/utilisateurs');
                         } else {
@@ -211,6 +213,18 @@ class AdminController extends Controller {
                $utilisateur = self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil')));
                $utilisateur['nom'] = htmlspecialchars(stripslashes($utilisateur['nom']));
                $utilisateur['prenom'] = htmlspecialchars(stripslashes($utilisateur['prenom']));
+               //Récupération des données propres au rôle
+               if ((int) $utilisateur['idRole'] === 2) {
+                  //Si l'utilisateur est un professeur
+                  $prof = self::model('Prof')->first(array('idUtil' => $utilisateur['idUtil']));
+                  $utilisateur['numBureau'] = $prof['numBureau'];
+                  $utilisateur['telBureau'] = $prof['telBureau'];
+               } else if ((int) $utilisateur['idRole'] === 3) {
+                  //Si l'utilisateur est un étudiant
+                  $etudiant = self::model('Eleve')->first(array('idUtil' => $utilisateur['idUtil']));
+                  $utilisateur['numEtudiant'] = $etudiant['numEtudiant'];
+                  $utilisateur['anneeRedouble'] = $etudiant['anneeRedouble'];
+               }
                $this->addVar('utilisateur', $utilisateur);
             } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
                if ((int) HTTPRequest::get('idUtil') !== User::id()) {
