@@ -100,11 +100,29 @@ class ProfController extends Controller {
                   if (HTTPRequest::get('matiere')) {
                      //Si la matiere existe
                      $this->setWindowTitle('Examens de la matière' . HTTPRequest::get('matiere'));
+                     $this->setSubAction('manageExamens');
+                     $this->addVar('matiere', HTTPRequest::get('matiere'));
+                  } else {
                      
                   }
                }
-            }            
+            } else {
+               $this->setWindowTitle('Matières du modules ' . HTTPRequest::get('module'));
+               //récupération des matières des modules d'une promo
+               $matiereList = self::model('Matiere')->field('libelle', array('idPromo' => self::model('Promo'), 'idModule' => self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idModule'))));
+               debug($matiereList);
+               foreach ($matiereList as &$matiere) {
+                  $matiere = htmlspecialchars(stripslashes($matiere));
+               }
+               $this->addVar('MatiereDuModule', $matiereList);
+            }
+         } else {
+            $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+            HTTPResponse::redirect('/prof/');
          }
+      } else {
+         $this->app()->user()->addPopup('Veuillez sélectionner une promotion avant.');
+         HTTPResponse::redirect('/prof/');
       }
    }
 
@@ -137,4 +155,5 @@ class ProfController extends Controller {
          HTTPResponse::redirect('/prof/');
       }
    }
+
 }
