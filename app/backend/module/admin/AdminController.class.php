@@ -215,8 +215,8 @@ class AdminController extends Controller {
                               if ($etudiant->isValid()) {
                                  $etudiant->save();
                                  //Si le rôle a changé, et que l'ancien rôle était "prof", on supprime l'entrée
-                                 if ((int) $oldIdRole === 2){
-                                    self::model('Prof')-> delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                                 if ((int) $oldIdRole === 2) {
+                                    self::model('Prof')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                                  }
                               } else {
                                  $erreurs = $etudiant->errors();
@@ -355,9 +355,32 @@ class AdminController extends Controller {
       } else if (HTTPRequest::getExists('promo')) {
          //Si la promotion existe
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
-            $this->setWindowTitle('Gestion de la promotion ' . HTTPRequest::get('promo'));
-            $this->setSubAction('managePromo');
-            $this->addVar('promo', htmlspecialchars(stripslashes(HTTPRequest::get('promo'))));
+            if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
+               if (HTTPRequest::postExists('libelle')) {
+                  $promo = self::model('Promo');
+                  $promo['idPromo'] = $promo->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
+                  $promo['libelle'] = HTTPRequest::post('libelle');
+                  if ($promo->save()) {
+                     User::addPopup('Le nom de la promotion a bien été modifié.', Popup::SUCCESS);
+                     HTTPResponse::redirect('/admin/' . $promo['libelle']);
+                  } else {
+                     $erreurs = $promo->errors();
+                     foreach ($erreurs as $erreurId) {
+                        switch ($erreurId) {
+                           case PromoModel::BAD_LIBELLE_ERROR;
+                              User::addPopup('Le nom de la promotion est invalide', Popup::ERROR);
+                        }
+                     }
+                  }
+               }
+               $this->setWindowTitle('Modifier une promotion');
+               $this->setSubAction('editPromo');
+               $this->addVar('promo', HTTPRequest::get('promo'));
+            } else {
+               $this->setWindowTitle('Gestion de la promotion ' . HTTPRequest::get('promo'));
+               $this->setSubAction('managePromo');
+               $this->addVar('promo', htmlspecialchars(stripslashes(HTTPRequest::get('promo'))));
+            }
          } else {
             $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/admin/promos');
@@ -557,6 +580,28 @@ class AdminController extends Controller {
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
                $this->setSubAction('addStudent');
                //TODO! Traitement du formulaire
+               if (HTTPRequest::postExists('etudiant')) {
+                  $eleve = self::model('Eleve');
+                  if ($eleve->exists(array('idUtil' => HTTPRequest::post('etudiant')))) {
+                     $eleve['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => HTTPRequest::post('etudiant')), 'numEtudiant');
+                     $eleve['idPromo'] = $idPromo;
+                     if ($eleve->save()) {
+                        User::addPopup('La promo a bien été assignée à l\'étudiant', Popup::SUCCESS);
+                        HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/étudiants');
+                     } else {
+                        $erreurs = $eleve->errors();
+                        foreach ($erreurs as $idErreur) {
+                           switch ($idErreur) {
+                              case EleveModel::BAD_ID_PROMO_ERROR :
+                                 User::addPopup('La promotion sélectionnée n\'existe pas', Popup::ERROR);
+                                 break;
+                           }
+                        }
+                     }
+                  } else {
+                     User::addPopup('L\'étudiant sélectionné n\'existe pas');
+                  }
+               }
                $this->setWindowTitle('Ajouter un étudiant');
                $idsEtudiants = self::model('Eleve')->field('idUtil');
                $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiants));

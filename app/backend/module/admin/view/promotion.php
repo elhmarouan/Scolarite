@@ -4,15 +4,17 @@
       <label>Intitulé</label> <input type="text" name="libelle" /><br />
       <input type="submit" value="Ajouter !" />
    </form>
+   <p><a href="/admin/promos"> Retour à la liste des promotions</a></p>
 <?php elseif ($editPromo) : ?>
    <h1>Modifier une promotion</h1>
    <form method="post" action="">
       <label>Intitulé</label> <input type="text" name="libelle" value="<?php echo $promo; ?>" /><br />
       <input type="submit" value="Modifier !" />
    </form>
+   <p><a href="/admin/<?php echo $promo; ?>">Retour à la gestion de la promotion</a></p>
 <?php elseif ($managePromo) : ?>
    <h1>Gestion de la promotion <?php echo $promo; ?></h1>
-   <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton">Supprimer cette promotion</a></p>
+   <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton">Supprimer cette promotion</a> <a href="/admin/<?php echo $promo; ?>/modifier" class="button orangeButton">Modifier la promotion</a></p>
    <ul>
       <li><a href="/admin/<?php echo $promo; ?>/étudiants">Gestion des étudiants</a></li>
       <li><a href="/admin/<?php echo $promo; ?>/modules">Gestion des modules</a></li>

@@ -21,6 +21,7 @@
       <br />
       <input type="submit" value="Ajouter !" />
    </form>
+   <p><a href="admin/<?php echo $promo; ?>/étudiants">Retour à la liste des étudiants</a></p>
 <?php else : ?>
    <h1>Gestion des étudiants <?php echo $prefixPromo . $promo; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/étudiants/ajouter" class="button greenButton">Ajouter un étudiant</a></p>
@@ -53,5 +54,6 @@
             </tr>
          <?php endif; ?>
       </tbody>
-   <?php endif; ?>
-</table>
+   </table>
+   <p><a href="/admin/<?php echo $promo ?>">Retour à la promotion</a></p>
+<?php endif; ?>
