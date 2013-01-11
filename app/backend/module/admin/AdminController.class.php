@@ -327,6 +327,9 @@ class AdminController extends Controller {
     * Gestion des promotions
     */
    public function promotion() {
+      /**
+       * Ajout d'une promotion
+       */
       if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
          $this->setWindowTitle('Ajouter une promotion');
          $this->setSubAction('addPromo');
@@ -355,10 +358,14 @@ class AdminController extends Controller {
       } else if (HTTPRequest::getExists('promo')) {
          //Si la promotion existe
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
+            /**
+             * Modification d'une promotion
+             */
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
                if (HTTPRequest::postExists('libelle')) {
                   $promo = self::model('Promo');
-                  $promo['idPromo'] = $promo->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
+                  $promo['idPromo'] = $idPromo;
                   $promo['libelle'] = HTTPRequest::post('libelle');
                   if ($promo->save()) {
                      User::addPopup('Le nom de la promotion a bien été modifié.', Popup::SUCCESS);
@@ -376,6 +383,18 @@ class AdminController extends Controller {
                $this->setWindowTitle('Modifier une promotion');
                $this->setSubAction('editPromo');
                $this->addVar('promo', HTTPRequest::get('promo'));
+               /**
+                * Suppression d'une promotion
+                */
+            } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
+               if (!self::model('Module')->exists(array('idPromo' => $idPromo)) && !self::model('Eleve')->exists(array('idPromo' => $idPromo))) {
+                  self::model('Promo')->delete(array('idPromo' => $idPromo));
+                  User::addPopup('La promotion a bien été supprimée.', Popup::SUCCESS);
+                  HTTPResponse::redirect('/admin/promos');
+               } else {
+                  User::addPopup('Impossible de supprimer cette promotion : veuillez supprimer tous les modules de la promotion, et ré-assigner les étudiants à une autre promo avant.', Popup::ERROR);
+                  HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo'));
+               }
             } else {
                $this->setWindowTitle('Gestion de la promotion ' . HTTPRequest::get('promo'));
                $this->setSubAction('managePromo');
@@ -414,9 +433,42 @@ class AdminController extends Controller {
                   //Si la matière existe (le libelle existe et correspond au module actuel)
                   if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
                      $this->addVar('matiere', HTTPRequest::get('matiere'));
-                     $this->addVar('coef', number_format(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'), 2, ',', ' '));
-                     $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
-                     $this->setSubAction('manageMatiere');
+                     $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
+                     if (HTTPRequest::getExists('action')) {
+                        if (HTTPRequest::get('action') === 'modifier') {
+                           /**
+                            * Modifier une matière
+                            */
+                           if (HTTPRequest::getExists('libelle', 'coef')) {
+                              
+                           }
+                           $this->setSubAction('editMatiere');
+                           $this->setWindowTitle('Modifier une matière');
+                           $this->addVar('coef', number_format(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'), 2, ',', ' '));
+                        } else if (HTTPRequest::get('action') === 'supprimer') {
+                           /**
+                            * Supprimer une matière
+                            */
+                        }
+                     } else {
+                        $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
+                        //Liste des examens
+                        $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
+                        foreach ($listeDesExamens as &$examen) {
+                           $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                           $examen['date'] = $examen['date']->format('d/m/Y');
+                        }
+                        $this->addVar('listeDesExamens', $listeDesExamens);
+                        
+                        //TODO! Appliquer les coefs sur les notes de la promo
+                        $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
+                        $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
+                        $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
+                        $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
+                        
+                        $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
+                        $this->setSubAction('manageMatiere');
+                     }
                   } else {
                      User::addPopup('La matière « ' . HTTPRequest::get('matiere') . ' » n\'existe pas.', Popup::ERROR);
                      HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/matières');
@@ -502,9 +554,14 @@ class AdminController extends Controller {
                      /**
                       * Suppression d'un module
                       */
-                     $module->delete(array('idMod' => $idModule));
-                     User::addPopup('Le module a bien été supprimé.', Popup::SUCCESS);
-                     HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/modules');
+                     if (!self::model('Matiere')->exists(array('idMod' => $idModule))) {
+                        $module->delete(array('idMod' => $idModule));
+                        User::addPopup('Le module a bien été supprimé.', Popup::SUCCESS);
+                        HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/modules');
+                     } else {
+                        User::addPopup('Impossible de supprimer ce module : veuillez supprimer toutes les matières du module avant.', Popup::ERROR);
+                        HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/matières');
+                     }
                   }
                } else {
                   $this->setSubAction('manageModule');

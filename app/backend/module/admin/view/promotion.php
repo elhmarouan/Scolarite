@@ -14,7 +14,7 @@
    <p><a href="/admin/<?php echo $promo; ?>">Retour à la gestion de la promotion</a></p>
 <?php elseif ($managePromo) : ?>
    <h1>Gestion de la promotion <?php echo $promo; ?></h1>
-   <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton">Supprimer cette promotion</a> <a href="/admin/<?php echo $promo; ?>/modifier" class="button orangeButton">Modifier la promotion</a></p>
+   <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cette promotion ?');">Supprimer cette promotion</a> <a href="/admin/<?php echo $promo; ?>/modifier" class="button orangeButton">Modifier la promotion</a></p>
    <ul>
       <li><a href="/admin/<?php echo $promo; ?>/étudiants">Gestion des étudiants</a></li>
       <li><a href="/admin/<?php echo $promo; ?>/modules">Gestion des modules</a></li>

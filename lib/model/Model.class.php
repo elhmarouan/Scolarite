@@ -127,7 +127,7 @@ abstract class Model implements ArrayAccess {
     * @return array
     */
    public function errors() {
-      return $this->_errors;
+      return array_unique($this->_errors);
    }
 
    /**

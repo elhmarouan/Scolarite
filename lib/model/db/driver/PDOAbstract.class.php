@@ -47,7 +47,9 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::SELECT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
       }
-      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
+      $tokensValues = $conditionsBuilder['tokensValues'];
       $limits = $query->limits();
       $sql = '
          SELECT ' . $this->_selectFields($query->fields()) . '
@@ -62,7 +64,35 @@ abstract class PDOAbstract implements DriverInterface {
             $outputFormat = PDO::FETCH_OBJ;
             break;
       }
-      $result = $this->fetchAll($this->query($sql, $query->tokensValues()), $outputFormat);
+      $result = $this->fetchAll($this->query($sql, $tokensValues), $outputFormat);
+      
+      /**
+       * By default, the fields given by the database are all string-typed. We try to recognize
+       * the native type (included serialized types) using some elementary comparaisons.
+       */
+      foreach ($result as &$row) {
+         foreach ($row as &$field) {
+            if (ctype_digit($field)) {
+               settype($field, 'int');
+            } elseif (is_numeric($field)) {
+               settype($field, 'float');
+            } elseif (@unserialize($field) !== false) {
+               $field = unserialize($field);
+            } else {
+               if ($field === null) {
+                  continue;
+               }
+               try {
+                  $datetimeField = new DateTime($field);
+               } catch (Exception $e) {
+                  //This isn't a dateTime field
+                  continue;
+               }
+               $field = $datetimeField;
+            }
+         }
+      }
+      
       if (count($query->fields()) === 1) {
          if ($limits !== array() && $limits[0] === 1) {
             $result = $result[0][implode('', $query->fields())];
@@ -83,12 +113,14 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::COUNT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: count query required.'));
       }
-      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
+      $tokensValues = $conditionsBuilder['tokensValues'];
       $sql = '
          SELECT COUNT(1) AS count
          FROM ' . implode(', ', $query->datasources()) . '
          ' . ( !empty($conditions) ? $conditions : '' );
-      $result = $this->fetchAll($this->query($sql, $query->tokensValues()));
+      $result = $this->fetchAll($this->query($sql, $tokensValues));
       return (int) $result[0]['count'];
    }
    
@@ -110,9 +142,10 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::UPDATE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: update query required.'));
       }
-      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
       $updateStatement = $this->_updateStatement($query->setValues());
-      $tokensValues = $this->_tokensValues($query->tokensValues());
+      $tokensValues = $this->_tokensValues($conditionsBuilder['tokensValues']);
       $sql = '
          UPDATE ' . implode(', ', $query->datasources()) . '
          SET ' . $updateStatement . '
@@ -124,11 +157,13 @@ abstract class PDOAbstract implements DriverInterface {
       if ($query->type() !== Query::DELETE_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: delete query required.'));
       }
-      $conditions = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
+      $tokensValues = $conditionsBuilder['tokensValues'];
       $sql = '
          DELETE FROM ' . implode(', ', $query->datasources()) . '
          ' . (!empty($conditions) ? $conditions : '' );
-      return $this->query($sql, $query->tokensValues());
+      return $this->query($sql, $tokensValues);
    }
 
    public function createDatasource(Query $query) {
@@ -324,6 +359,7 @@ abstract class PDOAbstract implements DriverInterface {
                            $subWhereStatement .= $this->_escapeValue($tokensValues[$subCondition['token']][$i]) . ', ';
                         } 
                         $subWhereStatement = rtrim($subWhereStatement, ', ') . ') ) ';
+                        unset($tokensValues[$subCondition['token']]);
                      } else {
                         throw new ErrorException(__('Unable to build the WHERE statement: "eq" and "neq" are the only supported operators for array tokens.'));
                      }
@@ -334,9 +370,9 @@ abstract class PDOAbstract implements DriverInterface {
                $whereStatement .= ltrim($subWhereStatement, $currentType) . ')';
             }
          }
-         return $whereStatement;
+         return array('whereStatement' => $whereStatement, 'tokensValues' => $tokensValues);
       } else {
-         return '';
+         array('whereStatement' => '', 'tokensValues' => $tokensValues);
       }
    }
 

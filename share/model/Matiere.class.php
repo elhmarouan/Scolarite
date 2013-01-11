@@ -40,6 +40,7 @@ class MatiereModel extends Model {
    }
 
    public function setCoefMat($coefMat) {
+      $coefMat = is_string($coefMat) ? str_replace(',', '.', $coefMat) : $coefMat;
       if (is_numeric($coefMat) && (float) $coefMat > 0) {
          $this->_coefMat = (float) $coefMat;
       } else {
