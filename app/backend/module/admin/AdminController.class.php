@@ -75,7 +75,7 @@ class AdminController extends Controller {
                                           break;
                                     }
                                  }
-                              }  
+                              }
                            } else {
                               $utilisateur->delete(array('idUtil' => $idUtil));
                               User::addPopup('Les informations nécessaires à la création du profil n\'ont pas été renseignées.', Popup::ERROR);
@@ -103,7 +103,7 @@ class AdminController extends Controller {
                                           break;
                                     }
                                  }
-                              } 
+                              }
                            } else {
                               $utilisateur->delete(array('idUtil' => $idUtil));
                               User::addPopup('Les informations nécessaires à la création du profil n\'ont pas été renseignées.', Popup::ERROR);
@@ -163,6 +163,7 @@ class AdminController extends Controller {
                         $utilisateur['login'] = HTTPRequest::post('login');
                         $utilisateur['nom'] = HTTPRequest::post('nom');
                         $utilisateur['prenom'] = HTTPRequest::post('prenom');
+                        $oldIdRole = $utilisateur->first(array('idUtil' => HTTPRequest::get('idUtil')), 'idRole');
                         $utilisateur['idRole'] = HTTPRequest::post('role');
                         if (HTTPRequest::post('password') !== '') {
                            if (HTTPRequest::post('password') === HTTPRequest::post('passwordConfirm')) {
@@ -172,10 +173,70 @@ class AdminController extends Controller {
                               $badPassword = true;
                            }
                         }
-                        if (!$badPassword && $utilisateur->save()) {
-                           //TODO! Traitement des cas particuliers (prof et élève)
-                           User::addPopup('L\'utilisateur a bien été modifié.', Popup::SUCCESS);
-                           HTTPResponse::redirect('/admin/utilisateurs');
+                        if ((int) HTTPRequest::get('idUtil') === User::id()) {
+                           if ($oldIdRole !== $utilisateur['idRole']) {
+                              User::addPopup('Impossible de modifier votre rôle. Si vous voulez vraiment le faire, faîtes-en la demande à un autre administrateur.', Popup::ERROR);
+                              $badRole = true;
+                           }
+                        }
+                        if (!$badPassword && !$badRole && $utilisateur->isValid()) {
+                           //Si le rôle n'a pas changé, on ne fait qu'éditer l'entrée existante
+                           if ((int) $utilisateur['idRole'] === 2) {
+                              //Si c'est un professeur
+                              $prof = self::model('Prof');
+                              $prof['idUtil'] = HTTPRequest::get('idUtil');
+                              $prof['numBureau'] = HTTPRequest::post('numBureau');
+                              $prof['telBureau'] = HTTPRequest::post('telBureau');
+                              if ($prof->isValid()) {
+                                 $prof->save();
+                                 //Si le rôle a changé, et que l'ancien rôle était "étudiant", on supprime l'ancienne entrée
+                                 if ((int) $oldIdRole === 3) {
+                                    self::model('Eleve')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                                 }
+                              } else {
+                                 $erreurs = $prof->errors();
+                                 foreach ($erreurs as $erreurId) {
+                                    switch ($erreurId) {
+                                       case ProfModel::BAD_TEL_BUREAU_ERROR:
+                                          User::addPopup('Numéro de téléphone incorrect', Popup::ERROR);
+                                          break;
+                                       case ProfModel::BAD_NUM_BUREAU_ERROR:
+                                          User::addPopup('Numéro de bureau incorrect', Popup::ERROR);
+                                          break;
+                                    }
+                                 }
+                              }
+                           } else if ((int) $utilisateur['idRole'] === 3) {
+                              //Si c'est un élève
+                              $etudiant = self::model('Eleve');
+                              $etudiant['idUtil'] = HTTPRequest::get('idUtil');
+                              $etudiant['numEtudiant'] = HTTPRequest::post('numEtudiant');
+                              $etudiant['anneeRedouble'] = HTTPRequest::post('anneeRedouble');
+                              if ($etudiant->isValid()) {
+                                 $etudiant->save();
+                                 //Si le rôle a changé, et que l'ancien rôle était "prof", on supprime l'entrée
+                                 if ((int) $oldIdRole === 2){
+                                    self::model('Prof')-> delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                                 }
+                              } else {
+                                 $erreurs = $etudiant->errors();
+                                 foreach ($erreurs as $erreurId) {
+                                    switch ($erreurId) {
+                                       case EleveModel::BAD_NUM_ETUDIANT_ERROR:
+                                          User::addPopup('Numéro étudiant incorrect', Popup::ERROR);
+                                          break;
+                                       case EleveModel::BAD_ANNEE_REDOUBLE_ERROR:
+                                          User::addPopup('Année de redoublement incorrecte');
+                                          break;
+                                    }
+                                 }
+                              }
+                           }
+                           if (empty($erreurs)) {
+                              $utilisateur->save();
+                              User::addPopup('L\'utilisateur a bien été modifié.', Popup::SUCCESS);
+                              HTTPResponse::redirect('/admin/utilisateurs');
+                           }
                         } else {
                            //Récupération et affichage des erreurs
                            $erreurs = $utilisateur->errors();
@@ -381,7 +442,7 @@ class AdminController extends Controller {
                      $listeDesProfs = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->findAll('idUtil')));
                      $idProfs = self::model('Prof')->findAll('idProf');
                      //Fusion des ids prof et de la liste de profs
-                     for ($i = 0 ; $i < count($listeDesProfs) ; ++$i) {
+                     for ($i = 0; $i < count($listeDesProfs); ++$i) {
                         $listeDesProfs[$i]['idProf'] = $idProfs[$i];
                         $listeDesProfs[$i]['login'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['login']));
                         $listeDesProfs[$i]['nom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['nom']));

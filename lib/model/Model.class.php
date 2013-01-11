@@ -114,6 +114,11 @@ abstract class Model implements ArrayAccess {
     * @return boolean
     */
    public function isValid() {
+      foreach (get_object_vars($this) as $attribute => $value) {
+         if ($value === null && !in_array($attribute, array('_datasourceName', '_relations', '_errors', '_query', '_daoName'))) {
+            $this->{'set' . ucfirst(ltrim($attribute, '_'))}(false);
+         }
+      }
       return empty($this->_errors);
    }
 
@@ -208,11 +213,6 @@ abstract class Model implements ArrayAccess {
     * @throws ErrorException
     */
    public function save() {
-      foreach (get_object_vars($this) as $attribute => $value) {
-         if ($value === null && !in_array($attribute, array('_datasourceName', '_relations', '_errors', '_query', '_daoName'))) {
-            $this->{'set' . ucfirst(ltrim($attribute, '_'))}(false);
-         }
-      }
       if ($this->isValid()) {
          $primaryKeys = $this->_query->getPrimaryKeys($this->_datasourceName());
          if (count($primaryKeys) > 1) {
