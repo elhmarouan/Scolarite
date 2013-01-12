@@ -24,9 +24,9 @@ class MatiereModel extends Model {
    const BAD_ID_PROF_ERROR = 5;
 
    public function setIdMat($idMat) {
-      if (empty($idMat) || is_numeric($idMat) && (int) $idMat > 0) {
+      if (is_numeric($idMat) && (int) $idMat > 0) {
          $this->_idMat = (int) $idMat;
-      } else {
+      } else if (!empty($idMat)) {
          $this->_errors[] = self::BAD_ID_MAT_ERROR;
       }
    }

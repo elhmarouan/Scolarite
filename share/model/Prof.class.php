@@ -22,9 +22,9 @@ class ProfModel extends Model {
    const BAD_ID_UTIL_ERROR = 4;
 
    public function setIdProf($idProf) {
-      if (empty($idProf) || (is_numeric($idProf) && (int) $idProf > 0)) {
+      if (is_numeric($idProf) && (int) $idProf > 0) {
          $this->_idProf = (int) $idProf;
-      } else {
+      } else if (!empty($idProf)) {
          $this->_errors[] = self::BAD_ID_PROF_ERROR;
       }
    }
@@ -46,7 +46,7 @@ class ProfModel extends Model {
    }
    
    public function setIdUtil($idUtil) {
-      if (empty($idUtil) || (is_numeric($idUtil) && (int) $idUtil > 0)) {
+      if (is_numeric($idUtil) && (int) $idUtil > 0) {
          $this->_idUtil = (int) $idUtil;
       } else {
          $this->_errors[] = self::BAD_ID_UTIL_ERROR;

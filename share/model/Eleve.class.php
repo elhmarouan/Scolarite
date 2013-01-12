@@ -37,7 +37,7 @@ class EleveModel extends Model {
    }
    
    public function setIdPromo($idPromo) {
-      if ((is_numeric($idPromo) && (int) $idPromo > 0)) {
+      if (is_numeric($idPromo) && (int) $idPromo > 0) {
          $this->_idPromo = (int) $idPromo;
       } else if (!empty($idPromo)) {
          $this->_errors[] = self::BAD_ID_PROMO_ERROR;
@@ -45,9 +45,9 @@ class EleveModel extends Model {
    }
    
    public function setIdUtil($idUtil) {
-      if ((is_numeric($idUtil) && (int) $idUtil > 0)) {
+      if (is_numeric($idUtil) && (int) $idUtil > 0) {
          $this->_idUtil = (int) $idUtil;
-      } else if (!empty($idUtil)) {
+      } else {
          $this->_errors[] = self::BAD_ID_UTIL_ERROR;
       }
    }

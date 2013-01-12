@@ -20,10 +20,9 @@ class ModuleModel extends Model {
    const BAD_ID_PROMO_ERROR = 3;
 
    public function setIdMod($idMod) {
-      $idMod = (int) $idMod;
-      if ($idMod > 0) {
-         $this->_idMod = $idMod;
-      } else {
+      if (is_numeric($idMod) && (int) $idMod > 0) {
+         $this->_idMod = (int) $idMod;
+      } else if (!empty($idMod)) {
          $this->_errors[] = self::BAD_ID_MOD_ERROR;
       }
    }
@@ -37,9 +36,8 @@ class ModuleModel extends Model {
    }
 
    public function setIdPromo($idPromo) {
-      $idPromo = (int) $idPromo;
-      if ($idPromo > 0) {
-         $this->_idPromo = $idPromo;
+      if (is_numeric($idPromo) && (int) $idPromo > 0) {
+         $this->_idPromo = (int) $idPromo;
       } else {
          $this->_errors[] = self::BAD_ID_PROMO_ERROR;
       }

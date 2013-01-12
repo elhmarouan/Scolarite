@@ -32,6 +32,104 @@ class AdminController extends Controller {
    }
 
    /**
+    * Gestion des types d'examens
+    */
+   public function typesExams() {
+      if (HTTPRequest::getExists('idTypeExam')) {
+         if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
+            /**
+             * Modification d'un type d'examen
+             */
+            if (HTTPRequest::postExists('libelle', 'coef')) {
+               $typeExam = self::model('TypeExam');
+               if (!$typeExam->exists(array('idType !=' => HTTPRequest::get('idTypeExam'), 'libelle' => HTTPRequest::post('libelle')))) {
+                  $typeExam['idType'] = HTTPRequest::get('idTypeExam');
+                  $typeExam['libelle'] = HTTPRequest::post('libelle');
+                  $typeExam['coef'] = HTTPRequest::post('coef');
+                  if ($typeExam->save()) {
+                     User::addPopup('Le type d\'examen a bien été modifié.', Popup::SUCCESS);
+                     HTTPResponse::redirect('/admin/typesExams');
+                  } else {
+                     //Traitement des erreurs
+                     $erreurs = $typeExam->errors();
+                     foreach ($erreurs as $erreurId) {
+                        switch ($erreurId) {
+                           case TypeExamModel::BAD_LIBELLE_ERROR:
+                              User::addPopup('Libellé invalide.', Popup::ERROR);
+                              break;
+                           case TypeExamModel::BAD_COEF_ERROR:
+                              User::addPopup('Coefficient invalide.', Popup::ERROR);
+                              break;
+                        }
+                     }
+                  }
+               } else {
+                  User::addPopup('Un autre type d\'examen porte déjà ce nom. Choisissez-en un autre.', Popup::ERROR);
+               }
+            }
+            $this->setSubAction('editExamType');
+            $this->setWindowTitle('Modifier un type d\'examen');
+            $this->addVar('idTypeExam', HTTPRequest::get('idTypeExam'));
+            //Récupération du contenu des champs du formulaire
+            $typeExam = self::model('TypeExam')->first(array('idType' => HTTPRequest::get('idTypeExam')));
+            $typeExam['libelle'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+            $typeExam['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+            $this->addVar('typeExam', $typeExam);
+         } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
+            /**
+             * Suppression d'un type d'examen
+             */
+            if (!self::model('Examen')->exists(array('idType' => HTTPRequest::get('idTypeExam')))) {
+               self::model('TypeExam')->delete(array('idType' => HTTPRequest::get('idTypeExam')));
+               User::addPopup('Le type d\'examen a bien été supprimé.', Popup::SUCCESS);
+            } else {
+               User::addPopup('Ce type est utilisé par certains examens. Veuillez le modifier, changer le type des examens en question, ou les supprimer.', Popup::ERROR);
+            }
+            HTTPResponse::redirect('/admin/typesExams');
+         }
+      } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
+         /**
+          * Ajout d'un type d'examen
+          */
+         if (HTTPRequest::postExists('libelle', 'coef')) {
+            $typeExam = self::model('TypeExam');
+            if (!$typeExam->exists(array('libelle' => HTTPRequest::post('libelle')))) {
+               $typeExam['libelle'] = HTTPRequest::post('libelle');
+               $typeExam['coef'] = HTTPRequest::post('coef');
+               if ($typeExam->save()) {
+                  User::addPopup('Le type d\'examen a bien été ajouté.', Popup::SUCCESS);
+                  HTTPResponse::redirect('/admin/typesExams');
+               } else {
+                  $erreurs = $typeExam->errors();
+                  foreach ($erreurs as $erreurId) {
+                     switch ($erreurId) {
+                        case TypeExamModel::BAD_LIBELLE_ERROR:
+                           User::addPopup('Libellé invalide.', Popup::ERROR);
+                           break;
+                        case TypeExamModel::BAD_COEF_ERROR:
+                           User::addPopup('Coefficient invalide.', Popup::ERROR);
+                           break;
+                     }
+                  }
+               }
+            } else {
+               User::addPopup('Un autre type d\'examen porte déjà ce nom. Choisissez-en un autre.', Popup::ERROR);
+            }
+         }
+         $this->setSubAction('addExamType');
+         $this->setWindowTitle('Ajouter un type d\'examen');
+      } else {
+         $this->setWindowTitle('Gestion des types d\'examens');
+         $listeDesTypesExams = self::model('TypeExam')->findAll();
+         foreach ($listeDesTypesExams as &$typeExam) {
+            $typeExam['libelle'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+            $typeExam['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+         }
+         $this->addVar('listeDesTypesExams', $listeDesTypesExams);
+      }
+   }
+
+   /**
     * Gestion des utilisateurs
     */
    public function utilisateur() {
@@ -459,13 +557,13 @@ class AdminController extends Controller {
                            $examen['date'] = $examen['date']->format('d/m/Y');
                         }
                         $this->addVar('listeDesExamens', $listeDesExamens);
-                        
+
                         //TODO! Appliquer les coefs sur les notes de la promo
                         $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                         $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
                         $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
                         $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
-                        
+
                         $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
                         $this->setSubAction('manageMatiere');
                      }

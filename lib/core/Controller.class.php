@@ -110,7 +110,7 @@ class Controller {
       } else {
          throw new InvalidArgumentException(__('Invalid view: the view must be a not-empty string.'));
       }
-      $this->page()->setTemplate(APP_DIR . strtolower($this->_app->name()) . '/module/' . strtolower($this->_module) . '/view/' . strtolower($this->_view) . '.php');
+      $this->page()->setTemplate(APP_DIR . strtolower($this->_app->name()) . '/module/' . strtolower($this->_module) . '/view/' . lcfirst($this->_view) . '.php');
    }
 
    public function setPage(Page $page) {

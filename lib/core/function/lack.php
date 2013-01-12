@@ -38,3 +38,18 @@ if (!function_exists('array_replace_recursive')) {
    }
 
 }
+
+if (!function_exists('lcfirst')) {
+
+   /**
+    * Make a string's first character lowercase
+    * (replacement for PHP 5 < 5.3.0)
+    * 
+    * @param string $str
+    * @return string
+    */
+   function lcfirst($str) {
+      return (string) (strtolower(substr($str, 0, 1)) . substr($str, 1));
+   }
+
+}

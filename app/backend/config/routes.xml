@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf8" ?>
 <routes>
     <route url="/admin/" module="Admin" action="index" />
+    <route url="/admin/typesExams" module="Admin" action="typesExams" />
+    <route url="/admin/typesExams/(ajouter)" module="Admin" action="typesExams" vars="action" />
+    <route url="/admin/typesExams/([0-9]+)/(modifier|supprimer)" module="Admin" action="typesExams" vars="idTypeExam,action" />
     <route url="/admin/utilisateurs" module="Admin" action="utilisateur" />
     <route url="/admin/utilisateurs/(ajouter)" module="Admin" action="utilisateur" vars="action" />
     <route url="/admin/utilisateurs/([0-9]+)/(modifier|supprimer)" module="Admin" action="utilisateur" vars="idUtil,action" />

@@ -19,21 +19,21 @@
 <?php elseif ($editMatiere) : ?>
    <h1>Modifier une matière</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/modifier">
-      Nom de la matière : <input type="text" name="libelle" value="<?php echo $matiere; ?>" /><br />
-      Coefficient : <input type="number" name="coef" value="<?php echo $coef; ?>" /><br />
+      <label>Nom de la matière :</label> <input type="text" name="libelle" value="<?php echo $matiere; ?>" /><br />
+      <label>Coefficient :</label> <input type="number" name="coef" value="<?php echo $coef; ?>" /><br />
       <input type="submit" value="Modifier !" />
    </form>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>">Retour à la gestion de la matière</a></p>
 <?php elseif ($addModule) : ?>
    <h1>Ajouter un module</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/modules/ajouter">
-      Nom du module : <input type="text" name="libelle" placeholder="ex: Informatique" /><br />
+      <label>Nom du module :</label> <input type="text" name="libelle" placeholder="ex: Informatique" /><br />
       <input type="submit" value="Ajouter !" />
    </form>
 <?php elseif ($editModule) : ?>
    <h1>Modifier un module</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier">
-      Nom du module : <input type="text" name="libelle" value="<?php echo $module; ?>" /><br />
+      <label>Nom du module :</label> <input type="text" name="libelle" value="<?php echo $module; ?>" /><br />
       <input type="submit" value="Modifier !" />
    </form>
 <?php elseif ($manageMatiere) : ?>

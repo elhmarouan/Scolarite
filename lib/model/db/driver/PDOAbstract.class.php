@@ -174,7 +174,7 @@ abstract class PDOAbstract implements DriverInterface {
       
    }
 
-   public function query($sql, array $tokens = array()) {
+   public function query($sql, array $tokens = null) {
       if (empty($sql)) {
          throw new InvalidArgumentException(__('Unable to execute the query: $sql is empty.'));
       }
