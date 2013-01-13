@@ -133,9 +133,10 @@ class AdminController extends Controller {
     * Gestion des utilisateurs
     */
    public function utilisateur() {
-      //Si l'on demande à ajouter un utilisateur
       if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
-         //Si le formulaire d'ajout a été posté
+         /**
+          * Ajout d'un utilisateur
+          */
          if (HTTPRequest::postExists('nom', 'prenom', 'role', 'login', 'password', 'passwordConfirm')) {
             if (self::model('Role')->exists(array('idRole' => HTTPRequest::post('role')))) {
                $utilisateur = self::model('Utilisateur');
@@ -249,9 +250,10 @@ class AdminController extends Controller {
       } else if (HTTPRequest::getExists('idUtil')) {
          $utilisateur = self::model('Utilisateur');
          if ($utilisateur->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
-            //Si l'on demande à modifier un utilisateur
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
-               //Si le formulaire de modification a été posté
+               /**
+                * Modification d'un utilisateur
+                */
                if (HTTPRequest::postExists('nom', 'prenom', 'role', 'login', 'password', 'passwordConfirm')) {
                   if (self::model('Role')->exists(array('idRole' => HTTPRequest::post('role')))) {
                      $utilisateur = self::model('Utilisateur');
@@ -532,40 +534,114 @@ class AdminController extends Controller {
                   if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
                      $this->addVar('matiere', HTTPRequest::get('matiere'));
                      $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
-                     if (HTTPRequest::getExists('action')) {
-                        if (HTTPRequest::get('action') === 'modifier') {
-                           /**
-                            * Modifier une matière
-                            */
-                           if (HTTPRequest::getExists('libelle', 'coef')) {
-                              
+                     if (HTTPRequest::getExists('idExam')) {
+                        if (HTTPRequest::getExists('action')) {
+                           if (HTTPRequest::get('action') === 'modifier') {
+                              /**
+                               * Modifier un examen
+                               */
+                              $this->setWindowTitle('Modifier un examen');
+                              $this->setSubAction('editExam');
+                           } else if (HTTPRequest::get('action') === 'supprimer') {
+                              /**
+                               * Supprimer un examen
+                               */
                            }
-                           $this->setSubAction('editMatiere');
-                           $this->setWindowTitle('Modifier une matière');
-                           $this->addVar('coef', number_format(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'), 2, ',', ' '));
-                        } else if (HTTPRequest::get('action') === 'supprimer') {
-                           /**
-                            * Supprimer une matière
-                            */
                         }
                      } else {
-                        $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
-                        //Liste des examens
-                        $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
-                        foreach ($listeDesExamens as &$examen) {
-                           $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
-                           $examen['date'] = $examen['date']->format('d/m/Y');
+                        if (HTTPRequest::getExists('action')) {
+                           if (HTTPRequest::get('action') === 'ajouter') {
+                              /**
+                               * Ajouter un examen
+                               */
+                              $this->setWindowTitle('Ajouter un examen');
+                              $this->setSubAction('addExam');
+                           } else if (HTTPRequest::get('action') === 'modifier') {
+                              /**
+                               * Modifier une matière
+                               */
+                              if (HTTPRequest::postExists('libelle', 'coef', 'idProf')) {
+                                 $matiere = self::model('Matiere');
+                                 //On vérifie si une autre matière ne porte pas déjà le même nom dans le module concerné
+                                 if (!$matiere->exists(array('idMod' => $idModule, 'libelle' => HTTPRequest::post('libelle'), 'idMat !=' => $idMatiere))) {
+                                    $matiere['idMat'] = $idMatiere;
+                                    $matiere['idMod'] = $idModule;
+                                    $matiere['libelle'] = HTTPRequest::post('libelle');
+                                    $matiere['coefMat'] = HTTPRequest::post('coef');
+                                    $matiere['idProf'] = HTTPRequest::post('idProf');
+                                    if ($matiere->save()) {
+                                       User::addPopup('La matière a bien été modifiée.', Popup::SUCCESS);
+                                       HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::post('libelle'));
+                                    } else {
+                                       //Récupération et affichage des erreurs
+                                       $erreurs = $matiere->errors();
+                                       foreach ($erreurs as $erreurId) {
+                                          switch ($erreurId) {
+                                             case MatiereModel::BAD_COEF_MAT_ERROR:
+                                                User::addPopup('Le coefficient est invalide.', Popup::ERROR);
+                                                break;
+                                             case MatiereModel::BAD_LIBELLE_ERROR:
+                                                User::addPopup('Le nom de la matière est invalide.', Popup::ERROR);
+                                                break;
+                                             case MatiereModel::BAD_ID_PROF_ERROR:
+                                                User::addPopup('Le professeur que vous avez nommé responsable n\'existe pas.', Popup::ERROR);
+                                                break;
+                                          }
+                                       }
+                                    }
+                                 } else {
+                                    User::addPopup('Une autre matière porte déjà ce nom. Veuillez en choisir un autre.', Popup::ERROR);
+                                 }
+                              }
+                              $this->setSubAction('editMatiere');
+                              $this->setWindowTitle('Modifier une matière');
+                              $this->addVar('coef', number_format(self::model('Matiere')->first(array('idMat' => $idMatiere), 'coefMat'), 2, ',', ' '));
+                              //Liste des professeurs
+                              $listeDesProfs = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->findAll('idUtil')));
+                              $idProfs = self::model('Prof')->findAll('idProf');
+                              $idProfResponsable = self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf');
+                              //Fusion des ids prof et de la liste de profs
+                              for ($i = 0; $i < count($listeDesProfs); ++$i) {
+                                 $listeDesProfs[$i]['idProf'] = $idProfs[$i];
+                                 $listeDesProfs[$i]['responsable'] = ($idProfs[$i] === $idProfResponsable) ? true : false;
+                                 $listeDesProfs[$i]['login'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['login']));
+                                 $listeDesProfs[$i]['nom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['nom']));
+                                 $listeDesProfs[$i]['prenom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['prenom']));
+                              }
+                              $this->addVar('listeProfsResponsables', $listeDesProfs);
+                           } else if (HTTPRequest::get('action') === 'supprimer') {
+                              /**
+                               * Supprimer une matière
+                               */
+                              if (!self::model('Examen')->exists(array('idMat' => $idMatiere))) {
+                                 self::model('Matiere')->delete(array('idMat' => $idMatiere));
+                                 User::addPopup('La matière a bien été supprimée.', Popup::SUCCESS);
+                                 HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/matières');
+                              } else {
+                                 User::addPopup('Impossible de supprimer cette matière : veuillez supprimer tous les examens contenus dans celle-ci avant.', Popup::ERROR);
+                                 HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::get('matiere'));
+                              }
+                           }
+                        } else {
+                           $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
+                           //Liste des examens
+                           $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
+                           foreach ($listeDesExamens as &$examen) {
+                              $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                              $examen['date'] = $examen['date']->format('d/m/Y');
+                              $examen['type'] = htmlspecialchars(stripslashes(self::model('TypeExam')->first(array('idType' => $examen['idType']), 'libelle')));
+                           }
+                           $this->addVar('listeDesExamens', $listeDesExamens);
+
+                           //TODO! Appliquer les coefs sur les notes de la promo
+                           $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
+                           $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
+                           $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
+                           $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
+
+                           $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
+                           $this->setSubAction('manageMatiere');
                         }
-                        $this->addVar('listeDesExamens', $listeDesExamens);
-
-                        //TODO! Appliquer les coefs sur les notes de la promo
-                        $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
-                        $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
-                        $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
-                        $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
-
-                        $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
-                        $this->setSubAction('manageMatiere');
                      }
                   } else {
                      User::addPopup('La matière « ' . HTTPRequest::get('matiere') . ' » n\'existe pas.', Popup::ERROR);
