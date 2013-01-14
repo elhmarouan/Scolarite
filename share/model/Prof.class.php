@@ -46,7 +46,7 @@ class ProfModel extends Model {
    }
    
    public function setIdUtil($idUtil) {
-      if (is_numeric($idUtil) && (int) $idUtil > 0) {
+      if (is_numeric($idUtil) && (int) $idUtil > 0 && Controller::model('Utilisateur')->exists(array('idUtil' => $idUtil))) {
          $this->_idUtil = (int) $idUtil;
       } else {
          $this->_errors[] = self::BAD_ID_UTIL_ERROR;

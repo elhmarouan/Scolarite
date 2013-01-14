@@ -36,7 +36,7 @@ class ModuleModel extends Model {
    }
 
    public function setIdPromo($idPromo) {
-      if (is_numeric($idPromo) && (int) $idPromo > 0) {
+      if (is_numeric($idPromo) && (int) $idPromo > 0 && Controller::model('Promo')->exists(array('idPromo' => $idPromo))) {
          $this->_idPromo = (int) $idPromo;
       } else {
          $this->_errors[] = self::BAD_ID_PROMO_ERROR;

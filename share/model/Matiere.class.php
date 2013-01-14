@@ -49,7 +49,7 @@ class MatiereModel extends Model {
    }
 
    public function setIdMod($idMod) {
-      if (is_numeric($idMod) && (int) $idMod > 0) {
+      if (is_numeric($idMod) && (int) $idMod > 0 && Controller::model('Module')->exists(array('idMod' => $idMod))) {
          $this->_idMod = (int) $idMod;
       } else {
          $this->_errors[] = self::BAD_ID_MOD_ERROR;
@@ -57,7 +57,7 @@ class MatiereModel extends Model {
    }
 
    public function setIdProf($idProf) {
-      if (is_numeric($idProf) && ((int) $idProf > 0)) {
+      if (is_numeric($idProf) && (int) $idProf > 0 && Controller::model('Prof')->exists(array('idProf' => $idProf))) {
          $this->_idProf = (int) $idProf;
       } else {
          $this->_errors[] = self::BAD_ID_PROF_ERROR;

@@ -1,22 +1,62 @@
 <?php if ($addExam) : ?>
    <h1>Ajouter un examen</h1>
+   <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/examen/ajouter">
+      <label>Libellé :</label> <input type="text" name="libelle" /><br />
+      <label>Date :</label> <input type="date" name="date" /> (au format JJ/MM/AAAA)<br />
+      <label>Type :</label>
+      <?php if (!empty($listeTypesExams)) : ?>
+         <select name="idType">
+            <?php foreach ($listeTypesExams as $typeExam) : ?>
+               <option value="<?php echo $typeExam['idType']; ?>"><?php echo $typeExam['libelle']; ?> (coefficient <?php echo $typeExam['coef']; ?>)</option>
+            <?php endforeach; ?>
+         </select>
+      <?php else : ?>
+         Aucun type disponible
+      <?php endif; ?><br />
+      <input type="submit" value="Ajouter !" />
+   </form>
+   <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>">Retour à la gestion de la matière</a></p>
 <?php elseif ($editExam) : ?>
    <h1>Modifier un examen</h1>
+   <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/modifier">
+      <label>Libellé :</label> <input type="text" name="libelle" value="<?php echo $examen['libelle']; ?>" /><br />
+      <label>Date :</label> <input type="date" name="date" value="<?php echo $examen['date']; ?>" /> (au format JJ/MM/AAAA)<br />
+      <label>Type :</label>
+      <?php if (!empty($listeTypesExams)) : ?>
+         <select name="idType">
+            <?php
+            foreach ($listeTypesExams as $typeExam) :
+               if ($examen['idType'] === $typeExam['idType']) :
+                  ?>
+                  <option value="<?php echo $typeExam['idType']; ?>" selected><?php echo $typeExam['libelle']; ?> (coefficient <?php echo $typeExam['coef']; ?>)</option>
+               <?php else : ?>
+                  <option value="<?php echo $typeExam['idType']; ?>"><?php echo $typeExam['libelle']; ?> (coefficient <?php echo $typeExam['coef']; ?>)</option>
+               <?php
+               endif;
+            endforeach;
+            ?>
+         </select>
+      <?php else : ?>
+         Aucun type disponible
+   <?php endif; ?><br />
+      <input type="submit" value="Modifier !" />
+   </form>
+   <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>">Retour à la gestion de la matière</a></p>
 <?php elseif ($addMatiere) : ?>
    <h1>Ajouter une matière</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter">
       <label>Nom de la matière :</label> <input type="text" name="libelle" placeholder="ex: Physique" /><br />
       <label>Coefficient :</label> <input type="number" name="coef" /><br />
       <label>Professeur responsable :</label> 
-      <?php if (!empty($listeProfsResponsables)) : ?>
+         <?php if (!empty($listeProfsResponsables)) : ?>
          <select name="idProf">
             <?php foreach ($listeProfsResponsables as $prof) : ?>
                <option value="<?php echo $prof['idProf']; ?>"><?php echo $prof['prenom']; ?> <?php echo $prof['nom']; ?> (<?php echo $prof['login']; ?>)</option>
-            <?php endforeach; ?>
+         <?php endforeach; ?>
          </select>
       <?php else : ?>
          Aucun professeur disponible
-      <?php endif; ?><br />
+   <?php endif; ?><br />
       <input type="submit" value="Ajouter !" />
    </form>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières">Retour à la gestion du module</a></p>
@@ -26,7 +66,7 @@
       <label>Nom de la matière :</label> <input type="text" name="libelle" value="<?php echo $matiere; ?>" /><br />
       <label>Coefficient :</label> <input type="number" name="coef" value="<?php echo $coef; ?>" /><br />
       <label>Professeur responsable :</label> 
-      <?php if (!empty($listeProfsResponsables)) : ?>
+         <?php if (!empty($listeProfsResponsables)) : ?>
          <select name="idProf">
             <?php
             foreach ($listeProfsResponsables as $prof) :
@@ -55,7 +95,7 @@
       if ($moyennePromo !== null) :
          echo $moyennePromo;
          ?> / 20
-   <?php else: ?>
+      <?php else: ?>
          Indisponible
    <?php endif; ?>
    </p>
@@ -121,7 +161,7 @@
    <?php endif; ?>
    </ul>
    <p><a href="/admin/<?php echo $promo; ?>/modules">Retour à la gestion des modules</a></p>
-   <?php else : ?>
+<?php else : ?>
    <h1>Gestion des modules <?php echo $prefixPromo . $promo; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/modules/ajouter" class="button greenButton">Ajouter un nouveau module</a></p>
    <ul>

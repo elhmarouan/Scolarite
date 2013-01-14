@@ -27,7 +27,7 @@ class ParticipeModel extends Model {
    }
    
    public function setIdExam($idExam) {
-      if (is_numeric($idExam) && (int) $idExam > 0) {
+      if (is_numeric($idExam) && (int) $idExam > 0 && Controller::model('Examen')->exists(array('idExam' => $idExam))) {
          $this->_idExam = (int) $idExam;
       } else {
          $this->_errors[] = self::BAD_ID_EXAM_ERROR;

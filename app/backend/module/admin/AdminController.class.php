@@ -540,12 +540,56 @@ class AdminController extends Controller {
                               /**
                                * Modifier un examen
                                */
+                              if (HTTPRequest::postExists('libelle', 'date', 'idType')) {
+                                 $examen = self::model('Examen');
+                                 $examen['idExam'] = HTTPRequest::get('idExam');
+                                 $examen['libelle'] = HTTPRequest::post('libelle');
+                                 $examen['idMat'] = $idMatiere;
+                                 $examen['date'] = HTTPRequest::post('date');
+                                 $examen['idType'] = HTTPRequest::post('idType');
+                                 if ($examen->save()) {
+                                    User::addPopup('L\'examen a bien été modifié.', Popup::SUCCESS);
+                                    HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::get('matiere'));
+                                 } else {
+                                    //Traitement des erreurs
+                                    $erreurs = $examen->errors();
+                                    foreach ($erreurs as $erreurId) {
+                                       switch ($erreurId) {
+                                          case ExamenModel::BAD_LIBELLE_ERROR:
+                                             User::addPopup('Libellé incorrect.', Popup::ERROR);
+                                             break;
+                                          case ExamenModel::BAD_DATE_ERROR:
+                                             User::addPopup('Date incorrecte.', Popup::ERROR);
+                                             break;
+                                          case ExamenModel::BAD_ID_TYPE_ERROR:
+                                             User::addPopup('Type d\'examen incorrect ou inconnu.', Popup::ERROR);
+                                             break;
+                                       }
+                                    }
+                                 }
+                              }
                               $this->setWindowTitle('Modifier un examen');
                               $this->setSubAction('editExam');
+                              //Récupération du contenu des champs du formulaire
+                              $examen = self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')));
+                              $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                              $examen['date'] = $examen['date']->format('d/m/Y');
+                              $this->addVar('examen', $examen);
+                              //Récupération de la liste des types d'examens
+                              $listeTypesExams = self::model('TypeExam')->findAll('idType', 'libelle', 'coef');
+                              foreach ($listeTypesExams as &$typeExam) {
+                                 $typeExam['libelle'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+                                 $typeExam['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+                              }
+                              $this->addVar('listeTypesExams', $listeTypesExams);
                            } else if (HTTPRequest::get('action') === 'supprimer') {
                               /**
                                * Supprimer un examen
                                */
+                              self::model('Participe')->delete(array('idExam' => HTTPRequest::get('idExam')));
+                              self::model('Examen')->delete(array('idExam' => HTTPRequest::get('idExam')));
+                              User::addPopup('L\'examen a bien été supprimé.', Popup::SUCCESS);
+                              HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::get('matiere'));
                            }
                         }
                      } else {
@@ -554,8 +598,42 @@ class AdminController extends Controller {
                               /**
                                * Ajouter un examen
                                */
+                              if (HTTPRequest::postExists('libelle', 'date', 'idType')) {
+                                 $examen = self::model('Examen');
+                                 $examen['libelle'] = HTTPRequest::post('libelle');
+                                 $examen['idMat'] = $idMatiere;
+                                 $examen['date'] = HTTPRequest::post('date');
+                                 $examen['idType'] = HTTPRequest::post('idType');
+                                 if ($examen->save()) {
+                                    User::addPopup('L\'examen a bien été ajouté.', Popup::SUCCESS);
+                                    HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::get('matiere'));
+                                 } else {
+                                    //Traitement des erreurs
+                                    $erreurs = $examen->errors();
+                                    foreach ($erreurs as $erreurId) {
+                                       switch ($erreurId) {
+                                          case ExamenModel::BAD_LIBELLE_ERROR:
+                                             User::addPopup('Libellé incorrect.', Popup::ERROR);
+                                             break;
+                                          case ExamenModel::BAD_DATE_ERROR:
+                                             User::addPopup('Date incorrecte.', Popup::ERROR);
+                                             break;
+                                          case ExamenModel::BAD_ID_TYPE_ERROR:
+                                             User::addPopup('Type d\'examen incorrect ou inconnu.', Popup::ERROR);
+                                             break;
+                                       }
+                                    }
+                                 }
+                              }
                               $this->setWindowTitle('Ajouter un examen');
                               $this->setSubAction('addExam');
+                              //Récupération de la liste des types d'examens
+                              $listeTypesExams = self::model('TypeExam')->findAll('idType', 'libelle', 'coef');
+                              foreach ($listeTypesExams as &$typeExam) {
+                                 $typeExam['libelle'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+                                 $typeExam['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+                              }
+                              $this->addVar('listeTypesExams', $listeTypesExams);
                            } else if (HTTPRequest::get('action') === 'modifier') {
                               /**
                                * Modifier une matière
@@ -810,27 +888,22 @@ class AdminController extends Controller {
             $this->addVar('promo', HTTPRequest::get('promo'));
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
                $this->setSubAction('addStudent');
-               //TODO! Traitement du formulaire
                if (HTTPRequest::postExists('etudiant')) {
                   $eleve = self::model('Eleve');
-                  if ($eleve->exists(array('idUtil' => HTTPRequest::post('etudiant')))) {
-                     $eleve['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => HTTPRequest::post('etudiant')), 'numEtudiant');
-                     $eleve['idPromo'] = $idPromo;
-                     if ($eleve->save()) {
-                        User::addPopup('La promo a bien été assignée à l\'étudiant', Popup::SUCCESS);
-                        HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/étudiants');
-                     } else {
-                        $erreurs = $eleve->errors();
-                        foreach ($erreurs as $idErreur) {
-                           switch ($idErreur) {
-                              case EleveModel::BAD_ID_PROMO_ERROR :
-                                 User::addPopup('La promotion sélectionnée n\'existe pas', Popup::ERROR);
-                                 break;
-                           }
+                  $eleve['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => HTTPRequest::post('etudiant')), 'numEtudiant');
+                  $eleve['idPromo'] = $idPromo;
+                  if ($eleve->save()) {
+                     User::addPopup('La promo a bien été assignée à l\'étudiant', Popup::SUCCESS);
+                     HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/étudiants');
+                  } else {
+                     $erreurs = $eleve->errors();
+                     foreach ($erreurs as $idErreur) {
+                        switch ($idErreur) {
+                           case EleveModel::BAD_ID_PROMO_ERROR :
+                              User::addPopup('La promotion sélectionnée n\'existe pas', Popup::ERROR);
+                              break;
                         }
                      }
-                  } else {
-                     User::addPopup('L\'étudiant sélectionné n\'existe pas');
                   }
                }
                $this->setWindowTitle('Ajouter un étudiant');
