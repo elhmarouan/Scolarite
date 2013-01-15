@@ -33,24 +33,24 @@ class ProfController extends Controller {
     * Options d'une promotion
     */
    public function promo() {
-      if (HTTPRequest::get('promo')) {
+      if (HTTPRequest::getExists('promo')) {
          //Si la promotion existe
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
             $this->setWindowTitle('Gestion de la promotion ' . HTTPRequest::get('promo'));
             $this->setSubAction('managePromo');
             $this->addVar('promo', htmlspecialchars(stripslashes(HTTPRequest::get('promo'))));
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+            User::addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/prof/');
          }
       } else {
-         $this->app()->user()->addPopup('Veuillez sélectionner une promotion avant.');
+         User::addPopup('Veuillez sélectionner une promotion avant.');
          HTTPResponse::redirect('/prof/');
       }
    }
 
    public function module() {
-      if (HTTPRequest::get('promo')) {
+      if (HTTPRequest::getExists('promo')) {
          //Si la promotion existe
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
             $this->addVar('promo', HTTPRequest::get('promo'));
@@ -60,8 +60,16 @@ class ProfController extends Controller {
                   $this->setWindowTitle('Matières du module ' . HTTPRequest::get('module'));
                   $this->setSubAction('manageMatieres');
                   $this->addVar('module', HTTPRequest::get('module'));
-               } else {
                   
+                  //Récupération de la liste des matières
+                  $listeDesMatieres = self::model('Matiere')->field('libelle', array('idMod' => self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo')), 'idMod')));
+                  foreach ($listeDesMatieres as &$matiere) {
+                     $matiere = htmlspecialchars(stripslashes($matiere));
+                  }
+                  $this->addVar('listeDesMatieres', $listeDesMatieres);
+               } else {
+                  User::addPopup('Ce module n\'existe pas.');
+                  HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
                }
             } else {
                if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
@@ -79,51 +87,53 @@ class ProfController extends Controller {
                $this->addVar('listeDesModules', $modulesList);
             }
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+            User::addPopup('Désolé, cette promotion n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/prof/');
          }
       } else {
-         $this->app()->user()->addPopup('Veuillez sélectionner une promotion avant.');
          HTTPResponse::redirect('/prof/');
       }
    }
 
    public function matiere() {
-      if (HTTPRequest::get('promo')) {
-         //Si la promotion existe
+      if (HTTPRequest::getExists('promo', 'module', 'matiere')) {
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
             $this->addVar('promo', HTTPRequest::get('promo'));
-            if (HTTPRequest::getExists('module')) {
-               //Si le module existe 
-               if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module')))) {
-                  $this->addVar('module', HTTPRequest::get('module'));
-                  if (HTTPRequest::get('matiere')) {
-                     //Si la matiere existe
-                     $this->setWindowTitle('Examens de la matière' . HTTPRequest::get('matiere'));
-                     $this->setSubAction('manageExamens');
-                     $this->addVar('matiere', HTTPRequest::get('matiere'));
-                  } else {
-                     
+            $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
+            if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo))) {
+               $this->addVar('module', HTTPRequest::get('module'));
+               $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
+               if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
+                  $this->addVar('matiere', HTTPRequest::get('matiere'));
+                  $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
+                  //Liste des examens
+                  $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
+                  foreach ($listeDesExamens as &$examen) {
+                     $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                     $examen['date'] = $examen['date']->format('d/m/Y');
+                     $examen['type'] = htmlspecialchars(stripslashes(self::model('TypeExam')->first(array('idType' => $examen['idType']), 'libelle')));
                   }
+                  $this->addVar('listeDesExamens', $listeDesExamens);
+                  $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
+               } else {
+                  User::addPopup('Désolé, cette matière n\'existe pas.', Popup::ERROR);
+                  HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/matières');
                }
             } else {
-               $this->setWindowTitle('Matières du modules ' . HTTPRequest::get('module'));
-               //récupération des matières des modules d'une promo
-               $matiereList = self::model('Matiere')->field('libelle', array('idPromo' => self::model('Promo'), 'idModule' => self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idModule'))));
-               debug($matiereList);
-               foreach ($matiereList as &$matiere) {
-                  $matiere = htmlspecialchars(stripslashes($matiere));
-               }
-               $this->addVar('MatiereDuModule', $matiereList);
+               User::addPopup('Désolé, ce module n\'existe pas.', Popup::ERROR);
+               HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
             }
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+            User::addPopup('Désolé, cette promotion n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/prof/');
          }
       } else {
-         $this->app()->user()->addPopup('Veuillez sélectionner une promotion avant.');
          HTTPResponse::redirect('/prof/');
       }
+   }
+   
+   public function examen() {
+      
    }
 
    public function etudiant() {
@@ -147,11 +157,11 @@ class ProfController extends Controller {
             }
             $this->addVar('listeDesEtudiants', $studentsList);
          } else {
-            $this->app()->user()->addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
+            User::addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/prof/');
          }
       } else {
-         $this->app()->user()->addPopup('Veuillez sélectionner une promotion avant.');
+         User::addPopup('Veuillez sélectionner une promotion avant.');
          HTTPResponse::redirect('/prof/');
       }
    }

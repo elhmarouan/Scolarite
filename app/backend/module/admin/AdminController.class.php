@@ -716,6 +716,12 @@ class AdminController extends Controller {
                            $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
                            $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
                            $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
+                           
+                           $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf')), 'idUtil')));
+                           $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
+                           $profResponsable['nom'] = htmlspecialchars(stripslashes($profResponsable['nom']));
+                           $profResponsable['prenom'] = htmlspecialchars(stripslashes($profResponsable['prenom']));
+                           $this->addVar('profResponsable', $profResponsable);
 
                            $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
                            $this->setSubAction('manageMatiere');
@@ -886,52 +892,21 @@ class AdminController extends Controller {
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
             $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
             $this->addVar('promo', HTTPRequest::get('promo'));
-            if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
-               $this->setSubAction('addStudent');
-               if (HTTPRequest::postExists('etudiant')) {
-                  $eleve = self::model('Eleve');
-                  $eleve['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => HTTPRequest::post('etudiant')), 'numEtudiant');
-                  $eleve['idPromo'] = $idPromo;
-                  if ($eleve->save()) {
-                     User::addPopup('La promo a bien été assignée à l\'étudiant', Popup::SUCCESS);
-                     HTTPResponse::redirect('/admin/' . HTTPRequest::get('promo') . '/étudiants');
-                  } else {
-                     $erreurs = $eleve->errors();
-                     foreach ($erreurs as $idErreur) {
-                        switch ($idErreur) {
-                           case EleveModel::BAD_ID_PROMO_ERROR :
-                              User::addPopup('La promotion sélectionnée n\'existe pas', Popup::ERROR);
-                              break;
-                        }
-                     }
-                  }
-               }
-               $this->setWindowTitle('Ajouter un étudiant');
-               $idsEtudiants = self::model('Eleve')->field('idUtil');
-               $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiants));
-               foreach ($listeDesEtudiants as &$etudiant) {
-                  $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
-                  $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
-                  $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
-               }
-               $this->addVar('listeDesEtudiants', $listeDesEtudiants);
+            if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
+               $prefixPromo = 'd\'';
             } else {
-               if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
-                  $prefixPromo = 'd\'';
-               } else {
-                  $prefixPromo = 'de ';
-               }
-               $idsEtudiantsPromo = self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo));
-               $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiantsPromo));
-               foreach ($listeDesEtudiants as &$etudiant) {
-                  $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
-                  $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
-                  $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
-               }
-               $this->addVar('listeDesEtudiants', $listeDesEtudiants);
-               $this->setWindowTitle('Gestion des étudiants ' . $prefixPromo . HTTPRequest::get('promo'));
-               $this->addVar('prefixPromo', $prefixPromo);
+               $prefixPromo = 'de ';
             }
+            $idsEtudiantsPromo = self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo));
+            $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiantsPromo));
+            foreach ($listeDesEtudiants as &$etudiant) {
+               $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+               $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+               $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+            }
+            $this->addVar('listeDesEtudiants', $listeDesEtudiants);
+            $this->setWindowTitle('Gestion des étudiants ' . $prefixPromo . HTTPRequest::get('promo'));
+            $this->addVar('prefixPromo', $prefixPromo);
          } else {
             User::addPopup('Cette promotion n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/admin/');

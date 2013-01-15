@@ -16,7 +16,7 @@
    <h1>Gestion de la promotion <?php echo $promo; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/supprimer" class="button redButton" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cette promotion ?');">Supprimer cette promotion</a> <a href="/admin/<?php echo $promo; ?>/modifier" class="button orangeButton">Modifier la promotion</a></p>
    <ul>
-      <li><a href="/admin/<?php echo $promo; ?>/étudiants">Gestion des étudiants</a></li>
+      <li><a href="/admin/<?php echo $promo; ?>/étudiants">Liste des étudiants</a></li>
       <li><a href="/admin/<?php echo $promo; ?>/modules">Gestion des modules</a></li>
    </ul>
    <p><a href="/admin/promos">Retour à la gestion des promotions</a></p>

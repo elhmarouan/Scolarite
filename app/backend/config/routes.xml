@@ -30,7 +30,7 @@
     <route url="/prof/([a-z]{3}[1-9]{1})/étudiants" module="Prof" action="etudiant" vars="promo" />
     <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/matières" module="Prof" action="module" vars="promo,module" />
     <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
-    <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/examens" module="Prof" action="examens" vars="promo,module,matiere" />
+    <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([0-9]+)" module="Prof" action="examen" vars="promo,module,matiere,idExam" />
        
     <route url="/eleve/" module="Eleve" action="index" />
     <route url="/eleve/perso" module="Eleve" action="perso" />

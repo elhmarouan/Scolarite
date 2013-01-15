@@ -99,12 +99,13 @@
          Indisponible
    <?php endif; ?>
    </p>
+   <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<?php echo $profResponsable['login']; ?>)</p>
    <h2>Liste des examens</h2>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/examen/ajouter" class="button greenButton">Ajouter un examen</a></p>
    <table>
       <thead>
          <tr>
-            <th>Libelle</th>
+            <th>Libellé</th>
             <th>Type</th>
             <th>Date</th>
             <th>Actions</th>
