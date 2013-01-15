@@ -186,6 +186,7 @@ class AdminController extends Controller {
                               $eleve['idUtil'] = $idUtil;
                               $eleve['numEtudiant'] = HTTPRequest::post('numEtudiant');
                               $eleve['anneeRedouble'] = HTTPRequest::post('anneeRedouble');
+                              $eleve['idPromo'] = HTTPRequest::post('idPromo');
                               //Si la création de l'élève échoue
                               if (!$eleve->save()) {
                                  //On supprime la nouvelle fiche utilisateur
@@ -199,6 +200,9 @@ class AdminController extends Controller {
                                           break;
                                        case EleveModel::BAD_ANNEE_REDOUBLE_ERROR;
                                           User::addPopup('Année de redoublement invalide.', Popup::ERROR);
+                                          break;
+                                       case EleveModel::BAD_ID_PROMO_ERROR:
+                                          User::addPopup('Promotion invalide ou inconnue.', Popup::ERROR);
                                           break;
                                     }
                                  }
@@ -247,6 +251,11 @@ class AdminController extends Controller {
             $role['libelle'] = htmlspecialchars(stripslashes($role['libelle']));
          }
          $this->addVar('listeDesRoles', $listeDesRoles);
+         $listeDesPromos = self::model('Promo')->findAll('idPromo', 'libelle');
+         foreach ($listeDesPromos as &$promo) {
+            $promo['libelle'] = htmlspecialchars(stripslashes($promo['libelle']));
+         }
+         $this->addVar('listeDesPromos', $listeDesPromos);
       } else if (HTTPRequest::getExists('idUtil')) {
          $utilisateur = self::model('Utilisateur');
          if ($utilisateur->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
@@ -312,6 +321,7 @@ class AdminController extends Controller {
                               $etudiant['idUtil'] = HTTPRequest::get('idUtil');
                               $etudiant['numEtudiant'] = HTTPRequest::post('numEtudiant');
                               $etudiant['anneeRedouble'] = HTTPRequest::post('anneeRedouble');
+                              $etudiant['idPromo'] = HTTPRequest::post('idPromo');
                               if ($etudiant->isValid()) {
                                  $etudiant->save();
                                  //Si le rôle a changé, et que l'ancien rôle était "prof", on supprime l'entrée
@@ -328,6 +338,10 @@ class AdminController extends Controller {
                                        case EleveModel::BAD_ANNEE_REDOUBLE_ERROR:
                                           User::addPopup('Année de redoublement incorrecte');
                                           break;
+                                       case EleveModel::BAD_ID_PROMO_ERROR:
+                                          User::addPopup('Promotion invalide ou inconnue.', Popup::ERROR);
+                                          break;
+                                               
                                     }
                                  }
                               }
@@ -371,6 +385,11 @@ class AdminController extends Controller {
                   $role['libelle'] = htmlspecialchars(stripslashes($role['libelle']));
                }
                $this->addVar('listeDesRoles', $listeDesRoles);
+               $listeDesPromos = self::model('Promo')->findAll('idPromo', 'libelle');
+               foreach ($listeDesPromos as &$promo) {
+                  $promo['libelle'] = htmlspecialchars(stripslashes($promo['libelle']));
+               }
+               $this->addVar('listeDesPromos', $listeDesPromos);
                $utilisateur = self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil')));
                $utilisateur['nom'] = htmlspecialchars(stripslashes($utilisateur['nom']));
                $utilisateur['prenom'] = htmlspecialchars(stripslashes($utilisateur['prenom']));
@@ -711,11 +730,18 @@ class AdminController extends Controller {
                            }
                            $this->addVar('listeDesExamens', $listeDesExamens);
 
-                           //TODO! Appliquer les coefs sur les notes de la promo
+                           //Récupération de la moyenne de la promotion, en prenant en compte les coefficients de chaque examen
                            $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                            $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
-                           $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
-                           $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null);
+                           $participationsPromo = self::model('Participe')->find(array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
+                           $notesPromo = array();
+                           $quotient = 0;
+                           foreach ($participationsPromo as $participation) {
+                              $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                              $notesPromo[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                              $quotient += $coef;
+                           }
+                           $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null);
                            
                            $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf')), 'idUtil')));
                            $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));

@@ -35,11 +35,11 @@ class EleveModel extends Model {
          $this->_errors[] = self::BAD_ANNEE_REDOUBLE_ERROR;
       }
    }
-   
+  
    public function setIdPromo($idPromo) {
       if (is_numeric($idPromo) && (int) $idPromo > 0 && Controller::model('Promo')->exists(array('idPromo' => $idPromo))) {
          $this->_idPromo = (int) $idPromo;
-      } else if (!empty($idPromo)) {
+      } else {
          $this->_errors[] = self::BAD_ID_PROMO_ERROR;
       }
    }

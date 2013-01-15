@@ -27,10 +27,22 @@
          <label>Année de redoublement :</label>
          <select name="anneeRedouble">
             <option value="0">Aucune</option>
-            <?php for ($i = (int) date('Y') - 5 ; $i <= (int) date('Y') - 1 ; $i++) : ?>
-            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+            <?php for ($i = (int) date('Y') - 5; $i <= (int) date('Y') - 1; $i++) : ?>
+               <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
             <?php endfor; ?>
-         </select>         
+         </select><br />
+         <label>Promotion</label>
+         <?php if (!empty($listeDesPromos)) : ?>
+            <select name="idPromo">
+               <?php foreach ($listeDesPromos as $promo) : ?>
+                  <option value="<?php echo $promo['idPromo']; ?>"><?php echo $promo['libelle']; ?></option>
+                  <?php
+               endforeach;
+               ?>
+            </select>
+         <?php else : ?>
+            Aucune promotion disponible
+         <?php endif; ?>     
       </fieldset>
       <fieldset id="profilProf">
          <legend>Profil professeur</legend>
@@ -46,7 +58,7 @@
       <input type="submit" value="Ajouter !" />
    </form>
    <p><a href="/admin/utilisateurs">Retour à la liste des utilisateurs</a></p>
-   <?php elseif ($editUser) : ?>
+<?php elseif ($editUser) : ?>
    <h1>Modifier un utilisateur</h1>
    <p>Veuillez remplir les champs ci-dessous pour créer un nouvel utilisateur</p>
    <form method="post" action="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier">
@@ -58,7 +70,7 @@
          <?php if (!empty($listeDesRoles)) : ?>
             <select name="role" onChange="display_profil(this[this.selectedIndex].value);">
                <?php foreach ($listeDesRoles as $role) : ?>
-                  <option value="<?php echo $role['idRole']; ?>"<?php if($role['idRole'] === $utilisateur['idRole']) : ?> selected<?php endif; ?>><?php echo $role['libelle']; ?></option>
+                  <option value="<?php echo $role['idRole']; ?>"<?php if ($role['idRole'] === $utilisateur['idRole']) : ?> selected<?php endif; ?>><?php echo $role['libelle']; ?></option>
                <?php endforeach; ?>
             </select>
             <?php
@@ -69,22 +81,40 @@
          endif;
          ?>
       </fieldset>
-      <fieldset id="profilEtudiant"<?php if ($utilisateur['idRole'] === '3') echo ' style="display:block;"' ; ?>>
+      <fieldset id="profilEtudiant"<?php if ($utilisateur['idRole'] === 3) echo ' style="display:block;"'; ?>>
          <legend>Profil étudiant</legend>
          <label>Numéro d'étudiant :</label><input type="text" name="numEtudiant" value="<?php echo $utilisateur['numEtudiant']; ?>" /> <br />
          <label>Année de redoublement :</label>
          <select name="anneeRedouble">
             <option value="0">Aucune</option>
-            <?php for ($i = (int) date('Y') - 5 ; $i <= (int) date('Y') - 1 ; $i++) :
-               if ((int) $utilisateur['anneeRedouble'] === $i) : ?>
+            <?php
+            for ($i = (int) date('Y') - 5; $i <= (int) date('Y') - 1; $i++) :
+               if ((int) $utilisateur['anneeRedouble'] === $i) :
+                  ?>
                   <option value="<?php echo $i; ?>" selected><?php echo $i; ?></option>
                <?php else : ?>
                   <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
                <?php endif; ?>
             <?php endfor; ?>
-         </select>         
+         </select><br />
+         <label>Promotion</label>
+         <?php if (!empty($listeDesPromos)) : ?>
+            <select name="idPromo">
+               <?php foreach ($listeDesPromos as $promo) : ?>
+                  <?php if ($promo['idPromo'] === $utilisateur['idPromo']) : ?>
+                     <option value="<?php echo $promo['idPromo']; ?>" selected><?php echo $promo['libelle']; ?></option>
+                  <?php else : ?>
+                     <option value="<?php echo $promo['idPromo']; ?>"><?php echo $promo['libelle']; ?></option>
+                  <?php
+                  endif;
+               endforeach;
+               ?>
+            </select>
+         <?php else : ?>
+            Aucune promotion disponible
+   <?php endif; ?>
       </fieldset>
-      <fieldset id="profilProf"<?php if ($utilisateur['idRole'] === '2') echo ' style="display:block;"' ; ?>>
+      <fieldset id="profilProf"<?php if ($utilisateur['idRole'] === 2) echo ' style="display:block;"'; ?>>
          <legend>Profil professeur</legend>
          <label>Numéro du bureau :</label><input type="text" name="numBureau" value="<?php echo $utilisateur['numBureau']; ?>" /><br />
          <label>Téléphone :</label><input type="tel" name="telBureau" value="<?php echo $utilisateur['telBureau']; ?>" /><br/>
@@ -130,7 +160,7 @@
             <tr>
                <td colspan="5">Aucun utilisateur</td>
             </tr>
-         <?php endif; ?>
+   <?php endif; ?>
       </tbody>
    </table>
    <p><a href="/admin/">Retour à l'accueil du panel d'administration</a></p>
