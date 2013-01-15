@@ -38,7 +38,7 @@
          </select>
       <?php else : ?>
          Aucun type disponible
-   <?php endif; ?><br />
+      <?php endif; ?><br />
       <input type="submit" value="Modifier !" />
    </form>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>">Retour à la gestion de la matière</a></p>
@@ -48,15 +48,15 @@
       <label>Nom de la matière :</label> <input type="text" name="libelle" placeholder="ex: Physique" /><br />
       <label>Coefficient :</label> <input type="number" name="coef" /><br />
       <label>Professeur responsable :</label> 
-         <?php if (!empty($listeProfsResponsables)) : ?>
+      <?php if (!empty($listeProfsResponsables)) : ?>
          <select name="idProf">
             <?php foreach ($listeProfsResponsables as $prof) : ?>
                <option value="<?php echo $prof['idProf']; ?>"><?php echo $prof['prenom']; ?> <?php echo $prof['nom']; ?> (<?php echo $prof['login']; ?>)</option>
-         <?php endforeach; ?>
+            <?php endforeach; ?>
          </select>
       <?php else : ?>
          Aucun professeur disponible
-   <?php endif; ?><br />
+      <?php endif; ?><br />
       <input type="submit" value="Ajouter !" />
    </form>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières">Retour à la gestion du module</a></p>
@@ -66,7 +66,7 @@
       <label>Nom de la matière :</label> <input type="text" name="libelle" value="<?php echo $matiere; ?>" /><br />
       <label>Coefficient :</label> <input type="number" name="coef" value="<?php echo $coef; ?>" /><br />
       <label>Professeur responsable :</label> 
-         <?php if (!empty($listeProfsResponsables)) : ?>
+      <?php if (!empty($listeProfsResponsables)) : ?>
          <select name="idProf">
             <?php
             foreach ($listeProfsResponsables as $prof) :
@@ -82,7 +82,7 @@
          </select>
       <?php else : ?>
          Aucun professeur disponible
-   <?php endif; ?><br />
+      <?php endif; ?><br />
       <input type="submit" value="Modifier !" />
    </form>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>">Retour à la gestion de la matière</a></p>
@@ -97,7 +97,7 @@
          ?> / 20
       <?php else: ?>
          Indisponible
-   <?php endif; ?>
+      <?php endif; ?>
    </p>
    <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<?php echo $profResponsable['login']; ?>)</p>
    <h2>Liste des examens</h2>
@@ -108,6 +108,7 @@
             <th>Libellé</th>
             <th>Type</th>
             <th>Date</th>
+            <th>Moyenne de la promo</th>
             <th>Actions</th>
          </tr>
       </thead>
@@ -120,6 +121,14 @@
                   <td><?php echo $examen['libelle']; ?></td>
                   <td><?php echo $examen['type']; ?></td>
                   <td><?php echo $examen['date']; ?></td>
+                  <td>
+                     <?php if (!empty($examen['moyennePromo'])) :
+                        echo $examen['moyennePromo'];
+                        ?> / 20
+                     <?php else : ?>
+                        Indisponible
+         <?php endif; ?>
+                  </td>
                   <td><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/modifier"><img src="/img/admin/exam_edit.png" alt="modifier" title="Modifier cet examen" /></a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/supprimer"><img src="/img/admin/exam_delete.png" alt="supprimer"  title="Supprimer cet examen" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cet examen ?');" /></a></td>
                </tr>
                <?php
@@ -127,7 +136,7 @@
          else :
             ?>
             <tr>
-               <td colspan="4">Aucun examen</td>
+               <td colspan="5">Aucun examen</td>
             </tr>
    <?php endif; ?>
       </tbody>

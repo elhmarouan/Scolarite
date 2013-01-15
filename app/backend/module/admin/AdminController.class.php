@@ -721,17 +721,19 @@ class AdminController extends Controller {
                            }
                         } else {
                            $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
+                           $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                            //Liste des examens
                            $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
                            foreach ($listeDesExamens as &$examen) {
                               $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
                               $examen['date'] = $examen['date']->format('d/m/Y');
                               $examen['type'] = htmlspecialchars(stripslashes(self::model('TypeExam')->first(array('idType' => $examen['idType']), 'libelle')));
+                              $notesPromo = self::model('Participe')->find(array('numEtudiant' => $numsEtudiants, 'idExam' => $examen['idExam']), 'note');
+                              $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                            }
                            $this->addVar('listeDesExamens', $listeDesExamens);
 
                            //Récupération de la moyenne de la promotion, en prenant en compte les coefficients de chaque examen
-                           $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                            $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
                            $participationsPromo = self::model('Participe')->find(array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams));
                            $notesPromo = array();
