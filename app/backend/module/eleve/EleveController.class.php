@@ -18,33 +18,26 @@ class EleveController extends Controller {
    }
 
    public function index() {
-      $this->setWindowTitle('Accueil élève');
+      $this->setWindowTitle('Accueil Etudiant');
    }
 
-   public function perso() {
-      $this->setWindowTitle('Informations personnelles');
+   public function etudiant() {
+      $this->setWindowTitle('Informations Personnelles');
    }
 
    public function promotion() {
-      if (HTTPRequest::getExists('promo')) {
-         $this->setWindowTitle('Consultation de la promotion ' . HTTPRequest::get('promo'));
-         $this->setSubAction('manageClass');
-         $this->addVar('promo', stripslashes(htmlspecialchars(HTTPRequest::get('promo'))));
-      } else {
-         $this->setWindowTitle('Consultaion des promotions');
-      }
+      $this->setWindowTitle('Informations Promotion');
    }
-
+   
    public function matieres() {
       if (HTTPRequest::getExists('promo') && HTTPRequest::getExists('module') && HTTPRequest::getExists('matiere')) {
-         $this->setWindowTitle('Gestion de ' . HTTPRequest::get('matiere'));
+         $this->setWindowTitle('Consultation de ' . HTTPRequest::get('matiere'));
          $this->addVar('matiere', HTTPRequest::get('matiere'));
       }
    }
 
    public function notes() {
-         
-                          
+                                
       $numUtil = self::model('Participe')->find(array('numEtudiant' => self::model('Utilisateur')->first(array('idUtil' => User::id()), 'numEtudiant')));
       debug($numUtil);
       
