@@ -37,8 +37,8 @@
     <route url="/eleve/promo" module="Eleve" action="promotion" />
     <route url="/eleve/perso/notesm" module="Eleve" action="perso" vars="action" />
     <route url="/eleve/perso/moyennesm" module="Eleve" action="perso" vars="action" />
-    <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="action" />
-    <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="action" />
+    <route url="/eleve/promo/notesm" module="Eleve" action="promotion" vars="promo" />
+    <route url="/eleve/promo/moyennesm" module="Eleve" action="promotion" vars="promo" />
     
     <route url="/connexion" module="User" action="connexion" />
     <route url="/deconnexion" module="User" action="deconnexion" />    

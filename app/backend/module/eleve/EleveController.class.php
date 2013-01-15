@@ -27,11 +27,11 @@ class EleveController extends Controller {
 
    public function promotion() {
       if (HTTPRequest::getExists('promo')) {
-         $this->setWindowTitle('Gestion de la promotion ' . HTTPRequest::get('promo'));
+         $this->setWindowTitle('Consultation de la promotion ' . HTTPRequest::get('promo'));
          $this->setSubAction('manageClass');
          $this->addVar('promo', stripslashes(htmlspecialchars(HTTPRequest::get('promo'))));
       } else {
-         $this->setWindowTitle('Gestion des promotions');
+         $this->setWindowTitle('Consultaion des promotions');
       }
    }
 
