@@ -188,7 +188,6 @@ abstract class PDOAbstract implements DriverInterface {
       } catch (PDOException $e) {
          throw new RuntimeException(__('Unable to execute the query: %s', $e->getMessage()));
       }
-
       return $preparedQuery;
    }
    

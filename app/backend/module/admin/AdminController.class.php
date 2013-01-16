@@ -398,7 +398,7 @@ class AdminController extends Controller {
                   //Si l'utilisateur est un professeur
                   $prof = self::model('Prof')->first(array('idUtil' => $utilisateur['idUtil']));
                   $utilisateur['numBureau'] = $prof['numBureau'];
-                  $utilisateur['telBureau'] = $prof['telBureau'];
+                  $utilisateur['telBureau'] = '0' . $prof['telBureau'];
                } else if ((int) $utilisateur['idRole'] === 3) {
                   //Si l'utilisateur est un étudiant
                   $etudiant = self::model('Eleve')->first(array('idUtil' => $utilisateur['idUtil']));
@@ -727,8 +727,10 @@ class AdminController extends Controller {
                            foreach ($listeDesExamens as &$examen) {
                               $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
                               $examen['date'] = $examen['date']->format('d/m/Y');
-                              $examen['type'] = htmlspecialchars(stripslashes(self::model('TypeExam')->first(array('idType' => $examen['idType']), 'libelle')));
-                              $notesPromo = self::model('Participe')->find(array('numEtudiant' => $numsEtudiants, 'idExam' => $examen['idExam']), 'note');
+                              $typeExam = self::model('TypeExam')->first(array('idType' => $examen['idType']));
+                              $examen['type'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+                              $examen['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+                              $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $examen['idExam']));
                               $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                            }
                            $this->addVar('listeDesExamens', $listeDesExamens);
@@ -745,10 +747,12 @@ class AdminController extends Controller {
                            }
                            $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null);
                            
-                           $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf')), 'idUtil')));
+                           $idProfResponsable = self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf');
+                           $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => $idProfResponsable), 'idUtil')));
                            $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
                            $profResponsable['nom'] = htmlspecialchars(stripslashes($profResponsable['nom']));
                            $profResponsable['prenom'] = htmlspecialchars(stripslashes($profResponsable['prenom']));
+                           $profResponsable['idProf'] = $idProfResponsable;
                            $this->addVar('profResponsable', $profResponsable);
 
                            $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
@@ -850,12 +854,16 @@ class AdminController extends Controller {
                      }
                   }
                } else {
+                  /**
+                   * Gestion d'un module
+                   */
                   $this->setSubAction('manageModule');
                   $matieresList = self::model('Matiere')->field('libelle', array('idMod' => $idModule));
                   foreach ($matieresList as &$matiere) {
                      $matiere = htmlspecialchars(stripslashes($matiere));
                   }
                   $this->addVar('listeDesMatieres', $matieresList);
+                  $this->addVar('coefModule', array_sum(self::model('Matiere')->field('coefMat', array('idMod' => $idModule))));
                }
             } else {
                User::addPopup('Le module « ' . HTTPRequest::get('module') . ' » n\'existe pas.', Popup::ERROR);
@@ -949,7 +957,19 @@ class AdminController extends Controller {
     * Gestion des professeurs
     */
    public function prof() {
-      
+      if (HTTPRequest::getExists('idProf')) {
+         if (self::model('Prof')->exists(array('idProf' => HTTPRequest::get('idProf')))) {
+            $prof = array_merge(self::model('Prof')->first(array('idProf' => HTTPRequest::get('idProf'))), self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => HTTPRequest::get('idProf')), 'idUtil'))));
+            $prof['nom'] = htmlspecialchars(stripslashes($prof['nom']));
+            $prof['prenom'] = htmlspecialchars(stripslashes($prof['prenom']));
+            $prof['login'] = htmlspecialchars(stripslashes($prof['login']));
+            $this->addVar('prof', $prof);
+            $this->setWindowTitle('Profil professeur');
+         } else {
+            User::addPopup('Ce professeur n\'existe pas.', Popup::ERROR);
+            HTTPResponse::redirect('/admin/');
+         }
+      }
    }
 
 }

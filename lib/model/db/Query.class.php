@@ -11,15 +11,17 @@
  */
 class Query {
 
+   //Query types
    const SELECT_QUERY = 1;
    const COUNT_QUERY = 2;
    const INSERT_QUERY = 3;
    const UPDATE_QUERY = 4;
    const DELETE_QUERY = 5;
    
+   //Output types
    const OUTPUT_ARRAY = 1;
    const OUTPUT_OBJECT = 2;
-   
+
    private static $_dao = array();
    private $_currentDao;
    private $_type;
@@ -35,7 +37,7 @@ class Query {
        'orderBy' => array()
    );
    private $_values = array();
-   
+
    public function __construct($daoName) {
       if (!is_string($daoName) || empty($daoName)) {
          throw new InvalidArgumentException(__('Invalid dao name.'));
@@ -56,11 +58,11 @@ class Query {
       }
       $this->_currentDao = $daoName;
    }
-   
+
    private function _reset() {
       $defaultAttributes = get_class_vars(get_class($this));
       foreach ($defaultAttributes as $attribute => $defaultValue) {
-         if(!in_array($attribute, array('_dao', '_currentDao'))) { 
+         if (!in_array($attribute, array('_dao', '_currentDao'))) {
             $this->$attribute = $defaultValue;
          }
       }
@@ -80,7 +82,7 @@ class Query {
       $this->_sqlParts['select'] = is_array($fields) ? $fields : func_get_args();
       return $this;
    }
-   
+
    /**
     * Set the current query type to COUNT.
     * @return Query
@@ -97,7 +99,7 @@ class Query {
       }
       return $this;
    }
-   
+
    public function update($datasource = '') {
       $this->_type = self::UPDATE_QUERY;
       if (!empty($datasource)) {
@@ -113,7 +115,7 @@ class Query {
       }
       return $this;
    }
-   
+
    public function set() {
       if ($this->_type !== self::UPDATE_QUERY && $this->_type !== self::INSERT_QUERY) {
          throw new ErrorException(__('Unable to use the "set" method on this query: update or insert query required.'));
@@ -158,12 +160,12 @@ class Query {
       }
       return $this;
    }
-   
+
    public function join(array $joinData, $type = 'left') {
       $this->_sqlParts['join'][] = array(
           'type' => $type,
           'data' => $joinData
-          );
+      );
       return $this;
    }
 
@@ -187,15 +189,15 @@ class Query {
       $this->_sqlParts['where'][] = $where;
       return $this;
    }
-   
+
    public function andWhere(array $conditions, $type = 'AND') {
       return $this->where($conditions, $type, 'AND');
    }
-   
+
    public function orWhere(array $conditions, $type = 'AND') {
       return $this->where($conditions, $type, 'OR');
    }
-   
+
    public function limit($limit = 20, $offset = null) {
       if (is_int($limit) && $limit > 0) {
          $this->_sqlParts['limit'] = array($limit);
@@ -219,11 +221,11 @@ class Query {
    public function conditions() {
       return $this->_sqlParts['where'];
    }
-   
+
    public function limits() {
       return $this->_sqlParts['limit'];
    }
-   
+
    public function joinList() {
       return $this->_sqlParts['join'];
    }
@@ -235,11 +237,11 @@ class Query {
    public function type() {
       return $this->_type;
    }
-   
+
    public function setValues() {
       return $this->_sqlParts['set'];
    }
-   
+
    public function tokensValues() {
       return $this->_values;
    }
@@ -247,23 +249,23 @@ class Query {
    public function customQuery($sql, array $tokens) {
       self::$_dao[$this->_currentDao]->query($sql, $tokens);
    }
-   
+
    public function getPrimaryKeys($datasource) {
       return self::$_dao[$this->_currentDao]->primaryKeysOf($datasource);
    }
-   
+
    private function _buildToken($field) {
       $field = explode('.', $field);
       $token = isset($field[1]) ? $field[1] : $field[0];
       $proposedToken = $token . '_0';
-      
-      for($i = 0 ; array_key_exists($proposedToken, $this->_values) ; ++$i) {
+
+      for ($i = 0; array_key_exists($proposedToken, $this->_values); ++$i) {
          $proposedToken = $token . '_' . $i;
       }
-      
+
       return $proposedToken;
    }
-   
+
    private function _extractOperator(&$field) {
       $knownOperators = array(
           '>' => 'gt',
@@ -286,20 +288,36 @@ class Query {
          return 'eq';
       }
    }
-   
+
    public function getLastInsertId() {
       return self::$_dao[$this->_currentDao]->lastInsertId();
    }
-   
+
    public function getResult($outputFormat = self::OUTPUT_ARRAY) {
       if (!empty($this->_type)) {
-         if(!empty($this->_sqlParts['from'])) {
+         if (!empty($this->_sqlParts['from'])) {
+            if (Config::read('cache.enable')) {
+               if ($this->_type === self::COUNT_QUERY) {
+                  $cacheKey = sha1(var_export(get_object_vars($this), true));
+                  if (file_exists(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache')) {
+                     $this->_reset();
+                     return (int) file_get_contents(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache');
+                  }
+               } else if ($this->_type !== self::SELECT_QUERY) {
+                  foreach (glob(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/*.cache') as $cacheFile) {
+                     unlink($cacheFile);
+                  }
+               }
+            }
             switch ($this->_type) {
                case self::SELECT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->select($this, $outputFormat);
                   break;
                case self::COUNT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->count($this);
+                  if (Config::read('cache.enable')) {
+                     file_put_contents(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache', $result);
+                  }
                   break;
                case self::INSERT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->insert($this);
@@ -323,4 +341,5 @@ class Query {
          throw new ErrorException(__('Unable to execute the query: please use "select", "update" or "delete" methods first.'));
       }
    }
+
 }

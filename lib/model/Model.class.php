@@ -18,6 +18,14 @@ abstract class Model implements ArrayAccess {
    public function __construct() {
       Application::load('Panda.model.db.Query');
       $this->_daoName = $this->_daoName ? $this->_daoName : Config::read('datasources.default');
+      if (Config::read('cache.enable')) {
+         if (!file_exists(SHARE_DIR . 'cache/datasource')) {
+            mkdir(SHARE_DIR . 'cache/datasource');
+         }
+         if (!file_exists(SHARE_DIR . 'cache/datasource/' . $this->_daoName)) {
+            mkdir(SHARE_DIR . 'cache/datasource/' . $this->_daoName);
+         }
+      }
       $this->_query = new Query($this->_daoName);
    }
 

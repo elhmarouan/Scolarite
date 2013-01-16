@@ -48,11 +48,24 @@ class MysqlDriver extends PDOAbstract implements DriverInterface {
       }
       $primaryKeysSchema = $this->fetchAll($this->query('SHOW KEYS FROM ' . $this->_escapeField($datasource) . ' WHERE Key_name = "PRIMARY"'));
       $primaryKeys = array();
-      foreach($primaryKeysSchema as $primaryKey) {
+      foreach ($primaryKeysSchema as $primaryKey) {
          $primaryKeys[] = $primaryKey['Column_name'];
       }
       return $primaryKeys;
    }
+   
+   /*public function typesOf($datasource) {
+      if(empty($datasource) || !is_string($datasource)) {
+         throw new InvalidArgumentException(__('Unable to get this table fields types: invalid datasource.'));
+      }
+      $fieldsSchema = $this->fetchAll($this->query('SHOW FIELDS FROM ' . $this->_escapeField($datasource)));
+      $fieldsTypes = array();
+      foreach ($fieldsSchema as $field) {
+         $fieldsTypes[$field['Field']] = $field['Type'];
+      }
+      return $fieldsTypes;
+   }*/
+   
    public function _escapeField($field) {
       return ($field === '*') ? $field : '`' . $field . '`';
    }

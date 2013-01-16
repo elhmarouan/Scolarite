@@ -99,7 +99,7 @@
          Indisponible
       <?php endif; ?>
    </p>
-   <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<?php echo $profResponsable['login']; ?>)</p>
+   <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idProf']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</p>
    <h2>Liste des examens</h2>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/examen/ajouter" class="button greenButton">Ajouter un examen</a></p>
    <table>
@@ -107,6 +107,7 @@
          <tr>
             <th>Libellé</th>
             <th>Type</th>
+            <th>Poids</th>
             <th>Date</th>
             <th>Moyenne de la promo</th>
             <th>Actions</th>
@@ -120,9 +121,11 @@
                <tr>
                   <td><?php echo $examen['libelle']; ?></td>
                   <td><?php echo $examen['type']; ?></td>
+                  <td><?php echo $examen['coef']; ?></td>
                   <td><?php echo $examen['date']; ?></td>
                   <td>
-                     <?php if (!empty($examen['moyennePromo'])) :
+                     <?php
+                     if (!empty($examen['moyennePromo'])) :
                         echo $examen['moyennePromo'];
                         ?> / 20
                      <?php else : ?>
@@ -136,7 +139,7 @@
          else :
             ?>
             <tr>
-               <td colspan="5">Aucun examen</td>
+               <td colspan="6">Aucun examen</td>
             </tr>
    <?php endif; ?>
       </tbody>
@@ -157,6 +160,16 @@
 <?php elseif ($manageModule) : ?>
    <h1>Gestion du module <?php echo $module; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter" class="button greenButton">Ajouter un nouvelle matière</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier" class="button orangeButton">Modifier ce module</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/supprimer" class="button redButton" onClick="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?');">Supprimer ce module</a></p>
+   <p><strong>Coefficient</strong> : 
+   <?php
+   if (!empty($coefModule)) :
+      echo $coefModule;
+   else : ?>
+      Indisponible
+   <?php
+   endif; ?>
+   </p>
+   <h2>Liste des matières</h2>
    <ul>
       <?php
       if (!empty($listeDesMatieres)) :
