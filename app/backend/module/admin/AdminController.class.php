@@ -720,6 +720,9 @@ class AdminController extends Controller {
                               }
                            }
                         } else {
+                           /**
+                            * Gestion d'une matière
+                            */
                            $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
                            $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                            //Liste des examens
@@ -858,12 +861,21 @@ class AdminController extends Controller {
                    * Gestion d'un module
                    */
                   $this->setSubAction('manageModule');
+                  $listeProfsResponsables = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->field('idUtil', array('idProf' => self::model('Matiere')->field('idProf', array('idMod' => $idModule))))));
+                  foreach ($listeProfsResponsables as &$profResponsable) {
+                     $profResponsable['nom'] = htmlspecialchars(stripslashes($profResponsable['nom']));
+                     $profResponsable['prenom'] = htmlspecialchars(stripslashes($profResponsable['prenom']));
+                     $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
+                  }
+                  $this->addVar('listeProfsResponsables', $listeProfsResponsables);
+                  //Récupération de la liste des matières
                   $matieresList = self::model('Matiere')->field('libelle', array('idMod' => $idModule));
                   foreach ($matieresList as &$matiere) {
                      $matiere = htmlspecialchars(stripslashes($matiere));
                   }
                   $this->addVar('listeDesMatieres', $matieresList);
-                  $this->addVar('coefModule', array_sum(self::model('Matiere')->field('coefMat', array('idMod' => $idModule))));
+                  $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $idModule));
+                  $this->addVar('coefModule', str_replace('.', ',', round(array_sum($coefsMatieres) / count($coefsMatieres), 2)));
                }
             } else {
                User::addPopup('Le module « ' . HTTPRequest::get('module') . ' » n\'existe pas.', Popup::ERROR);
@@ -963,12 +975,31 @@ class AdminController extends Controller {
             $prof['nom'] = htmlspecialchars(stripslashes($prof['nom']));
             $prof['prenom'] = htmlspecialchars(stripslashes($prof['prenom']));
             $prof['login'] = htmlspecialchars(stripslashes($prof['login']));
+            //Récupération de la liste des responsabilités
+            $prof['responsabilites'] = array();
+            $matieres = self::model('Matiere')->find(array('idProf' => $prof['idProf']));
+            foreach ($matieres as $matiere) {
+               $module = self::model('Module')->first(array('idMod' => $matiere['idMod']));
+               $promo = self::model('Promo')->first(array('idPromo' => $module['idPromo']));
+               $prof['responsabilites'][] = array('matiere' => htmlspecialchars(stripslashes($matiere['libelle'])), 'module' => htmlspecialchars(stripslashes($module['libelle'])), 'promo' => htmlspecialchars(stripslashes($promo['libelle'])));
+            }
             $this->addVar('prof', $prof);
             $this->setWindowTitle('Profil professeur');
          } else {
             User::addPopup('Ce professeur n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/admin/');
          }
+      }
+   }
+   
+   /**
+    * Export au format CSV
+    */
+   public function exporterCsv() {
+      if (HTTPRequest::getExists('promo')) {
+         HTTPResponse::addHeader('Content-Type: text/csv');
+         HTTPResponse::addHeader('Content-Disposition: attachment;filename=export.csv');
+         $this->page()->useRawView();
       }
    }
 

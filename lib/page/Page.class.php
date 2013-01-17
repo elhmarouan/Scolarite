@@ -10,7 +10,7 @@
 class Page {
 
    private $_appName;
-   private $_error;
+   private $_rawView;
    private $_template;
    private $_vars = array();
 
@@ -67,7 +67,7 @@ class Page {
       } else {
          ob_start('zlib.output_compression');
       }
-      if (!$this->error()) {
+      if (!$this->rawView()) {
          require APP_DIR . $this->appName() . '/template/layout.php';
       } else {
          echo $content;
@@ -80,8 +80,8 @@ class Page {
       return $this->_appName;
    }
 
-   public function error() {
-      return $this->_error;
+   public function rawView() {
+      return $this->_rawView;
    }
 
    public function template() {
@@ -111,12 +111,8 @@ class Page {
       $this->_template = $template;
    }
 
-   public function setError() {
-      $this->_error = true;
-   }
-
-   public function unsetError() {
-      $this->_error = false;
+   public function useRawView() {
+      $this->_rawView = true;
    }
 
 }

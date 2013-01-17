@@ -27,7 +27,7 @@ class HTTPResponse {
    public static function redirect404($app) {
       Application::load('Panda.page.Page');
       self::setPage(new Page($app));
-      self::page()->setError();
+      self::page()->useRawView();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/404.php');
       self::addHeader('HTTP/1.0 404 Not Found');
 
@@ -37,7 +37,7 @@ class HTTPResponse {
    public static function redirect403($app) {
       Application::load('Panda.page.Page');
       self::setPage(new Page($app));
-      self::page()->setError();
+      self::page()->useRawView();
       self::page()->setTemplate(APP_DIR . strtolower($app->name()) . '/template/403.php');
       self::addHeader('HTTP/1.0 403 Forbidden');
 

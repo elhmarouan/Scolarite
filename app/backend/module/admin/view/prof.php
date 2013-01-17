@@ -10,7 +10,7 @@
    if (!empty($prof['responsabilites'])) :
       foreach ($prof['responsabilites'] as $responsabilite) :
          ?>
-         <li><?php echo $responsabilite; ?></li>
+         <li><a href="/admin/<?php echo $responsabilite['promo']; ?>"><?php echo $responsabilite['promo']; ?></a> > <a href="/admin/<?php echo $responsabilite['promo']; ?>/<?php echo $responsabilite['module']; ?>/matières"><?php echo $responsabilite['module']; ?></a> > <a href="/admin/<?php echo $responsabilite['promo']; ?>/<?php echo $responsabilite['module']; ?>/<?php echo $responsabilite['matiere']; ?>"><?php echo $responsabilite['matiere']; ?></a></li>
          <?php
       endforeach;
    else :

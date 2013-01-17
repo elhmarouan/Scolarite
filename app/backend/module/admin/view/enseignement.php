@@ -130,7 +130,7 @@
                         ?> / 20
                      <?php else : ?>
                         Indisponible
-         <?php endif; ?>
+                     <?php endif; ?>
                   </td>
                   <td><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/modifier"><img src="/img/admin/exam_edit.png" alt="modifier" title="Modifier cet examen" /></a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/supprimer"><img src="/img/admin/exam_delete.png" alt="supprimer"  title="Supprimer cet examen" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cet examen ?');" /></a></td>
                </tr>
@@ -141,7 +141,7 @@
             <tr>
                <td colspan="6">Aucun examen</td>
             </tr>
-   <?php endif; ?>
+         <?php endif; ?>
       </tbody>
    </table>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières">Retour à la gestion du module</a></p>
@@ -161,13 +161,28 @@
    <h1>Gestion du module <?php echo $module; ?></h1>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/matières/ajouter" class="button greenButton">Ajouter un nouvelle matière</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/modifier" class="button orangeButton">Modifier ce module</a> <a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/supprimer" class="button redButton" onClick="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?');">Supprimer ce module</a></p>
    <p><strong>Coefficient</strong> : 
-   <?php
-   if (!empty($coefModule)) :
-      echo $coefModule;
-   else : ?>
-      Indisponible
-   <?php
-   endif; ?>
+      <?php
+      if (!empty($coefModule)) :
+         echo $coefModule;
+      else :
+         ?>
+         Indisponible
+      <?php endif; ?>
+   </p>
+   <p><strong>Professeurs responsables</strong> :
+      <?php if (!empty($listeProfsResponsables)) : ?>
+      <ul>
+         <?php
+         foreach ($listeProfsResponsables as $profResponsable) :
+            ?>
+            <li><?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idProf']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</li>
+            <?php endforeach; ?>
+      </ul>
+      <?php
+   else :
+      ?>
+      Aucun
+   <?php endif; ?>
    </p>
    <h2>Liste des matières</h2>
    <ul>
@@ -181,7 +196,7 @@
       else :
          ?>
          <li>Aucune matière disponible</li>
-   <?php endif; ?>
+      <?php endif; ?>
    </ul>
    <p><a href="/admin/<?php echo $promo; ?>/modules">Retour à la gestion des modules</a></p>
 <?php else : ?>
@@ -198,7 +213,7 @@
       else :
          ?>
          <li>Aucun module disponible</li>
-   <?php endif; ?>
+      <?php endif; ?>
    </ul>
    <p><a href="/admin/<?php echo $promo; ?>">Retour à la gestion de la promotion</a></p>
 <?php endif; ?>
