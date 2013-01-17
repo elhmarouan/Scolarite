@@ -18,7 +18,7 @@
                <td><?php echo $etudiant['login']; ?></td>
                <td><?php echo $etudiant['nom']; ?></td>
                <td><?php echo $etudiant['prenom']; ?></td>
-               <td>-</td>
+               <td><a href="/admin/étudiant/<?php echo $etudiant['idEleve']; ?>/profil"><img src="/img/admin/go_user.png" alt="Profil élève" title="Consulter le profil de cet élève" /></a></td>
             </tr>
             <?php
          endforeach;

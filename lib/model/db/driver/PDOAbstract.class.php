@@ -350,8 +350,8 @@ abstract class PDOAbstract implements DriverInterface {
                   if(!array_key_exists($subCondition['operator'], $this->_operators)) {
                      throw new ErrorException(__('Unable to build the WHERE statement: invalid operator "%s"', $subCondition['operator']));
                   }
-                  //IN and NOT IN conditions
                   if (is_array($tokensValues[$subCondition['token']]) && !empty($tokensValues[$subCondition['token']])) {
+                     //IN and NOT IN conditions
                      if ($subCondition['operator'] === 'eq' || $subCondition['operator'] === 'neq') {
                         $subWhereStatement .= $subCondition['operator'] === 'eq' ? 'IN (' : 'NOT IN (';
                         for ($i = 0 ; $i < count($tokensValues[$subCondition['token']]) ; ++$i) {
@@ -361,6 +361,14 @@ abstract class PDOAbstract implements DriverInterface {
                         unset($tokensValues[$subCondition['token']]);
                      } else {
                         throw new ErrorException(__('Unable to build the WHERE statement: "eq" and "neq" are the only supported operators for array tokens.'));
+                     }
+                  } else if ($tokensValues[$subCondition['token']] === null) {
+                     //IS NULL and IS NOT NULL
+                     if ($subCondition['operator'] === 'eq' || $subCondition['operator'] === 'neq') {
+                        $subWhereStatement .= ($this->_operators[$subCondition['operator']] === 'eq') ? 'IS NULL) ' : 'IS NOT NULL) ';
+                        unset($tokensValues[$subCondition['token']]);
+                     } else {
+                        throw new ErrorException(__('Unable to build the WHERE statement: "eq" and "neq" are the only supported operators for null tokens.'));
                      }
                   } else {
                      $subWhereStatement .= $this->_operators[$subCondition['operator']] . ' :' . $subCondition['token'] . ') ';

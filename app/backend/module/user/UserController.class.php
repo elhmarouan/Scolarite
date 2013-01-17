@@ -19,13 +19,25 @@ class UserController extends Controller {
                User::addPopup('Connexion réussie !', Popup::SUCCESS);
                switch ($role) {
                   case 'Administrateur' :
-                     HTTPResponse::redirect('/admin/');
+                     if (preg_match('#^/admin/#', HTTPRequest::requestURI())) {
+                        HTTPResponse::redirect(HTTPRequest::requestURI());
+                     } else {
+                        HTTPResponse::redirect('/admin/');
+                     }
                      break;
                   case 'Professeur' :
-                     HTTPResponse::redirect('/prof/');
+                     if (preg_match('#^/prof/#', HTTPRequest::requestURI())) {
+                        HTTPResponse::redirect(HTTPRequest::requestURI());
+                     } else {
+                        HTTPResponse::redirect('/prof/');
+                     }
                      break;
                   case 'Élève' :
-                     HTTPResponse::redirect('/eleve/');
+                     if (preg_match('#^/eleve/#', HTTPRequest::requestURI())) {
+                        HTTPResponse::redirect(HTTPRequest::requestURI());
+                     } else {
+                        HTTPResponse::redirect('/eleve/');
+                     }
                      break;
                }
                

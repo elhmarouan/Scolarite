@@ -9,6 +9,7 @@
     <route url="/admin/utilisateurs/(ajouter)" module="Admin" action="utilisateur" vars="action" />
     <route url="/admin/utilisateurs/([0-9]+)/(modifier|supprimer)" module="Admin" action="utilisateur" vars="idUtil,action" />
     <route url="/admin/prof/([0-9]+)/profil" module="Admin" action="prof" vars="idProf" />
+    <route url="/admin/étudiant/([0-9]+)/profil" module="Admin" action="etudiant" vars="idEleve" />
     <route url="/admin/promos" module="Admin" action="promotion" />
     <route url="/admin/promo/(ajouter)" module="Admin" action="promotion" vars="action" />
     <route url="/admin/([a-z]{3}[1-9]{1})" module="Admin" action="promotion" vars="promo" />
