@@ -948,6 +948,7 @@ class AdminController extends Controller {
             $idsEtudiantsPromo = self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo));
             $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiantsPromo));
             foreach ($listeDesEtudiants as &$etudiant) {
+               $etudiant['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => $etudiant['idUtil']), 'numEtudiant');
                $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
                $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
                $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
@@ -959,9 +960,34 @@ class AdminController extends Controller {
             User::addPopup('Cette promotion n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/admin/');
          }
-      } else {
-         User::addPopup('Veuillez sélectionner une promotion pour commencer.', Popup::ERROR);
-         HTTPResponse::redirect('/admin/');
+      } else if (HTTPRequest::getExists('idUtil')) {
+         if (self::model('Eleve')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            $this->setWindowTitle('Profil étudiant');
+            $this->setSubAction('showProfil');
+            $etudiant = array_merge(self::model('Eleve')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));
+            $etudiant['promo'] = htmlspecialchars(stripslashes(self::model('Promo')->first(array('idPromo' => $etudiant['idPromo']), 'libelle')));
+            $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+            $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+            $etudiant['listeDesModules'] = self::model('Module')->find(array('idPromo' => $etudiant['idPromo']));
+            foreach ($etudiant['listeDesModules'] as &$module) {
+               $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
+               $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+               foreach ($module['listeDesMatieres'] as &$matiere) {
+                  $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
+                  $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
+                  foreach ($matiere['listeDesExamens'] as &$examen) {
+                     $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                     $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note');
+                     $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']))));
+                     $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
+                  }
+               }
+            }
+            $this->addVar('etudiant', $etudiant);
+         } else {
+            User::addPopup('Cet étudiant n\'existe pas.', Popup::ERROR);
+            HTTPResponse::redirect('/admin/');
+         }
       }
    }
 
@@ -969,9 +995,9 @@ class AdminController extends Controller {
     * Gestion des professeurs
     */
    public function prof() {
-      if (HTTPRequest::getExists('idProf')) {
-         if (self::model('Prof')->exists(array('idProf' => HTTPRequest::get('idProf')))) {
-            $prof = array_merge(self::model('Prof')->first(array('idProf' => HTTPRequest::get('idProf'))), self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => HTTPRequest::get('idProf')), 'idUtil'))));
+      if (HTTPRequest::getExists('idUtil')) {
+         if (self::model('Prof')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            $prof = array_merge(self::model('Prof')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));
             $prof['nom'] = htmlspecialchars(stripslashes($prof['nom']));
             $prof['prenom'] = htmlspecialchars(stripslashes($prof['prenom']));
             $prof['login'] = htmlspecialchars(stripslashes($prof['login']));

@@ -99,7 +99,7 @@
          Indisponible
       <?php endif; ?>
    </p>
-   <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idProf']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</p>
+   <p><strong>Professeur responsable</strong> : <?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idUtil']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</p>
    <h2>Liste des examens</h2>
    <p><a href="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/examen/ajouter" class="button greenButton">Ajouter un examen</a></p>
    <table>
@@ -175,7 +175,7 @@
          <?php
          foreach ($listeProfsResponsables as $profResponsable) :
             ?>
-            <li><?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idProf']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</li>
+            <li><?php echo $profResponsable['prenom']; ?> <?php echo $profResponsable['nom']; ?> (<a href="/admin/prof/<?php echo $profResponsable['idUtil']; ?>/profil"><?php echo $profResponsable['login']; ?></a>)</li>
             <?php endforeach; ?>
       </ul>
       <?php
