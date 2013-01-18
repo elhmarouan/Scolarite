@@ -15,7 +15,21 @@
                if (!empty($module['listeDesMatieres'])) :
                   foreach ($module['listeDesMatieres'] as $matiere) :
                      ?>
-                     <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/<?php echo $matiere['libelle']; ?>"><?php echo $matiere['libelle']; ?></a></li>
+                     <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/<?php echo $matiere['libelle']; ?>"><?php echo $matiere['libelle']; ?></a>
+                       
+                     (<strong>Moyenne de l'étudiant</strong> :
+                     <?php if (!empty($matiere['moyenneEleve'])) :
+                        echo $matiere['moyenneEleve']; ?>/20
+                     <?php else : ?>
+                        Moyenne indisponible
+                     <?php endif; ?> ; 
+                     <strong>Moyenne promo</strong> :
+                     <?php if (!empty($matiere['moyennePromo'])) :
+                        echo $matiere['moyennePromo']; ?>/20
+                     <?php else : ?>
+                        Moyenne indisponible
+                     <?php endif; ?>)
+                     </li>
                      <ul>
                         <?php
                         if (!empty($matiere['listeDesExamens'])) :
@@ -28,6 +42,7 @@
                                     Absence justifiée
                               <?php endif; ?> ; <strong>Moyenne promo</strong> : <?php echo $examen['moyennePromo']; ?>/20)
                               </li>
+                              
                               <?php
                            endforeach;
                         else :

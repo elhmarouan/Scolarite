@@ -304,8 +304,11 @@ class Query {
                      return (int) file_get_contents(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache');
                   }
                } else if ($this->_type !== self::SELECT_QUERY) {
-                  foreach (glob(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/*.cache') as $cacheFile) {
-                     unlink($cacheFile);
+                  $cacheFilesList = glob(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/*.cache');
+                  if (!empty($cacheFilesList)) {
+                     foreach ($cacheFilesList as $cacheFile) {
+                        unlink($cacheFile);
+                     }
                   }
                }
             }

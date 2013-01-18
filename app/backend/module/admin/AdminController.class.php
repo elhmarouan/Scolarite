@@ -212,8 +212,10 @@ class AdminController extends Controller {
                               User::addPopup('Les informations nécessaires à la création du profil n\'ont pas été renseignées.', Popup::ERROR);
                            }
                         }
-                        User::addPopup('L\'utilisateur a bien été ajouté.', Popup::SUCCESS);
-                        HTTPResponse::redirect('/admin/utilisateurs');
+                        if (empty($erreurs)) {
+                           User::addPopup('L\'utilisateur a bien été ajouté.', Popup::SUCCESS);
+                           HTTPResponse::redirect('/admin/utilisateurs');
+                        }
                      } else {
                         //Récupération et affichage des erreurs
                         $erreurs = $utilisateur->errors();
@@ -969,12 +971,36 @@ class AdminController extends Controller {
             $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
             $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
             $etudiant['listeDesModules'] = self::model('Module')->find(array('idPromo' => $etudiant['idPromo']));
+            $numEtudiantsPromo = self::model('Eleve')->field('numEtudiant', array('idPromo'=> $etudiant['idPromo']));
             foreach ($etudiant['listeDesModules'] as &$module) {
                $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
                $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
                foreach ($module['listeDesMatieres'] as &$matiere) {
                   $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                   $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
+                  //Calcul de la moyenne de la promo
+                  $idsExams = self::model('Examen')->field('idExam', array('idMat' => $matiere['idMat']));
+                  $participationsPromo = self::model('Participe')->find(array('numEtudiant' => $numEtudiantsPromo, 'idExam' => $idsExams, 'note !=' => null));
+                  $notesPromo = array();
+                  $quotient = 0;
+                  foreach ($participationsPromo as $participation) {
+                     $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                     $notesPromo[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                     $quotient += $coef;
+                  }
+                  $matiere['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null;
+
+                  //Calcul de la moyenne de l'élève
+                  $participationsEleve = self::model('Participe')->find(array('numEtudiant' => $etudiant['numEtudiant'], 'idExam' => $idsExams, 'note !=' => null));
+                  $notesEleve = array();
+                  $quotient = 0;
+                  foreach ($participationsEleve as $participation) {
+                     $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                     $notesEleve[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                     $quotient += $coef;
+                  }
+                  $matiere['moyenneEleve'] = !empty($notesEleve) ? str_replace('.', ',', round(array_sum($notesEleve) / $quotient, 2)) : null;
+
                   foreach ($matiere['listeDesExamens'] as &$examen) {
                      $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
                      $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note');
