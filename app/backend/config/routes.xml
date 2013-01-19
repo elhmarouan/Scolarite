@@ -42,6 +42,9 @@
     <route url="/étudiant/promo" module="Eleve" action="promo" />
     <route url="/étudiant/promo/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="promo" vars="module" />
     <route url="/étudiant/promo/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="promo" vars="module,matiere" />
+    <route url="/étudiant/([0-9]+)" module="Eleve" action="buddy" vars="idUtil" />
+    <route url="/étudiant/([0-9]+)/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="buddy" vars="idUtil,module" />
+    <route url="/étudiant/([0-9]+)/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="buddy" vars="idUtil,module,matiere" />
     
     <route url="/connexion" module="User" action="connexion" />
     <route url="/deconnexion" module="User" action="deconnexion" />    

@@ -12,18 +12,20 @@
          </tr>
       </thead>
       <tbody>
-         <?php if (!empty($listeDesExamens)) :
+         <?php
+         if (!empty($listeDesExamens)) :
             foreach ($listeDesExamens as $examen) :
                ?>
                <tr>
                   <td><?php echo $examen['libelle']; ?></td>
                   <td><?php echo $examen['date']; ?></td>
                   <td>
-                     <?php if (!empty($examen['note'])) : 
-                     echo $examen['note']; ?>/20
+                     <?php if (!empty($examen['note'])) :
+                        echo $examen['note'];
+                        ?>/20
                      <?php else : ?>
-                     Absence justifiée
-                     <?php endif; ?>
+                        Absence justifiée
+         <?php endif; ?>
                   </td>
                   <td><?php echo $examen['moyennePromo']; ?>/20</td>
                </tr>
@@ -49,7 +51,18 @@
       if (!empty($listeDesMatieres)) :
          foreach ($listeDesMatieres as $matiere) :
             ?>
-            <li><a href="/étudiant/perso/<?php echo $module; ?>/<?php echo $matiere['libelle']; ?>"><?php echo $matiere['libelle']; ?></a></li>
+            <li><a href="/étudiant/perso/<?php echo $module; ?>/<?php echo $matiere['libelle']; ?>"><?php echo $matiere['libelle']; ?></a> :
+               <?php
+               if (!empty($matiere['moyenne'])) :
+                  echo $matiere['moyenne'];
+                  ?>/20
+               <?php else :
+                  ?>
+                  Moyenne indisponible
+               <?php
+               endif;
+               ?>
+            </li>
             <?php
          endforeach;
       else :
@@ -70,7 +83,7 @@
          <?php
       else :
          ?> Indisponible
-      <?php endif; ?></p>
+   <?php endif; ?></p>
    <h2>Mes modules</h2>
    <p><a href="/étudiant/promo" class="button blueButton">Résultats de ma promotion</a></p>
    <ul>
