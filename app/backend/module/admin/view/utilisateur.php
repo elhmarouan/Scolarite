@@ -112,7 +112,7 @@
             </select>
          <?php else : ?>
             Aucune promotion disponible
-   <?php endif; ?>
+         <?php endif; ?>
       </fieldset>
       <fieldset id="profilProf"<?php if ($utilisateur['idRole'] === 2) echo ' style="display:block;"'; ?>>
          <legend>Profil professeur</legend>
@@ -151,7 +151,14 @@
                   <td><?php echo $utilisateur['nom']; ?></td>
                   <td><?php echo $utilisateur['prenom']; ?></td>
                   <td><?php echo $utilisateur['role']; ?></td>
-                  <td><a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier"><img src="/img/admin/user_edit.png" alt="modifier" title="Modifier cet utilisateur" /></a> <a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/supprimer"><img src="/img/admin/user_delete.png" alt="supprimer"  title="Supprimer cet utilisateur" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');" /></a></td>
+                  <td>
+                     <?php if ($utilisateur['idRole'] === 2) : ?>
+                        <a href="/admin/prof/<?php echo $utilisateur['idUtil']; ?>/profil"><img src="/img/admin/go_user.png" alt="profil" title="Voir le profil de cet utilisateur" /></a>
+                     <?php elseif ($utilisateur['idRole'] === 3) : ?>
+                        <a href="/admin/étudiant/<?php echo $utilisateur['idUtil']; ?>/profil"><img src="/img/admin/go_user.png" alt="profil" title="Voir le profil de cet utilisateur" /></a>
+                     <?php endif; ?>
+                     <a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/modifier"><img src="/img/admin/user_edit.png" alt="modifier" title="Modifier cet utilisateur" /></a>
+                     <a href="/admin/utilisateurs/<?php echo $utilisateur['idUtil']; ?>/supprimer"><img src="/img/admin/user_delete.png" alt="supprimer"  title="Supprimer cet utilisateur" onClick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');" /></a></td>
                </tr>
                <?php
             endforeach;
@@ -160,7 +167,7 @@
             <tr>
                <td colspan="5">Aucun utilisateur</td>
             </tr>
-   <?php endif; ?>
+         <?php endif; ?>
       </tbody>
    </table>
    <p><a href="/admin/">Retour à l'accueil du panel d'administration</a></p>

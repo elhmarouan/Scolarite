@@ -33,10 +33,10 @@ class UserController extends Controller {
                      }
                      break;
                   case 'Élève' :
-                     if (preg_match('#^/eleve/#', HTTPRequest::requestURI())) {
+                     if (preg_match('#^/étudiant/#', HTTPRequest::requestURI())) {
                         HTTPResponse::redirect(HTTPRequest::requestURI());
                      } else {
-                        HTTPResponse::redirect('/eleve/');
+                        HTTPResponse::redirect('/étudiant/');
                      }
                      break;
                }

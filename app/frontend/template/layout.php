@@ -30,7 +30,7 @@
                   <?php
                else :
                   ?>
-                  <li><a href="/eleve/">Mon espace personnel</a></li>
+                  <li><a href="/étudiant/">Mon espace personnel</a></li>
                <?php endif; ?>
                <li><a href="/déconnexion">Déconnexion</a></li>
             </ul>

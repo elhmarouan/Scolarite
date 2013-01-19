@@ -12,7 +12,8 @@
 
 function exception_handler(Exception $exception) {
    //TODO! Display a HTTP 500 error and log the exception, if the application is on production state
-   echo $exception->getLine() . ': ' . $exception->getMessage();
+   echo get_class($exception) . ': ' . $exception->getMessage() . '<br />';
+   echo 'Where: ' . $exception->getFile() . ':' . $exception->getLine();
 }
 
 set_exception_handler('exception_handler');

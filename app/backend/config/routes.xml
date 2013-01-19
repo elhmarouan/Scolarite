@@ -35,13 +35,9 @@
     <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Prof" action="matiere" vars="promo,module,matiere" />
     <route url="/prof/([a-z]{3}[1-9]{1})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([0-9]+)" module="Prof" action="examen" vars="promo,module,matiere,idExam" />
        
-    <route url="/eleve/" module="Eleve" action="index" />
-    <route url="/eleve/perso" module="Eleve" action="perso" />
-    <route url="/eleve/promo" module="Eleve" action="promotion" />
-    <route url="/eleve/perso/notes" module="Eleve" action="perso" vars="action" />
-    <route url="/eleve/perso/moyennes" module="Eleve" action="perso" vars="action" />
-    <route url="/eleve/promo/notes" module="Eleve" action="promotion" vars="promo" />
-    <route url="/eleve/promo/moyennes" module="Eleve" action="promotion" vars="promo" />
+    <route url="/étudiant/" module="Eleve" action="index" />
+    <route url="/étudiant/perso" module="Eleve" action="perso" />
+    <route url="/étudiant/promo" module="Eleve" action="promotion" />
     
     <route url="/connexion" module="User" action="connexion" />
     <route url="/deconnexion" module="User" action="deconnexion" />    

@@ -877,7 +877,7 @@ class AdminController extends Controller {
                   }
                   $this->addVar('listeDesMatieres', $matieresList);
                   $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $idModule));
-                  $this->addVar('coefModule', str_replace('.', ',', round(array_sum($coefsMatieres) / count($coefsMatieres), 2)));
+                  $this->addVar('coefModule', !empty($coefsMatieres) ? str_replace('.', ',', round(array_sum($coefsMatieres) / count($coefsMatieres), 2)) : null);
                }
             } else {
                User::addPopup('Le module « ' . HTTPRequest::get('module') . ' » n\'existe pas.', Popup::ERROR);
@@ -1048,11 +1048,9 @@ class AdminController extends Controller {
     * Export au format CSV
     */
    public function exporterCsv() {
-      if (HTTPRequest::getExists('promo')) {
-         HTTPResponse::addHeader('Content-Type: text/csv');
-         HTTPResponse::addHeader('Content-Disposition: attachment;filename=export.csv');
-         $this->page()->useRawView();
-      }
+      HTTPResponse::addHeader('Content-Type: text/csv');
+      HTTPResponse::addHeader('Content-Disposition: attachment;filename=export.csv');
+      $this->page()->useRawView();
    }
 
 }

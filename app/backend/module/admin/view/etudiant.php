@@ -2,7 +2,18 @@
    <h1>Profil étudiant</h1>
    <p><strong>Nom</strong> : <?php echo $etudiant['nom']; ?></p>
    <p><strong>Prénom</strong> : <?php echo $etudiant['prenom']; ?></p>
+   <h2>Informations principales</h2>
    <p><strong>Promotion</strong> : <?php echo $etudiant['promo']; ?></p>
+   <p><strong>Numéro d'étudiant</strong> : <?php echo $etudiant['numEtudiant']; ?></p>
+   <p><strong>Année de redoublement</strong> :
+      <?php
+      if (!empty($etudiant['anneeRedouble'])) :
+         echo $etudiant['anneeRedouble'];
+      else :
+         ?>
+         Aucune
+      <?php endif; ?>
+   </p>
    <h2>Modules</h2>
    <ul>
       <?php
@@ -16,19 +27,18 @@
                   foreach ($module['listeDesMatieres'] as $matiere) :
                      ?>
                      <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/<?php echo $matiere['libelle']; ?>"><?php echo $matiere['libelle']; ?></a>
-                       
-                     (<strong>Moyenne de l'étudiant</strong> :
-                     <?php if (!empty($matiere['moyenneEleve'])) :
-                        echo $matiere['moyenneEleve']; ?>/20
-                     <?php else : ?>
-                        Moyenne indisponible
-                     <?php endif; ?> ; 
-                     <strong>Moyenne promo</strong> :
-                     <?php if (!empty($matiere['moyennePromo'])) :
-                        echo $matiere['moyennePromo']; ?>/20
-                     <?php else : ?>
-                        Moyenne indisponible
-                     <?php endif; ?>)
+                        <?php if (!empty($matiere['moyennePromo'])) : ?>
+                           (<strong>Moyenne de l'étudiant</strong> :
+                           <?php
+                           if (!empty($matiere['moyenneEleve'])) :
+                              echo $matiere['moyenneEleve'];
+                              ?>/20
+                           <?php else : ?>
+                              Moyenne indisponible
+                           <?php endif; ?> ; 
+                           <strong>Moyenne promo</strong> :
+                           <?php echo $matiere['moyennePromo']; ?>/20)
+                        <?php endif; ?>
                      </li>
                      <ul>
                         <?php
@@ -36,26 +46,28 @@
                            foreach ($matiere['listeDesExamens'] as $examen) :
                               ?>
                               <li><?php echo $examen['libelle']; ?> (<strong>Note</strong> :
-                                 <?php if (!empty($examen['note'])) :
-                                    echo $examen['note']; ?>/20
+                                 <?php
+                                 if (!empty($examen['note'])) :
+                                    echo $examen['note'];
+                                    ?>/20
                                  <?php else : ?>
                                     Absence justifiée
-                              <?php endif; ?> ; <strong>Moyenne promo</strong> : <?php echo $examen['moyennePromo']; ?>/20)
+                                 <?php endif; ?> ; <strong>Moyenne promo</strong> : <?php echo $examen['moyennePromo']; ?>/20)
                               </li>
-                              
+
                               <?php
                            endforeach;
                         else :
                            ?>
                            <li>Aucun examen</li>
-                     <?php endif; ?>
+                        <?php endif; ?>
                      </ul>
                      <?php
                   endforeach;
                else :
                   ?>
                   <li>Aucune matière</li>
-            <?php endif; ?>
+               <?php endif; ?>
             </ul>
             <?php
          endforeach;
@@ -96,7 +108,7 @@
             <tr>
                <td colspan="5">Aucun étudiant</td>
             </tr>
-   <?php endif; ?>
+         <?php endif; ?>
       </tbody>
    </table>
    <p><a href="/admin/<?php echo $promo ?>">Retour à la promotion</a></p>

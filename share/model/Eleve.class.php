@@ -29,7 +29,7 @@ class EleveModel extends Model {
    }
    
    public function setAnneeRedouble($anneeRedouble) {
-      if (checkdate(1, 1, $anneeRedouble)) {
+      if ((int) $anneeRedouble === 0 || checkdate(1, 1, $anneeRedouble)) {
          $this->_anneeRedouble = $anneeRedouble;
          } else if (!empty($anneeRedouble)) {
          $this->_errors[] = self::BAD_ANNEE_REDOUBLE_ERROR;

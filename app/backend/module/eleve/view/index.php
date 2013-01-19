@@ -1,7 +1,6 @@
-<?php if($manageNotes) : ?>
-<?php endif; ?>
-<h1>Étudiant</h1>  
+<h1>Étudiant</h1>
+<p>Bienvenue sur votre espace personnel.</p>
 <ul>
-   <li><a href="/eleve/perso">Vos résultats</a></li>
-   <li><a href="/eleve/promo">Résultats de votre promotion</a></li>
+   <li><a href="/étudiant/perso">Consulter vos résultats</a></li>
+   <li><a href="/étudiant/promo">Consulter les résultats de votre promotion</a></li>
 </ul>
