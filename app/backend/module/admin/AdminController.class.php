@@ -5,7 +5,7 @@
  *
  * Contrôleur du module réservé aux administrateurs
  * 
- * @author Stanislas Michalak <stanislas.michalak@gmail.com>
+ * @author Stanislas Michalak <stanislas.michalak@gmail.com> and Céline Lepicard <lepicardce@eisti.eu>
  *
  */
 class AdminController extends Controller {
@@ -1003,7 +1003,7 @@ class AdminController extends Controller {
 
                   foreach ($matiere['listeDesExamens'] as &$examen) {
                      $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
-                     $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note');
+                     $examen['note'] = str_replace('.', ',', round(self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note'),2));
                      $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']))));
                      $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                   }
