@@ -3,7 +3,7 @@
 /**
  * Élève controller
  * 
- * @author Vincent Simon <simonvince@eisti.eu>
+ * @author Vincent Simon <simonvince@eisti.eu> et Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
 class EleveController extends Controller {
@@ -41,6 +41,8 @@ class EleveController extends Controller {
                   $this->setSubAction('voirMatiere');
                   $this->setWindowTitle(HTTPRequest::get('matiere'));
 
+                  $quotientExams = 0;
+                  $notesPonderes = 0;
                   //Liste des examens
                   $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
                   foreach ($listeDesExamens as &$examen) {
@@ -50,7 +52,13 @@ class EleveController extends Controller {
                      $examen['note'] = !empty($noteEtudiant) ? str_replace('.', ',', round($noteEtudiant, 2)) : null;
                      $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'note !=' => null));
                      $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
+                     $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                     if (!empty($noteEtudiant)) {
+                        $notesPonderes += $noteEtudiant * $examen['coefExam'];
+                        $quotientExams += $examen['coefExam'];
+                     }
                   }
+                  $this->addVar('moyenneMatiere', $quotientExams !== 0 ? str_replace('.', ',', round($notesPonderes / $quotientExams, 2)) : null);
                   $this->addVar('listeDesExamens', $listeDesExamens);
                } else {
                   User::addPopup('Cette matière n\'existe pas.', Popup::ERROR);
@@ -171,6 +179,8 @@ class EleveController extends Controller {
                         $this->setSubAction('voirMatiere');
                         $this->setWindowTitle(HTTPRequest::get('matiere'));
 
+                        $quotientExams = 0;
+                        $notesPonderes = 0;
                         //Liste des examens
                         $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
                         foreach ($listeDesExamens as &$examen) {
@@ -180,7 +190,13 @@ class EleveController extends Controller {
                            $examen['note'] = !empty($noteEtudiant) ? str_replace('.', ',', round($noteEtudiant, 2)) : null;
                            $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'note !=' => null));
                            $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
+                           $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                           if (!empty($noteEtudiant)) {
+                              $notesPonderes += $noteEtudiant * $examen['coefExam'];
+                              $quotientExams += $examen['coefExam'];
+                           }
                         }
+                        $this->addVar('moyenneMatiere', $quotientExams !== 0 ? str_replace('.', ',', round($notesPonderes / $quotientExams, 2)) : null);
                         $this->addVar('listeDesExamens', $listeDesExamens);
                      } else {
                         User::addPopup('Cette matière n\'existe pas.', Popup::ERROR);
@@ -304,14 +320,23 @@ class EleveController extends Controller {
                   $this->setSubAction('voirMatiere');
                   $this->setWindowTitle(HTTPRequest::get('matiere'));
 
+                  $quotientExams = 0;
+                  $notesPonderes = 0;
                   //Liste des examens
                   $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
                   foreach ($listeDesExamens as &$examen) {
                      $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
                      $examen['date'] = $examen['date']->format('d/m/Y');
                      $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'note !=' => null));
-                     $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
+                     $moyennePromo = !empty($notesPromo) ? array_sum($notesPromo) / count($notesPromo) : null;
+                     $examen['moyennePromo'] = !empty($moyennePromo) ? str_replace('.', ',', round($moyennePromo, 2)) : null;
+                     $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                     if (!empty($moyennePromo)) {
+                        $notesPonderes += $moyennePromo * $examen['coefExam'];
+                        $quotientExams += $examen['coefExam'];
+                     }
                   }
+                  $this->addVar('moyenneMatiere', $quotientExams !== 0 ? str_replace('.', ',', round($notesPonderes / $quotientExams, 2)) : null);
                   $this->addVar('listeDesExamens', $listeDesExamens);
                } else {
                   User::addPopup('Cette matière n\'existe pas.', Popup::ERROR);

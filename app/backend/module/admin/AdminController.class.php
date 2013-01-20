@@ -5,7 +5,7 @@
  *
  * Contrôleur du module réservé aux administrateurs
  * 
- * @author Stanislas Michalak <stanislas.michalak@gmail.com> and Céline Lepicard <lepicardce@eisti.eu>
+ * @author Céline Lepicard <lepicardce@eisti.eu> et Stanislas Michalak <stanislas.michalak@gmail.com>
  *
  */
 class AdminController extends Controller {

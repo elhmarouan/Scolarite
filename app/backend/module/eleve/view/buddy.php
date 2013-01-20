@@ -1,7 +1,16 @@
 <?php if ($voirMatiere) : ?>
    <h1><?php echo $matiere; ?></h1>
-   <p><a href="/étudiant/promo/<?php echo $module; ?>/<?php echo $matiere; ?>" class="button blueButton">Résultats de ma promotion</a> <a href="/étudiant/perso/<?php echo $module; ?>/<?php echo $matiere; ?>" class="button blueButton">Mes résultats</a></p>
+   <p><strong>Moyenne de la matière</strong> :
+      <?php
+      if (!empty($moyenneMatiere)) :
+         echo $moyenneMatiere;
+         ?>/20
+         <?php
+      else :
+         ?> Indisponible
+   <?php endif; ?></p>
    <h2>Examens</h2>
+   <p><a href="/étudiant/promo/<?php echo $module; ?>/<?php echo $matiere; ?>" class="button blueButton">Résultats de ma promotion</a> <a href="/étudiant/perso/<?php echo $module; ?>/<?php echo $matiere; ?>" class="button blueButton">Mes résultats</a></p>
    <table>
       <thead>
          <tr>
