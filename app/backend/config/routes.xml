@@ -40,6 +40,7 @@
     <route url="/étudiant/perso/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="perso" vars="module" />
     <route url="/étudiant/perso/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="perso" vars="module,matiere" />
     <route url="/étudiant/promo" module="Eleve" action="promo" />
+    <route url="/étudiant/(liste)" module="Eleve" action="promo" vars="action" />
     <route url="/étudiant/promo/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="promo" vars="module" />
     <route url="/étudiant/promo/([A-Za-zàâéêèÉÊÈùç' -]{1,})/([A-Za-zàâéêèÉÊÈùç' -]{1,})" module="Eleve" action="promo" vars="module,matiere" />
     <route url="/étudiant/([0-9]+)" module="Eleve" action="buddy" vars="idUtil" />

@@ -35,8 +35,17 @@
    <p><a href="/étudiant/promo/<?php echo $module; ?>">Retour au module <?php echo $module; ?></a></p>
 <?php elseif ($voirModule) : ?>
    <h1>Résultats de la promotion pour le module « <?php echo $module; ?> »</h1>
-   <p><a href="/étudiant/perso/<?php echo $module; ?>" class="button blueButton">Mes résultats</a></p>
+   <p><strong>Moyenne du module</strong> :
+      <?php
+      if (!empty($moyenneModule)) :
+         echo $moyenneModule;
+         ?>/20
+         <?php
+      else :
+         ?> Indisponible
+      <?php endif; ?></p>
    <h2>Matières</h2>
+   <p><a href="/étudiant/perso/<?php echo $module; ?>" class="button blueButton">Mes résultats</a></p>
    <ul>
       <?php
       if (!empty($listeDesMatieres)) :
@@ -64,6 +73,40 @@
       ?>
    </ul>
    <p><a href="/étudiant/promo">Retour aux résultats de votre promotion</a></p>
+<?php elseif ($afficherListe) : ?>
+   <h1>Liste des étudiants de votre promotion</h1>
+   <p>Voici la liste des étudiants de votre promotion. Sélectionnez l'un d'entre eux pour consulter ses résultats.</p>
+   <table>
+      <thead>
+         <tr>
+            <th>Login</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Actions</th>
+         </tr>
+      </thead>
+      <tbody>
+         <?php
+         if (!empty($listeDesEtudiants)) :
+            foreach ($listeDesEtudiants as $etudiant) :
+               ?>
+               <tr>
+                  <td><?php echo $etudiant['login']; ?></td>
+                  <td><?php echo $etudiant['nom']; ?></td>
+                  <td><?php echo $etudiant['prenom']; ?></td>
+                  <td><a href="/étudiant/<?php echo $etudiant['idUtil']; ?>"><img src="/img/admin/go_notes.png" alt="Résultats étudiant" title="Consulter les résultats de cet étudiant" /></a></td>
+               </tr>
+               <?php
+            endforeach;
+         else :
+            ?>
+            <tr>
+               <td colspan="5">Aucun étudiant</td>
+            </tr>
+         <?php endif; ?>
+      </tbody>
+   </table>
+   <p><a href="/étudiant/">Retour à l'accueil de votre espace personnel</a></p>
 <?php else : ?>
    <h1>Résultats de votre promotion</h1>
    <p><strong>Moyenne générale</strong> :

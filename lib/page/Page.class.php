@@ -51,7 +51,7 @@ class Page {
       $windowTitle = isset($windowTitle) ? $windowTitle : 'Undefined';
       $popupsList = User::getPopups();
       try {
-         $root = Config::read('root.default');
+         $root = Config::read('roots.default');
       } catch(ErrorException $e) {
          if($e->getCode() === Config::UNKNOWN_KEY) {
             $root = '/';

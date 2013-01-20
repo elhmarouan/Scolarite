@@ -63,6 +63,8 @@ class EleveController extends Controller {
                $this->setSubAction('voirModule');
                $this->setWindowTitle(HTTPRequest::get('module'));
                $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $idModule));
+               $quotientModule = 0;
+               $moyennesModule = 0;
                foreach ($listeDesMatieres as &$matiere) {
                   $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                   //Calcul de la moyenne de la matière
@@ -77,10 +79,13 @@ class EleveController extends Controller {
                   }
                   if ($notesPonderes !== 0) {
                      $matiere['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
+                     $moyennesModule += ($notesPonderes / $quotientExams) * $matiere['coefMat'];
+                     $quotientModule += $matiere['coefMat'];
                   } else {
                      $matiere['moyenne'] = null;
                   }
                }
+               $this->addVar('moyenneModule', $quotientModule !== 0 ? str_replace('.', ',', round($moyennesModule / $quotientModule, 2)) : null);
                $this->addVar('listeDesMatieres', $listeDesMatieres);
             }
          } else {
@@ -98,24 +103,29 @@ class EleveController extends Controller {
          foreach ($listeDesModules as &$module) {
             $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
             //Calcul de la moyenne du module
-            $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numEtudiant, 'note !=' => null)), 'idMat' => self::model('Matiere')->field('idMat', array('idMod' => $module['idMod']))));
-            $quotientExams = 0;
-            $notesPonderes = 0;
-            foreach ($listeDesExamens as &$examen) {
-               $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $numEtudiant), 'note');
-               $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
-               $examen['coefMat'] = self::model('Matiere')->first(array('idMat' => $examen['idMat']), 'coefMat');
-               $notesPonderes += $examen['note'] * $examen['coefExam'] * $examen['coefMat'];
-               $quotientExams += $examen['coefExam'] * $examen['coefMat'];
+            $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+            $moyennesMatieres = array();
+            $quotientMatieres = 0;
+            foreach ($listeDesMatieres as &$matiere) {
+               $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numEtudiant, 'note !=' => null)), 'idMat' => $matiere['idMat']));
+               $quotientExams = 0;
+               $notesExams = 0;
+               foreach ($listeDesExamens as &$examen) {
+                  $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $numEtudiant), 'note');
+                  $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                  $notesExams += $examen['note'] * $examen['coefExam'];
+                  $quotientExams += $examen['coefExam'];
+               }
+               if ($quotientExams !== 0) {
+                  $moyennesMatieres[] = ($notesExams / $quotientExams) * $matiere['coefMat'];
+                  $quotientMatieres += $matiere['coefMat'];
+               }
             }
-            if ($notesPonderes !== 0) {
-               $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $module['idMod']));
-               $coefModule = array_sum($coefsMatieres) / count($coefsMatieres);
-               $moyennesModules[] = ($notesPonderes / $quotientExams) * $coefModule;
+            $coefModule = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+            $module['moyenne'] = $quotientMatieres !== 0 ? str_replace('.', ',', round((array_sum($moyennesMatieres) / $quotientMatieres), 2)) : null;
+            if ($quotientMatieres !== 0) {
+               $moyennesModules[] = (array_sum($moyennesMatieres) / $quotientMatieres) * $coefModule;
                $quotientModules += $coefModule;
-               $module['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
-            } else {
-               $module['moyenne'] = null;
             }
          }
          $this->addVar('moyenneGenerale', $quotientModules !== 0 ? str_replace('.', ',', round(array_sum($moyennesModules) / $quotientModules, 2)) : null);
@@ -183,6 +193,8 @@ class EleveController extends Controller {
                      $this->setSubAction('voirModule');
                      $this->setWindowTitle(HTTPRequest::get('module'));
                      $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $idModule));
+                     $quotientModule = 0;
+                     $moyennesModule = 0;
                      foreach ($listeDesMatieres as &$matiere) {
                         $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                         //Calcul de la moyenne de la matière
@@ -197,10 +209,13 @@ class EleveController extends Controller {
                         }
                         if ($notesPonderes !== 0) {
                            $matiere['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
+                           $moyennesModule += ($notesPonderes / $quotientExams) * $matiere['coefMat'];
+                           $quotientModule += $matiere['coefMat'];
                         } else {
                            $matiere['moyenne'] = null;
                         }
                      }
+                     $this->addVar('moyenneModule', $quotientModule !== 0 ? str_replace('.', ',', round($moyennesModule / $quotientModule, 2)) : null);
                      $this->addVar('listeDesMatieres', $listeDesMatieres);
                   }
                } else {
@@ -219,24 +234,29 @@ class EleveController extends Controller {
                foreach ($listeDesModules as &$module) {
                   $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
                   //Calcul de la moyenne du module
-                  $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numEtudiant, 'note !=' => null)), 'idMat' => self::model('Matiere')->field('idMat', array('idMod' => $module['idMod']))));
-                  $quotientExams = 0;
-                  $notesPonderes = 0;
-                  foreach ($listeDesExamens as &$examen) {
-                     $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $numEtudiant), 'note');
-                     $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
-                     $examen['coefMat'] = self::model('Matiere')->first(array('idMat' => $examen['idMat']), 'coefMat');
-                     $notesPonderes += $examen['note'] * $examen['coefExam'] * $examen['coefMat'];
-                     $quotientExams += $examen['coefExam'] * $examen['coefMat'];
+                  $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+                  $moyennesMatieres = array();
+                  $quotientMatieres = 0;
+                  foreach ($listeDesMatieres as &$matiere) {
+                     $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numEtudiant, 'note !=' => null)), 'idMat' => $matiere['idMat']));
+                     $quotientExams = 0;
+                     $notesExams = 0;
+                     foreach ($listeDesExamens as &$examen) {
+                        $examen['note'] = self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $numEtudiant), 'note');
+                        $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                        $notesExams += $examen['note'] * $examen['coefExam'];
+                        $quotientExams += $examen['coefExam'];
+                     }
+                     if ($quotientExams !== 0) {
+                        $moyennesMatieres[] = ($notesExams / $quotientExams) * $matiere['coefMat'];
+                        $quotientMatieres += $matiere['coefMat'];
+                     }
                   }
-                  if ($notesPonderes !== 0) {
-                     $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $module['idMod']));
-                     $coefModule = array_sum($coefsMatieres) / count($coefsMatieres);
-                     $moyennesModules[] = ($notesPonderes / $quotientExams) * $coefModule;
+                  $coefModule = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+                  $module['moyenne'] = $quotientMatieres !== 0 ? str_replace('.', ',', round((array_sum($moyennesMatieres) / $quotientMatieres), 2)) : null;
+                  if ($quotientMatieres !== 0) {
+                     $moyennesModules[] = (array_sum($moyennesMatieres) / $quotientMatieres) * $coefModule;
                      $quotientModules += $coefModule;
-                     $module['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
-                  } else {
-                     $module['moyenne'] = null;
                   }
                }
                $this->addVar('moyenneGenerale', $quotientModules !== 0 ? str_replace('.', ',', round(array_sum($moyennesModules) / $quotientModules, 2)) : null);
@@ -255,7 +275,22 @@ class EleveController extends Controller {
    public function promo() {
       $idPromo = self::model('Eleve')->first(array('idUtil' => User::id()), 'idPromo');
       $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
-      if (HTTPRequest::getExists('module')) {
+      if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'liste') {
+         /**
+          * Liste des étudiants de la promotion
+          */
+         $this->setSubAction('afficherListe');
+         $this->setWindowTitle('Liste des étudiants de votre promotion');
+         $idsEtudiantsPromo = self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo, 'idUtil !=' => User::id()));
+         $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => $idsEtudiantsPromo));
+         foreach ($listeDesEtudiants as &$etudiant) {
+            $etudiant['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => $etudiant['idUtil']), 'numEtudiant');
+            $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+            $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+            $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+         }
+         $this->addVar('listeDesEtudiants', $listeDesEtudiants);
+      } else if (HTTPRequest::getExists('module')) {
          if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo))) {
             $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
             $this->addVar('module', htmlspecialchars(stripslashes(HTTPRequest::get('module'))));
@@ -289,6 +324,8 @@ class EleveController extends Controller {
                $this->setSubAction('voirModule');
                $this->setWindowTitle(HTTPRequest::get('module'));
                $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $idModule));
+               $quotientModule = 0;
+               $moyennesModule = 0;
                foreach ($listeDesMatieres as &$matiere) {
                   $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                   //Calcul de la moyenne de la matière
@@ -303,10 +340,13 @@ class EleveController extends Controller {
                   }
                   if ($notesPonderes !== 0) {
                      $matiere['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
+                     $moyennesModule += ($notesPonderes / $quotientExams) * $matiere['coefMat'];
+                     $quotientModule += $matiere['coefMat'];
                   } else {
                      $matiere['moyenne'] = null;
                   }
                }
+               $this->addVar('moyenneModule', $quotientModule !== 0 ? str_replace('.', ',', round($moyennesModule / $quotientModule, 2)) : null);
                $this->addVar('listeDesMatieres', $listeDesMatieres);
             }
          } else {
@@ -324,24 +364,29 @@ class EleveController extends Controller {
          foreach ($listeDesModules as &$module) {
             $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
             //Calcul de la moyenne du module
-            $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numsEtudiants)), 'idMat' => self::model('Matiere')->field('idMat', array('idMod' => $module['idMod']))));
-            $quotientExams = 0;
-            $notesPonderes = 0;
-            foreach ($listeDesExamens as &$examen) {
-               $examen['note'] = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => $numsEtudiants, 'note !=' => null));
-               $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
-               $examen['coefMat'] = self::model('Matiere')->first(array('idMat' => $examen['idMat']), 'coefMat');
-               $notesPonderes += array_sum($examen['note']) * $examen['coefExam'] * $examen['coefMat'];
-               $quotientExams += count($examen['note']) * $examen['coefExam'] * $examen['coefMat'];
+            $listeDesMatieres = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+            $moyennesMatieres = array();
+            $quotientMatieres = 0;
+            foreach ($listeDesMatieres as &$matiere) {
+               $listeDesExamens = self::model('Examen')->find(array('idExam' => self::model('Participe')->field('idExam', array('numEtudiant' => $numsEtudiants, 'note !=' => null)), 'idMat' => $matiere['idMat']));
+               $quotientExams = 0;
+               $notesExams = 0;
+               foreach ($listeDesExamens as &$examen) {
+                  $examen['note'] = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => $numsEtudiants));
+                  $examen['coefExam'] = self::model('TypeExam')->first(array('idType' => $examen['idType']), 'coef');
+                  $notesExams += array_sum($examen['note']) * $examen['coefExam'];
+                  $quotientExams += count($examen['note']) * $examen['coefExam'];
+               }
+               if ($quotientExams !== 0) {
+                  $moyennesMatieres[] = ($notesExams / $quotientExams) * $matiere['coefMat'];
+                  $quotientMatieres += $matiere['coefMat'];
+               }
             }
-            if ($notesPonderes !== 0) {
-               $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $module['idMod']));
-               $coefModule = array_sum($coefsMatieres) / count($coefsMatieres);
-               $moyennesModules[] = ($notesPonderes / $quotientExams) * $coefModule;
+            $coefModule = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+            $module['moyenne'] = $quotientMatieres !== 0 ? str_replace('.', ',', round((array_sum($moyennesMatieres) / $quotientMatieres), 2)) : null;
+            if ($quotientMatieres !== 0) {
+               $moyennesModules[] = (array_sum($moyennesMatieres) / $quotientMatieres) * $coefModule;
                $quotientModules += $coefModule;
-               $module['moyenne'] = str_replace('.', ',', round($notesPonderes / $quotientExams, 2));
-            } else {
-               $module['moyenne'] = null;
             }
          }
          $this->addVar('moyenneGenerale', $quotientModules !== 0 ? str_replace('.', ',', round(array_sum($moyennesModules) / $quotientModules, 2)) : null);

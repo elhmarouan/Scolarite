@@ -45,7 +45,7 @@ class HTTPResponse {
    }
 
    public static function sendRenderedPage() {
-      exit(self::page()->build());
+      self::page()->build();
    }
 
    public static function page() {

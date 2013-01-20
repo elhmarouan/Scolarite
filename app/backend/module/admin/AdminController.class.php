@@ -876,8 +876,7 @@ class AdminController extends Controller {
                      $matiere = htmlspecialchars(stripslashes($matiere));
                   }
                   $this->addVar('listeDesMatieres', $matieresList);
-                  $coefsMatieres = self::model('Matiere')->field('coefMat', array('idMod' => $idModule));
-                  $this->addVar('coefModule', !empty($coefsMatieres) ? str_replace('.', ',', round(array_sum($coefsMatieres) / count($coefsMatieres), 2)) : null);
+                  $this->addVar('coefModule', str_replace('.', ',', round(self::model('Matiere')->avg('coefMat', array('idMod' => $idModule)), 2)));
                }
             } else {
                User::addPopup('Le module « ' . HTTPRequest::get('module') . ' » n\'existe pas.', Popup::ERROR);

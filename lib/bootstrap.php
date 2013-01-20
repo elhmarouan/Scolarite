@@ -1,7 +1,6 @@
 <?php
 require_once 'core/const/dir.php';
 require_once 'core/function/debug.php';
-require_once 'exception/ExceptionHandler.php';
 require_once 'core/function/lang.php';
 require_once 'core/function/lack.php';
 require_once 'core/function/array.php';

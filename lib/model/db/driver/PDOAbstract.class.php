@@ -9,7 +9,6 @@
  * @package Panda.model.db.driver
  * 
  */
-
 Application::load('Panda.model.db.driver.DriverInterface');
 
 abstract class PDOAbstract implements DriverInterface {
@@ -42,7 +41,7 @@ abstract class PDOAbstract implements DriverInterface {
       $this->_setPrefix($credentials['prefix']);
       $this->_pdo();
    }
-   
+
    public function select(Query $query, $outputFormat = Query::OUTPUT_ARRAY) {
       if ($query->type() !== Query::SELECT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: select query required.'));
@@ -65,7 +64,7 @@ abstract class PDOAbstract implements DriverInterface {
             break;
       }
       $result = $this->fetchAll($this->query($sql, $tokensValues), $outputFormat);
-      
+
       /**
        * By default, the fields given by the database are all string-typed. We try to recognize
        * the native type (included serialized types) using some elementary comparaisons.
@@ -74,14 +73,13 @@ abstract class PDOAbstract implements DriverInterface {
          foreach ($row as &$field) {
             if (ctype_digit($field)) {
                settype($field, 'int');
-            } elseif (is_numeric($field)) {
+            } else if (is_numeric($field)) {
                settype($field, 'float');
-            } elseif (@unserialize($field) !== false) {
+            } else if (@unserialize($field) !== false) {
                $field = unserialize($field);
+            } else if ($field === null) {
+               continue;
             } else {
-               if ($field === null) {
-                  continue;
-               }
                try {
                   $datetimeField = new DateTime($field);
                } catch (Exception $e) {
@@ -92,7 +90,7 @@ abstract class PDOAbstract implements DriverInterface {
             }
          }
       }
-      
+
       if (count($query->fields()) === 1) {
          if ($limits !== array() && $limits[0] === 1) {
             $result = $result[0][implode('', $query->fields())];
@@ -119,11 +117,49 @@ abstract class PDOAbstract implements DriverInterface {
       $sql = '
          SELECT COUNT(1) AS count
          FROM ' . implode(', ', $query->datasources()) . '
-         ' . ( !empty($conditions) ? $conditions : '' );
+         ' . (!empty($conditions) ? $conditions : '' );
       $result = $this->fetchAll($this->query($sql, $tokensValues));
       return (int) $result[0]['count'];
    }
+
+   public function sum(Query $query) {
+      if ($query->type() !== Query::SUM_QUERY) {
+         throw new InvalidArgumentException(__('Invalid query: sum query required.'));
+      }
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
+      $tokensValues = $conditionsBuilder['tokensValues'];
+      $sql = '
+         SELECT SUM(' . $this->_selectFields($query->fields()) . ') AS sum
+         FROM ' . implode(', ', $query->datasources()) . '
+         ' . (!empty($conditions) ? $conditions : '' );
+      $result = $this->fetchAll($this->query($sql, $tokensValues));
+      if (ctype_digit($result[0]['sum'])) {
+         return (int) $result[0]['sum'];
+      } else {
+         return (float) $result[0]['sum'];
+      }
+   }
    
+   public function avg(Query $query) {
+      if ($query->type() !== Query::AVG_QUERY) {
+         throw new InvalidArgumentException(__('Invalid query: sum query required.'));
+      }
+      $conditionsBuilder = $this->_buildConditions($query->conditions(), $query->tokensValues());
+      $conditions = $conditionsBuilder['whereStatement'];
+      $tokensValues = $conditionsBuilder['tokensValues'];
+      $sql = '
+         SELECT AVG(' . $this->_selectFields($query->fields()) . ') AS average
+         FROM ' . implode(', ', $query->datasources()) . '
+         ' . (!empty($conditions) ? $conditions : '' );
+      $result = $this->fetchAll($this->query($sql, $tokensValues));
+      if (ctype_digit($result[0]['average'])) {
+         return (int) $result[0]['average'];
+      } else {
+         return (float) $result[0]['average'];
+      }
+   }
+
    public function insert(Query $query) {
       if ($query->type() !== Query::INSERT_QUERY) {
          throw new InvalidArgumentException(__('Invalid query: insert query required.'));
@@ -149,7 +185,7 @@ abstract class PDOAbstract implements DriverInterface {
       $sql = '
          UPDATE ' . implode(', ', $query->datasources()) . '
          SET ' . $updateStatement . '
-         ' . ( !empty($conditions) ? $conditions : '' );
+         ' . (!empty($conditions) ? $conditions : '' );
       return $this->query($sql, $tokensValues);
    }
 
@@ -190,11 +226,11 @@ abstract class PDOAbstract implements DriverInterface {
       }
       return $preparedQuery;
    }
-   
+
    public function prepare($sqlQuery) {
       return $this->_pdo()->prepare($sqlQuery);
    }
-   
+
    public function fetch(PDOStatement $preparedQuery, $mode = PDO::FETCH_ASSOC) {
       return $preparedQuery->fetch($mode);
    }
@@ -202,9 +238,9 @@ abstract class PDOAbstract implements DriverInterface {
    public function fetchAll(PDOStatement $preparedQuery, $mode = PDO::FETCH_ASSOC) {
       return $preparedQuery->fetchAll($mode);
    }
-   
+
    abstract public function primaryKeysOf($datasource);
-   
+
    public function lastInsertId() {
       return $this->_pdo()->lastInsertId();
    }
@@ -278,11 +314,11 @@ abstract class PDOAbstract implements DriverInterface {
    protected function _escapeField($field) {
       return $field;
    }
-   
+
    protected function _selectFields($fields) {
       return is_array($fields) ? implode(', ', array_map(array($this, '_escapeField'), $fields)) : '*';
    }
-   
+
    protected function _insertParts(array $setValues) {
       if (empty($setValues)) {
          throw new InvalidArgumentException(__('Please use at least one field to insert.'));
@@ -297,7 +333,7 @@ abstract class PDOAbstract implements DriverInterface {
       }
       return array('fields' => $this->_selectFields($fields), 'tokens' => implode(', ', $tokens));
    }
-   
+
    protected function _updateStatement(array $setValues) {
       if (empty($setValues)) {
          throw new InvalidArgumentException(__('Please use at least one field to set.'));
@@ -310,7 +346,7 @@ abstract class PDOAbstract implements DriverInterface {
       }
       return implode(', ', $placeHolders);
    }
-   
+
    protected function _tokensValues(array $tokensValues) {
       foreach ($tokensValues as &$value) {
          if (is_object($value)) {
@@ -347,16 +383,16 @@ abstract class PDOAbstract implements DriverInterface {
                $subWhereStatement = '';
                foreach ($conditionGroup['conditions'] as $subCondition) {
                   $subWhereStatement .= $currentType . ' (' . $this->_escapeField($subCondition['field']) . ' ';
-                  if(!array_key_exists($subCondition['operator'], $this->_operators)) {
+                  if (!array_key_exists($subCondition['operator'], $this->_operators)) {
                      throw new ErrorException(__('Unable to build the WHERE statement: invalid operator "%s"', $subCondition['operator']));
                   }
                   if (is_array($tokensValues[$subCondition['token']]) && !empty($tokensValues[$subCondition['token']])) {
                      //IN and NOT IN conditions
                      if ($subCondition['operator'] === 'eq' || $subCondition['operator'] === 'neq') {
                         $subWhereStatement .= $subCondition['operator'] === 'eq' ? 'IN (' : 'NOT IN (';
-                        for ($i = 0 ; $i < count($tokensValues[$subCondition['token']]) ; ++$i) {
+                        for ($i = 0; $i < count($tokensValues[$subCondition['token']]); ++$i) {
                            $subWhereStatement .= $this->_escapeValue($tokensValues[$subCondition['token']][$i]) . ', ';
-                        } 
+                        }
                         $subWhereStatement = rtrim($subWhereStatement, ', ') . ') ) ';
                         unset($tokensValues[$subCondition['token']]);
                      } else {

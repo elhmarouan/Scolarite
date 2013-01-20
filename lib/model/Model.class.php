@@ -19,11 +19,11 @@ abstract class Model implements ArrayAccess {
       Application::load('Panda.model.db.Query');
       $this->_daoName = $this->_daoName ? $this->_daoName : Config::read('datasources.default');
       if (Config::read('cache.enable')) {
-         if (!file_exists(SHARE_DIR . 'cache/datasource')) {
-            mkdir(SHARE_DIR . 'cache/datasource');
+         if (!file_exists(APP_DIR . strtolower(Config::appName()) . '/cache/datasource')) {
+            mkdir(APP_DIR . strtolower(Config::appName()). '/cache/datasource');
          }
-         if (!file_exists(SHARE_DIR . 'cache/datasource/' . $this->_daoName)) {
-            mkdir(SHARE_DIR . 'cache/datasource/' . $this->_daoName);
+         if (!file_exists(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_daoName)) {
+            mkdir(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_daoName);
          }
       }
       $this->_query = new Query($this->_daoName);
@@ -137,6 +137,26 @@ abstract class Model implements ArrayAccess {
     */
    public function count(array $conditions = array()) {
       return $this->_query->count()->from($this->_datasourceName())->where($conditions)->getResult();
+   }
+   
+   /**
+    * Gets the sum a given field.
+    * @param string $field 
+    * @param array $conditions
+    * @return int|float
+    */
+   public function sum($field, array $conditions = array()) {
+      return $this->_query->sum($field)->from($this->_datasourceName())->where($conditions)->getResult();
+   }
+   
+   /**
+    * Gets the average of a given field.
+    * @param string $field 
+    * @param array $conditions
+    * @return int|float
+    */
+   public function avg($field, array $conditions = array()) {
+      return $this->_query->avg($field)->from($this->_datasourceName())->where($conditions)->getResult();
    }
 
    /**

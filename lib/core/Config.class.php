@@ -69,7 +69,7 @@ class Config {
       
    }
 
-   private static function _appName() {
+   public static function appName() {
       return self::$_appName;
    }
 
@@ -93,11 +93,11 @@ class Config {
    private static function _appConfigKeys() {
       if (empty(self::$_appConfigKeys)) {
          if (self::_format() === 'json') {
-            self::$_appConfigKeys = self::_extractFromJson(APP_DIR . self::_appName() . '/config/config.json');
+            self::$_appConfigKeys = self::_extractFromJson(APP_DIR . self::appName() . '/config/config.json');
          } else if (self::_format() === 'xml') {
-            self::$_appConfigKeys = self::_extractFromXml(APP_DIR . self::_appName() . '/config/config.xml');
+            self::$_appConfigKeys = self::_extractFromXml(APP_DIR . self::appName() . '/config/config.xml');
          } else {
-            self::$_appConfigKeys = self::_extractFromIni(APP_DIR . self::_appName() . '/config/config.ini');
+            self::$_appConfigKeys = self::_extractFromIni(APP_DIR . self::appName() . '/config/config.ini');
          }
       }
       return self::$_appConfigKeys;

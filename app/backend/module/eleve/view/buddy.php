@@ -26,7 +26,7 @@
                         ?>/20
                      <?php else : ?>
                         Absence justifiée
-         <?php endif; ?>
+                     <?php endif; ?>
                   </td>
                   <td><?php echo $examen['moyennePromo']; ?>/20</td>
                </tr>
@@ -45,8 +45,17 @@
    <p><a href="/étudiant/<?php echo $idEtudiant; ?>/<?php echo $module; ?>">Retour au module <?php echo $module; ?></a></p>
 <?php elseif ($voirModule) : ?>
    <h1><?php echo $module; ?></h1>
-   <p><a href="/étudiant/promo/<?php echo $module; ?>" class="button blueButton">Résultats de ma promotion</a> <a href="/étudiant/perso/<?php echo $module; ?>" class="button blueButton">Mes résultats</a></p>
+   <p><strong>Moyenne du module</strong> :
+      <?php
+      if (!empty($moyenneModule)) :
+         echo $moyenneModule;
+         ?>/20
+         <?php
+      else :
+         ?> Indisponible
+      <?php endif; ?></p>
    <h2>Matières</h2>
+   <p><a href="/étudiant/promo/<?php echo $module; ?>" class="button blueButton">Résultats de ma promotion</a> <a href="/étudiant/perso/<?php echo $module; ?>" class="button blueButton">Mes résultats</a></p>
    <ul>
       <?php
       if (!empty($listeDesMatieres)) :
@@ -84,7 +93,7 @@
          <?php
       else :
          ?> Indisponible
-   <?php endif; ?></p>
+      <?php endif; ?></p>
    <h2>Mes modules</h2>
    <p><a href="/étudiant/promo" class="button blueButton">Résultats de ma promotion</a> <a href="/étudiant/perso" class="button blueButton">Mes résultats</a></p>
    <ul>
@@ -110,7 +119,7 @@
       else :
          ?>
          <li>Aucun module</li>
-   <?php endif; ?>
+      <?php endif; ?>
    </ul>
 
    <p><a href="/étudiant/">Retour à l'accueil de votre espace personnel</a></p>

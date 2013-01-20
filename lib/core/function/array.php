@@ -1,7 +1,7 @@
 <?php
 
-define(INVALID_ARRAY_KEY, 1);
-define(UNKNOWN_ARRAY_KEY, 2);
+define('INVALID_ARRAY_KEY', 1);
+define('UNKNOWN_ARRAY_KEY', 2);
 
 function panda_array_key_exists($key, array $array) {
    if (!is_string($key) || empty($key)) {

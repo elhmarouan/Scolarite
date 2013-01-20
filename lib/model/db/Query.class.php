@@ -14,9 +14,11 @@ class Query {
    //Query types
    const SELECT_QUERY = 1;
    const COUNT_QUERY = 2;
-   const INSERT_QUERY = 3;
-   const UPDATE_QUERY = 4;
-   const DELETE_QUERY = 5;
+   const SUM_QUERY = 3;
+   const AVG_QUERY = 4;
+   const INSERT_QUERY = 5;
+   const UPDATE_QUERY = 6;
+   const DELETE_QUERY = 7;
    
    //Output types
    const OUTPUT_ARRAY = 1;
@@ -90,6 +92,26 @@ class Query {
    public function count() {
       $this->_type = self::COUNT_QUERY;
       return $this;
+   }
+   
+   public function sum($field) {
+      if (is_string($field) && !empty($field)) {
+         $this->_sqlParts['select'][] = $field;
+         $this->_type = self::SUM_QUERY;
+         return $this;
+      } else {
+         throw new InvalidArgumentException(__('Unable to execute the sum query: invalid field "%s".', (string) $field));
+      }
+   }
+   
+   public function avg($field) {
+      if (is_string($field) && !empty($field)) {
+         $this->_sqlParts['select'][] = $field;
+         $this->_type = self::AVG_QUERY;
+         return $this;
+      } else {
+         throw new InvalidArgumentException(__('Unable to execute the average query: invalid field "%s".', (string) $field));
+      }
    }
 
    public function insert($datasource = '') {
@@ -297,14 +319,14 @@ class Query {
       if (!empty($this->_type)) {
          if (!empty($this->_sqlParts['from'])) {
             if (Config::read('cache.enable')) {
-               if ($this->_type === self::COUNT_QUERY) {
+               if ($this->_type === self::COUNT_QUERY || $this->_type === self::SUM_QUERY || $this->_type === self::AVG_QUERY) {
                   $cacheKey = sha1(var_export(get_object_vars($this), true));
-                  if (file_exists(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache')) {
+                  if (file_exists(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache')) {
                      $this->_reset();
-                     return (int) file_get_contents(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache');
+                     return (int) file_get_contents(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache');
                   }
                } else if ($this->_type !== self::SELECT_QUERY) {
-                  $cacheFilesList = glob(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/*.cache');
+                  $cacheFilesList = glob(APP_DIR . strtolower(Config::appName()). '/cache/datasource/' . $this->_currentDao . '/*.cache');
                   if (!empty($cacheFilesList)) {
                      foreach ($cacheFilesList as $cacheFile) {
                         unlink($cacheFile);
@@ -319,7 +341,19 @@ class Query {
                case self::COUNT_QUERY:
                   $result = self::$_dao[$this->_currentDao]->count($this);
                   if (Config::read('cache.enable')) {
-                     file_put_contents(SHARE_DIR . 'cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache', $result);
+                     file_put_contents(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache', $result);
+                  }
+                  break;
+               case self::SUM_QUERY:
+                  $result = self::$_dao[$this->_currentDao]->sum($this);
+                  if (Config::read('cache.enable')) {
+                     file_put_contents(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache', $result);
+                  }
+                  break;
+               case self::AVG_QUERY:
+                  $result = self::$_dao[$this->_currentDao]->avg($this);
+                  if (Config::read('cache.enable')) {
+                     file_put_contents(APP_DIR . strtolower(Config::appName()) . '/cache/datasource/' . $this->_currentDao . '/' . $cacheKey . '.cache', $result);
                   }
                   break;
                case self::INSERT_QUERY:

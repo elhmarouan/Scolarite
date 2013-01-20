@@ -44,8 +44,17 @@
    <p><a href="/étudiant/perso/<?php echo $module; ?>">Retour au module <?php echo $module; ?></a></p>
 <?php elseif ($voirModule) : ?>
    <h1><?php echo $module; ?></h1>
-   <p><a href="/étudiant/promo/<?php echo $module; ?>" class="button blueButton">Résultats de ma promotion</a></p>
+   <p><strong>Moyenne du module</strong> :
+      <?php
+      if (!empty($moyenneModule)) :
+         echo $moyenneModule;
+         ?>/20
+         <?php
+      else :
+         ?> Indisponible
+   <?php endif; ?></p>
    <h2>Matières</h2>
+   <p><a href="/étudiant/promo/<?php echo $module; ?>" class="button blueButton">Résultats de ma promotion</a></p>
    <ul>
       <?php
       if (!empty($listeDesMatieres)) :

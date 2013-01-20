@@ -16,6 +16,7 @@ abstract class Application {
       self::load('Panda.core.Config');
       self::load('Panda.http.HTTPRequest');
       self::load('Panda.http.HTTPResponse');
+      self::load('Panda.error.ErrorHandler');
       $this->setName($appName);
       Config::setAppName($appName);
       self::load('Panda.user.User');
@@ -129,6 +130,7 @@ abstract class Application {
 
       HTTPResponse::setPage($controller->page());
       HTTPResponse::sendRenderedPage();
+      exit;
    }
 
    /**
