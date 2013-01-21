@@ -12,6 +12,16 @@
       <header>
          <a href="/"><img src="/img/scol.png" alt="scol.png"/></a>
       </header>
+      <div id="menu">
+         <ul>
+            <li><a href="/">Retour à l'accueil</a></li>
+            <?php if (User::isOnline()) : ?>
+               <li><a href="/déconnexion">Déconnexion</a></li>
+            <?php
+            endif;
+            ?>
+         </ul>
+      </div>
       <div id="content">
          <div id="popup">
             <?php
@@ -33,7 +43,7 @@
                   endswitch;
                   ?>
                   <div class="<?php echo $class; ?>">
-                  <?php echo $popup['message']; ?>
+                     <?php echo $popup['message']; ?>
                   </div>
                   <?php
                endforeach;

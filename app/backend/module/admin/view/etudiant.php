@@ -1,9 +1,10 @@
 <?php if ($showProfil) : ?>
    <h1>Profil étudiant</h1>
+   <p><strong>Login</strong> : <?php echo $etudiant['login']; ?></p>
    <p><strong>Nom</strong> : <?php echo $etudiant['nom']; ?></p>
    <p><strong>Prénom</strong> : <?php echo $etudiant['prenom']; ?></p>
    <h2>Informations principales</h2>
-   <p><strong>Promotion</strong> : <?php echo $etudiant['promo']; ?></p>
+   <p><strong>Promotion</strong> : <a href="/admin/<?php echo $etudiant['promo']; ?>"><?php echo $etudiant['promo']; ?></a></p>
    <p><strong>Numéro d'étudiant</strong> : <?php echo $etudiant['numEtudiant']; ?></p>
    <p><strong>Année de redoublement</strong> :
       <?php
@@ -14,13 +15,31 @@
          Aucune
       <?php endif; ?>
    </p>
+   <p><strong>Moyenne générale</strong> :
+      <?php
+      if (!empty($etudiant['moyenneGenerale'])) :
+         echo $etudiant['moyenneGenerale'];
+         ?>/20
+      <?php else : ?>
+         Moyenne indisponible
+      <?php endif; ?>
+   </p>
    <h2>Modules</h2>
    <ul>
       <?php
       if (!empty($etudiant['listeDesModules'])) :
          foreach ($etudiant['listeDesModules'] as $module) :
             ?>
-            <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/matières"><?php echo $module['libelle']; ?></a></li>
+            <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/matières"><?php echo $module['libelle']; ?></a>
+               (<strong>Moyenne de l'étudiant</strong> :
+               <?php
+               if (!empty($module['moyenneEleve'])) :
+                  echo $module['moyenneEleve'];
+                  ?>/20
+               <?php else : ?>
+                  Moyenne indisponible
+               <?php endif; ?>)
+            </li>
             <ul>
                <?php
                if (!empty($module['listeDesMatieres'])) :
@@ -74,11 +93,12 @@
       else :
          ?>
          <li>Aucun module</li>
-      <?php
-      endif;
-   else :
-      ?>
+      <?php endif; ?>
    </ul>
+   <p><a href="/admin/<?php echo $etudiant['promo']; ?>/étudiants">Retour à la liste des étudiants</a></p>
+   <?php
+else :
+   ?>
    <h1>Liste des étudiants <?php echo $prefixPromo . $promo; ?></h1>
    <p>Pour modifier ou supprimer un étudiant, veuillez cliquer <a href="/admin/utilisateurs">ici</a>.</p>
    <table>

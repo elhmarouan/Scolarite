@@ -697,15 +697,14 @@ class AdminController extends Controller {
                               $this->addVar('coef', number_format(self::model('Matiere')->first(array('idMat' => $idMatiere), 'coefMat'), 2, ',', ' '));
                               //Liste des professeurs
                               $listeDesProfs = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->findAll('idUtil')));
-                              $idProfs = self::model('Prof')->findAll('idProf');
                               $idProfResponsable = self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf');
                               //Fusion des ids prof et de la liste de profs
-                              for ($i = 0; $i < count($listeDesProfs); ++$i) {
-                                 $listeDesProfs[$i]['idProf'] = $idProfs[$i];
-                                 $listeDesProfs[$i]['responsable'] = ($idProfs[$i] === $idProfResponsable) ? true : false;
-                                 $listeDesProfs[$i]['login'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['login']));
-                                 $listeDesProfs[$i]['nom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['nom']));
-                                 $listeDesProfs[$i]['prenom'] = htmlspecialchars(stripslashes($listeDesProfs[$i]['prenom']));
+                              foreach ($listeDesProfs as &$prof) {
+                                 $prof['idProf'] = self::model('Prof')->first(array('idUtil' => $prof['idUtil']), 'idProf');
+                                 $prof['responsable'] = ($prof['idProf'] === $idProfResponsable) ? true : false;
+                                 $prof['login'] = htmlspecialchars(stripslashes($prof['login']));
+                                 $prof['nom'] = htmlspecialchars(stripslashes($prof['nom']));
+                                 $prof['prenom'] = htmlspecialchars(stripslashes($prof['prenom']));
                               }
                               $this->addVar('listeProfsResponsables', $listeDesProfs);
                            } else if (HTTPRequest::get('action') === 'supprimer') {
@@ -969,11 +968,16 @@ class AdminController extends Controller {
             $etudiant['promo'] = htmlspecialchars(stripslashes(self::model('Promo')->first(array('idPromo' => $etudiant['idPromo']), 'libelle')));
             $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
             $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+            $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
             $etudiant['listeDesModules'] = self::model('Module')->find(array('idPromo' => $etudiant['idPromo']));
             $numEtudiantsPromo = self::model('Eleve')->field('numEtudiant', array('idPromo'=> $etudiant['idPromo']));
+            $moyennesEleveModules = array();
+            $quotientMoyennesEleveModules = 0;
             foreach ($etudiant['listeDesModules'] as &$module) {
                $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
                $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+               $moyennesEleveMatieres = array();
+               $quotientMoyennesEleveMatieres = 0;
                foreach ($module['listeDesMatieres'] as &$matiere) {
                   $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                   $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
@@ -998,6 +1002,10 @@ class AdminController extends Controller {
                      $notesEleve[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
                      $quotient += $coef;
                   }
+                  if (!empty($notesEleve)) {
+                     $moyennesEleveMatieres[] = (array_sum($notesEleve) / $quotient) * $matiere['coefMat'];
+                     $quotientMoyennesEleveMatieres += $matiere['coefMat'];
+                  }
                   $matiere['moyenneEleve'] = !empty($notesEleve) ? str_replace('.', ',', round(array_sum($notesEleve) / $quotient, 2)) : null;
 
                   foreach ($matiere['listeDesExamens'] as &$examen) {
@@ -1007,7 +1015,14 @@ class AdminController extends Controller {
                      $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                   }
                }
+               $module['coef'] = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+               if (!empty($moyennesEleveMatieres)) {
+                  $moyennesEleveModules[] = (array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres) * $module['coef'];
+                  $quotientMoyennesEleveModules += $module['coef'];
+               }
+               $module['moyenneEleve'] = !empty($moyennesEleveMatieres) ? str_replace('.', ',', round(array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres, 2)) : null;
             }
+            $etudiant['moyenneGenerale'] = !empty($moyennesEleveModules) ? str_replace('.', ',', round(array_sum($moyennesEleveModules) / $quotientMoyennesEleveModules, 2)) : null;
             $this->addVar('etudiant', $etudiant);
          } else {
             User::addPopup('Cet étudiant n\'existe pas.', Popup::ERROR);

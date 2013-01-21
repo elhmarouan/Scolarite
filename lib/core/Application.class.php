@@ -130,7 +130,6 @@ abstract class Application {
 
       HTTPResponse::setPage($controller->page());
       HTTPResponse::sendRenderedPage();
-      exit;
    }
 
    /**

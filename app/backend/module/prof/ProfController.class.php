@@ -133,9 +133,47 @@ class ProfController extends Controller {
    }
    
    public function examen() {
-      
+      if (HTTPRequest::getExists('promo', 'module', 'matiere')) {
+         if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            $this->addVar('promo', HTTPRequest::get('promo'));
+            $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
+            if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo))) {
+               $this->addVar('module', HTTPRequest::get('module'));
+               $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
+               if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
+                  $this->addVar('matiere', HTTPRequest::get('matiere'));
+                  $this->addVar('examen', htmlspecialchars(stripslashes(self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')), 'libelle'))));
+                  $this->addVar('idExam', HTTPRequest::get('idExam'));
+                  $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
+                  $listeDesNotes = self::model('Participe')->find(array('idExam' => self::model('Examen')->field('idExam', array('idMat' => $idMatiere))));
+                  foreach ($listeDesNotes as &$note) {
+                     $etudiant = self::model('Utilisateur')->first(array('idUtil' => self::model('Eleve')->first(array('numEtudiant' => $note['numEtudiant']), 'idUtil')));
+                     $note['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+                     $note['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+                     $note['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+                     $note['note'] = !empty($note['note']) ? str_replace('.', ',', $note['note']) : null;
+                  }
+                  $this->addVar('listeDesNotes', $listeDesNotes);
+                  $this->addVar('estResponsable', self::model('Matiere')->exists(array('idProf' => self::model('Prof')->first(array('idUtil' => User::id()), 'idProf'), 'idMat' => $idMatiere)));
+                  $this->setWindowTitle('Gestion des Notes' . HTTPRequest::get('examen'));
+               } else {
+                  User::addPopup('Désolé, cet examen n\'existe pas.', Popup::ERROR);
+                  HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
+               }
+            } else {
+               User::addPopup('Désolé, ce module n\'existe pas.', Popup::ERROR);
+               HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
+            }
+         } else {
+            User::addPopup('Désolé, cette promotion n\'existe pas.', Popup::ERROR);
+            HTTPResponse::redirect('/prof/');
+         }
+      } else {
+         HTTPResponse::redirect('/prof/');
+      }
    }
-
+   
+   
    public function etudiant() {
       if (HTTPRequest::get('promo')) {
          //Si la promotion existe

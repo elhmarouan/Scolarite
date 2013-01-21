@@ -2,7 +2,7 @@
    <h1>Ajouter un examen</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/examen/ajouter">
       <label>Libellé :</label> <input type="text" name="libelle" /><br />
-      <label>Date :</label> <input type="date" name="date" /> (au format JJ/MM/AAAA)<br />
+      <label>Date :</label> <input type="text" name="date" /> (au format JJ/MM/AAAA)<br />
       <label>Type :</label>
       <?php if (!empty($listeTypesExams)) : ?>
          <select name="idType">
@@ -20,7 +20,7 @@
    <h1>Modifier un examen</h1>
    <form method="post" action="/admin/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $examen['idExam']; ?>/modifier">
       <label>Libellé :</label> <input type="text" name="libelle" value="<?php echo $examen['libelle']; ?>" /><br />
-      <label>Date :</label> <input type="date" name="date" value="<?php echo $examen['date']; ?>" /> (au format JJ/MM/AAAA)<br />
+      <label>Date :</label> <input type="text" name="date" value="<?php echo $examen['date']; ?>" /> (au format JJ/MM/AAAA)<br />
       <label>Type :</label>
       <?php if (!empty($listeTypesExams)) : ?>
          <select name="idType">
