@@ -57,16 +57,26 @@ class ProfController extends Controller {
             if (HTTPRequest::getExists('module')) {
                //Si le module existe
                if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module')))) {
+                  $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo')), 'idMod');
                   $this->setWindowTitle('Matières du module ' . HTTPRequest::get('module'));
                   $this->setSubAction('manageMatieres');
                   $this->addVar('module', HTTPRequest::get('module'));
 
+                  $listeProfsResponsables = self::model('Utilisateur')->find(array('idUtil' => self::model('Prof')->field('idUtil', array('idProf' => self::model('Matiere')->field('idProf', array('idMod' => $idModule))))));
+                  foreach ($listeProfsResponsables as &$profResponsable) {
+                     $profResponsable['nom'] = htmlspecialchars(stripslashes($profResponsable['nom']));
+                     $profResponsable['prenom'] = htmlspecialchars(stripslashes($profResponsable['prenom']));
+                     $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
+                  }
+                  $this->addVar('listeProfsResponsables', $listeProfsResponsables);
+
                   //Récupération de la liste des matières
-                  $listeDesMatieres = self::model('Matiere')->field('libelle', array('idMod' => self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo')), 'idMod')));
+                  $listeDesMatieres = self::model('Matiere')->field('libelle', array('idMod' => $idModule));
                   foreach ($listeDesMatieres as &$matiere) {
                      $matiere = htmlspecialchars(stripslashes($matiere));
                   }
                   $this->addVar('listeDesMatieres', $listeDesMatieres);
+                  $this->addVar('coefModule', str_replace('.', ',', round(self::model('Matiere')->avg('coefMat', array('idMod' => $idModule)), 2)));
                } else {
                   User::addPopup('Ce module n\'existe pas.');
                   HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
@@ -79,6 +89,7 @@ class ProfController extends Controller {
                }
                $this->addVar('prefixPromo', $prefixPromo);
                $this->setWindowTitle('Liste des modules ' . $prefixPromo . HTTPRequest::get('promo'));
+
                //Récupèration de la liste des modules correspondants à la promo
                $modulesList = self::model('Module')->field('libelle', array('idPromo' => self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo')));
                foreach ($modulesList as &$module) {
@@ -106,14 +117,39 @@ class ProfController extends Controller {
                if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
                   $this->addVar('matiere', HTTPRequest::get('matiere'));
                   $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
+                  $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
+                  $numsEtudiants = self::model('Eleve')->field('numEtudiant', array('idPromo' => $idPromo));
                   //Liste des examens
                   $listeDesExamens = self::model('Examen')->find(array('idMat' => $idMatiere));
                   foreach ($listeDesExamens as &$examen) {
                      $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
                      $examen['date'] = $examen['date']->format('d/m/Y');
-                     $examen['type'] = htmlspecialchars(stripslashes(self::model('TypeExam')->first(array('idType' => $examen['idType']), 'libelle')));
+                     $typeExam = self::model('TypeExam')->first(array('idType' => $examen['idType']));
+                     $examen['type'] = htmlspecialchars(stripslashes($typeExam['libelle']));
+                     $examen['coef'] = str_replace('.', ',', round($typeExam['coef'], 2));
+                     $notesPromo = self::model('Participe')->field('note', array('numEtudiant' => $numsEtudiants, 'idExam' => $examen['idExam'], 'note !=' => null));
+                     $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                   }
                   $this->addVar('listeDesExamens', $listeDesExamens);
+                  //Récupération de la moyenne de la promotion, en prenant en compte les coefficients de chaque examen
+                  $idsExams = self::model('Examen')->field('idExam', array('idMat' => $idMatiere));
+                  $participationsPromo = self::model('Participe')->find(array('numEtudiant' => $numsEtudiants, 'idExam' => $idsExams, 'note !=' => null));
+                  $notesPromo = array();
+                  $quotient = 0;
+                  foreach ($participationsPromo as $participation) {
+                     $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                     $notesPromo[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                     $quotient += $coef;
+                  }
+                  $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null);
+
+                  $idProfResponsable = self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf');
+                  $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => $idProfResponsable), 'idUtil')));
+                  $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
+                  $profResponsable['nom'] = htmlspecialchars(stripslashes($profResponsable['nom']));
+                  $profResponsable['prenom'] = htmlspecialchars(stripslashes($profResponsable['prenom']));
+                  $profResponsable['idProf'] = $idProfResponsable;
+                  $this->addVar('profResponsable', $profResponsable);
                   $this->setWindowTitle('Gestion de la matière ' . HTTPRequest::get('matiere'));
                } else {
                   User::addPopup('Désolé, cette matière n\'existe pas.', Popup::ERROR);
