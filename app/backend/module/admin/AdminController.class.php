@@ -344,7 +344,6 @@ class AdminController extends Controller {
                                        case EleveModel::BAD_ID_PROMO_ERROR:
                                           User::addPopup('Promotion invalide ou inconnue.', Popup::ERROR);
                                           break;
-                                               
                                     }
                                  }
                               }
@@ -752,7 +751,7 @@ class AdminController extends Controller {
                               $quotient += $coef;
                            }
                            $this->addVar('moyennePromo', !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null);
-                           
+
                            $idProfResponsable = self::model('Matiere')->first(array('idMat' => $idMatiere), 'idProf');
                            $profResponsable = self::model('Utilisateur')->first(array('idUtil' => self::model('Prof')->first(array('idProf' => $idProfResponsable), 'idUtil')));
                            $profResponsable['login'] = htmlspecialchars(stripslashes($profResponsable['login']));
@@ -885,6 +884,9 @@ class AdminController extends Controller {
             }
          } else {
             if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'ajouter') {
+               /**
+                * Ajout d'un module
+                */
                $this->setSubAction('addModule');
                $this->setWindowTitle('Ajouter un module');
                if (HTTPRequest::postExists('libelle')) {
@@ -940,6 +942,9 @@ class AdminController extends Controller {
    public function etudiant() {
       if (HTTPRequest::getExists('promo')) {
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            /**
+             * Liste des étudiants d'un promotion
+             */
             $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
             $this->addVar('promo', HTTPRequest::get('promo'));
             if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
@@ -964,6 +969,9 @@ class AdminController extends Controller {
          }
       } else if (HTTPRequest::getExists('idUtil')) {
          if (self::model('Eleve')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            /**
+             * Profil d'un étudiant
+             */
             $this->setWindowTitle('Profil étudiant');
             $this->setSubAction('showProfil');
             $etudiant = array_merge(self::model('Eleve')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));
@@ -972,7 +980,7 @@ class AdminController extends Controller {
             $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
             $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
             $etudiant['listeDesModules'] = self::model('Module')->find(array('idPromo' => $etudiant['idPromo']));
-            $numEtudiantsPromo = self::model('Eleve')->field('numEtudiant', array('idPromo'=> $etudiant['idPromo']));
+            $numEtudiantsPromo = self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']));
             $moyennesEleveModules = array();
             $quotientMoyennesEleveModules = 0;
             foreach ($etudiant['listeDesModules'] as &$module) {
@@ -1018,7 +1026,7 @@ class AdminController extends Controller {
 
                   foreach ($matiere['listeDesExamens'] as &$examen) {
                      $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
-                     $examen['note'] = str_replace('.', ',', round(self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note'),2));
+                     $examen['note'] = str_replace('.', ',', round(self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note'), 2));
                      $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']))));
                      $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
                   }
@@ -1046,6 +1054,9 @@ class AdminController extends Controller {
    public function prof() {
       if (HTTPRequest::getExists('idUtil')) {
          if (self::model('Prof')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            /**
+             * Profil d'un professeur
+             */
             $prof = array_merge(self::model('Prof')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));
             $prof['nom'] = htmlspecialchars(stripslashes($prof['nom']));
             $prof['prenom'] = htmlspecialchars(stripslashes($prof['prenom']));
@@ -1066,13 +1077,16 @@ class AdminController extends Controller {
          }
       }
    }
-   
+
    /**
     * Export au format CSV
     */
    public function exporterCsv() {
       if (HTTPRequest::getExists('what')) {
          if (HTTPRequest::get('what') === 'étudiant') {
+            /**
+             * Exportation des données d'un étudiant
+             */
             if (HTTPRequest::postExists('idUtil')) {
                //Si le formulaire a été validé
                $data = array();
@@ -1118,7 +1132,7 @@ class AdminController extends Controller {
                         $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                         $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
                         $idsExams = self::model('Examen')->field('idExam', array('idMat' => $matiere['idMat']));
-                        
+
                         //Calcul de la moyenne de l'élève
                         $participationsEleve = self::model('Participe')->find(array('numEtudiant' => $donneesUtil['numEtudiant'], 'idExam' => $idsExams, 'note !=' => null));
                         $notesEleve = array();
@@ -1172,8 +1186,30 @@ class AdminController extends Controller {
             $this->addVar('listeDesEtudiants', $listeDesEtudiants);
             $this->setSubAction('exportUser');
          } else if (HTTPRequest::get('what') === 'promotion') {
-            $this->setWindowTitle('Exporter les données d\'une promotion');
-            $this->setSubAction('exportPromo');
+            if (HTTPRequest::getExists('promo')) {
+               if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+                  /**
+                   * Export des données d'une promotion
+                   */
+                  $this->addVar('promo', htmlspecialchars(stripslashes(HTTPRequest::get('promo'))));
+                  $this->setWindowTitle('Exporter les données de la promotion « ' . HTTPRequest::get('promo') . ' »');
+                  $this->setSubAction('exportPromo');
+               } else {
+                  User::addPopup('Cette promotion n\'existe pas.', Popup::ERROR);
+                  HTTPResponse::redirect('/admin/exporter/promotion');
+               }
+            } else {
+               /**
+                * Choix d'une promotion
+                */
+               $this->setWindowTitle('Exporter les données d\'une promotion');
+               $this->setSubAction('exportPromos');
+               $promosList = self::model('Promo')->field('libelle');
+               foreach ($promosList as &$promo) {
+                  $promo = htmlspecialchars(stripslashes($promo));
+               }
+               $this->addVar('promosList', $promosList);
+            }
          }
       } else {
          $this->setWindowTitle('Exporter des informations');

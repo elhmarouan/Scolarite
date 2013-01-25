@@ -18,14 +18,14 @@ if ($exportUser) :
                         <option value="<?php echo $etudiant['idUtil']; ?>" selected><?php echo $etudiant['nom']; ?> <?php echo $etudiant['prenom']; ?> (<?php echo $etudiant['login']; ?>)</option>
                      <?php else : ?>
                         <option value="<?php echo $etudiant['idUtil']; ?>"><?php echo $etudiant['nom']; ?> <?php echo $etudiant['prenom']; ?> (<?php echo $etudiant['login']; ?>)</option>
-                  <?php
-                  endif;
-               endforeach;
-               ?>
+                     <?php
+                     endif;
+                  endforeach;
+                  ?>
                </select>
-      <?php else : ?>
+            <?php else : ?>
                Aucun
-      <?php endif; ?>
+            <?php endif; ?>
          </fieldset>
          <fieldset>
             <legend>Informations à exporter</legend>
@@ -50,13 +50,33 @@ if ($exportUser) :
          <input type="submit" value="Exporter !" />
       </form>
       <p><a href="/admin/exporter">Retour à l'export d'informations</a></p>
-   <?php endif;
+   <?php
+   endif;
 elseif ($exportPromo) :
    ?>
-   <h1>Exporter les données d'une promotion</h1>
+   <h1>Exporter les données de la promotion « <?php echo $promo; ?> »</h1>
    <ul>
-      <li>Liste des élèves</li>
-      <li>Liste des modules</li>
+      <li><a href="/admin/exporter/promotion/<?php echo $promo; ?>/étudiants">Liste des étudiants</a></li>
+      <li><a href="/admin/exporter/promotion/<?php echo $promo; ?>/modules">Liste des modules</a></li>
+   </ul>
+   <p><a href="/admin/exporter/promotion">Retour au choix de la promotion</a></p>
+   <?php
+elseif ($exportPromos) :
+   ?>
+   <h1>Exporter les données d'une promotion</h1>
+
+   <ul>
+      <?php
+      if (!empty($promosList)) :
+         foreach ($promosList as $promo) :
+            ?>
+            <li><a href="/admin/exporter/promotion/<?php echo $promo; ?>"><?php echo $promo; ?></a></li>
+            <?php
+         endforeach;
+      else :
+         ?>
+         <li>Aucune promotion disponible</li>
+   <?php endif; ?>
    </ul>
    <p><a href="/admin/exporter">Retour à l'export d'informations</a></p>
 <?php else : ?>

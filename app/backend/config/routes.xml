@@ -4,6 +4,8 @@
     <route url="/admin/exporter" module="Admin" action="exporterCsv" />
     <route url="/admin/exporter/(étudiant|promotion)" module="Admin" action="exporterCsv" vars="what" />
     <route url="/admin/exporter/(étudiant)/([0-9]+)" module="Admin" action="exporterCsv" vars="what,idUtil" />
+    <route url="/admin/exporter/(promotion)/([a-z]{3}[1-9]{1})" module="Admin" action="exporterCsv" vars="what,promo" />
+    <route url="/admin/exporter/(promotion)/([a-z]{3}[1-9]{1})/(étudiants|modules)" module="Admin" action="exporterCsv" vars="what,promo,content" />
     <route url="/admin/typesExams" module="Admin" action="typesExams" />
     <route url="/admin/typesExams/(ajouter)" module="Admin" action="typesExams" vars="action" />
     <route url="/admin/typesExams/([0-9]+)/(modifier|supprimer)" module="Admin" action="typesExams" vars="idTypeExam,action" />
