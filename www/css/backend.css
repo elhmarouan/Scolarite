@@ -13,6 +13,7 @@ a {
 a:hover {
    color: rgb(153, 17, 17);
    text-decoration: underline;
+   cursor: pointer;
 }
 
 a img {

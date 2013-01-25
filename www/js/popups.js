@@ -15,6 +15,8 @@ var popup = {
       if (!type) {
          type = this.INFORMATION;
       }
+      var id = document.getElementById('popup').childNodes.length + 1;
+      newPopup.setAttribute('id', 'popup' + id);
       switch (type) {
          case this.ERROR:
             newPopup.setAttribute('class', 'popupErreur');
@@ -31,5 +33,11 @@ var popup = {
       }
       newPopup.innerHTML = message;
       document.getElementById('popup').appendChild(newPopup);
+      return newPopup.id;
+   },
+   delete: function(idPopup) {
+      if (document.getElementById(idPopup)) {
+         document.getElementById('popup').removeChild(document.getElementById(idPopup));
+      }
    }
 };

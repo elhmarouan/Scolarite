@@ -182,9 +182,7 @@ class ProfController extends Controller {
                   if (self::model('Examen')->exists(array('idExam' => HTTPRequest::get('idExam')))) {
                      if (HTTPRequest::getExists('numEtudiant')) {
                         if (self::model('Participe')->exists(array('numEtudiant' => HTTPRequest::get('numEtudiant'), 'idExam' => HTTPRequest::get('idExam')))) {
-                           if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'modifier') {
-                              
-                           } else if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
+                           if (HTTPRequest::getExists('action') && HTTPRequest::get('action') === 'supprimer') {
                               /**
                                * Suppression d'une note
                                */
@@ -233,6 +231,41 @@ class ProfController extends Controller {
                               $this->addVar('erreurs', array('Impossible d\'ajouter cette note : au moins l\'un des champs est vide.'));
                            }
                            $this->setSubAction('addNote');
+                           HTTPResponse::addHeader('Content-Type: application/xml');
+                           $this->page()->useRawView();
+                        } else if (HTTPRequest::postExists('note', 'numEtudiant')) {
+                           /**
+                            * Modification d'une note en Ajax
+                            */
+                           if (HTTPRequest::post('note') !== '' && HTTPRequest::post('numEtudiant') !== '') {
+                              if (self::model('Participe')->exists(array('numEtudiant' => HTTPRequest::post('numEtudiant'), 'idExam' => HTTPRequest::get('idExam')))) {
+                                 $participe = self::model('Participe');
+                                 $participe['idExam'] = HTTPRequest::get('idExam');
+                                 $participe['note'] = HTTPRequest::post('note') === 'ABS' ? null : HTTPRequest::post('note');
+                                 $participe['numEtudiant'] = HTTPRequest::post('numEtudiant');
+                                 if ($participe->isValid()) {
+                                    if ($participe['note'] === null) {
+                                       $participe->delete(array('idExam' => $participe['idExam'], 'numEtudiant' => $participe['numEtudiant']));
+                                    }
+                                    $participe->save();
+                                 } else {
+                                    $erreurs = $participe->errors();
+                                    foreach ($erreurs as &$erreurId) {
+                                       switch ($erreurId) {
+                                          case ParticipeModel::BAD_NOTE_ERROR:
+                                             $erreurId = 'Note incorrecte.';
+                                             break;
+                                       }
+                                    }
+                                    $this->addVar('erreurs', $erreurs);
+                                 }
+                              } else {
+                                 $this->addVar('erreurs', array('Impossible de modifier cette note : note inconnue.'));
+                              }
+                           } else {
+                              $this->addVar('erreurs', array('Impossible de modifier cette note : au moins l\'un des champs est vide.'));
+                           }
+                           $this->setSubAction('editNote');
                            HTTPResponse::addHeader('Content-Type: application/xml');
                            $this->page()->useRawView();
                         } else {
