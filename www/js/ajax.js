@@ -1,3 +1,9 @@
+/**
+ * Fonctions utilitaires pour la gestion des requêtes ajax
+ * 
+ * @author Stanislas Michalak <stanislas.michalak@gmail.com>
+ */
+
 function getXMLHttpRequest() {
 	var xhr = null;
 	

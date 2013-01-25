@@ -978,6 +978,8 @@ class AdminController extends Controller {
                $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
                $moyennesEleveMatieres = array();
                $quotientMoyennesEleveMatieres = 0;
+               $moyennesPromoMatieres = array();
+               $quotientMoyennesPromoMatieres = 0;
                foreach ($module['listeDesMatieres'] as &$matiere) {
                   $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
                   $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
@@ -990,6 +992,10 @@ class AdminController extends Controller {
                      $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
                      $notesPromo[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
                      $quotient += $coef;
+                  }
+                  if (!empty($notesPromo)) {
+                     $moyennesPromoMatieres[] = (array_sum($notesPromo) / $quotient) * $matiere['coefMat'];
+                     $quotientMoyennesPromoMatieres += $matiere['coefMat'];
                   }
                   $matiere['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null;
 
@@ -1020,6 +1026,7 @@ class AdminController extends Controller {
                   $moyennesEleveModules[] = (array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres) * $module['coef'];
                   $quotientMoyennesEleveModules += $module['coef'];
                }
+               $module['moyennePromo'] = !empty($moyennesPromoMatieres) ? str_replace('.', ',', round(array_sum($moyennesPromoMatieres) / $quotientMoyennesPromoMatieres, 2)) : null;
                $module['moyenneEleve'] = !empty($moyennesEleveMatieres) ? str_replace('.', ',', round(array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres, 2)) : null;
             }
             $etudiant['moyenneGenerale'] = !empty($moyennesEleveModules) ? str_replace('.', ',', round(array_sum($moyennesEleveModules) / $quotientMoyennesEleveModules, 2)) : null;

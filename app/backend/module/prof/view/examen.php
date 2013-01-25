@@ -1,15 +1,29 @@
 <?php
 if ($addNote) :
+
    if (!empty($data)) :
-      ?>
-      <td><?php echo $data['login']; ?></td>
-      <td><?php echo $data['nom']; ?></td>
-      <td><?php echo $data['prenom']; ?></td>
-      <td><?php echo $data['note']; ?>/20</td>
-      <td>-</td>
-      <?php else : ?>
-         <td colspan="5"><a onClick="saisir_note(this);"><?php echo $erreur; ?></a></td>
-      <?php endif; ?>
+      echo '<?xml version="1.0" encoding="utf-8"?>'; ?>
+      <root>
+         <data>
+            <td><?php echo $data['login']; ?></td>
+            <td><?php echo $data['nom']; ?></td>
+            <td><?php echo $data['prenom']; ?></td>
+            <td><?php echo $data['note']; ?>/20</td>
+            <td>-</td>
+         </data>
+         <erreurs></erreurs>
+      </root>
+   <?php else :
+      echo '<?xml version="1.0" encoding="utf-8"?>'; ?>
+      <root>
+         <data></data>
+         <erreurs>
+            <?php foreach ($erreurs as $erreur) : ?>
+               <erreur><?php echo $erreur; ?></erreur>
+            <?php endforeach; ?>
+         </erreurs>
+      </root>
+   <?php endif; ?>
 <?php else : ?>
    <h1>Notes de l'examen « <?php echo $examen; ?> »</h1>
    <form method="post" action="" onSubmit="return save_note(this, '<?php echo $urlPage; ?>');">
@@ -39,9 +53,9 @@ if ($addNote) :
                            ?>/20
                         <?php else : ?>
                            Absence justifiée
-         <?php endif; ?>
+                        <?php endif; ?>
                      </td>
-                     <td><a href=""><img src="/img/prof/note_edit.png" alt="Modifier la note" title="Modifier la note" /></a> <a href=""><img src="/img/prof/note_delete.png" alt="Supprimer la note" title="Supprimer la note" /></a></td>
+                     <td><?php if ($estResponsable) : ?><a href="/prof/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $idExam; ?>/<?php echo $note['numEtudiant']; ?>/modifier"><img src="/img/prof/note_edit.png" alt="Modifier la note" title="Modifier la note" /></a> <a href="/prof/<?php echo $promo; ?>/<?php echo $module; ?>/<?php echo $matiere; ?>/<?php echo $idExam; ?>/<?php echo $note['numEtudiant']; ?>/supprimer"><img src="/img/prof/note_delete.png" alt="Supprimer la note" title="Supprimer la note" /></a><?php else : ?>-<?php endif; ?></td>
                   </tr>
                   <?php
                endforeach;
@@ -52,10 +66,11 @@ if ($addNote) :
                </tr>
             <?php
             endif;
-            ?>
-            <tr>
-               <td colspan="5"><a onClick="saisir_note(this);">Saisir une nouvelle note</a></td>
-            </tr>
+            if ($estResponsable) :
+               ?><tr>
+                  <td colspan="5"><a onClick="saisir_note(this);">Saisir une nouvelle note</a></td>
+               </tr>
+            <?php endif; ?>
          </tbody>
       </table>
    </form>

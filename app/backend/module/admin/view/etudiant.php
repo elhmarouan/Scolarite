@@ -31,14 +31,18 @@
          foreach ($etudiant['listeDesModules'] as $module) :
             ?>
             <li><a href="/admin/<?php echo $etudiant['promo']; ?>/<?php echo $module['libelle']; ?>/matières"><?php echo $module['libelle']; ?></a>
-               (<strong>Moyenne de l'étudiant</strong> :
-               <?php
-               if (!empty($module['moyenneEleve'])) :
-                  echo $module['moyenneEleve'];
-                  ?>/20
-               <?php else : ?>
-                  Moyenne indisponible
-               <?php endif; ?>)
+               <?php if (!empty($module['moyennePromo'])) : ?>
+                  (<strong>Moyenne de l'étudiant</strong> :
+                  <?php
+                  if (!empty($module['moyenneEleve'])) :
+                     echo $module['moyenneEleve'];
+                     ?>/20
+                  <?php else : ?>
+                     Moyenne indisponible
+                  <?php endif; ?> ; 
+                  <strong>Moyenne promo</strong> :
+                  <?php echo $module['moyennePromo']; ?>/20)
+               <?php endif; ?>
             </li>
             <ul>
                <?php
@@ -100,7 +104,7 @@
 else :
    ?>
    <h1>Liste des étudiants <?php echo $prefixPromo . $promo; ?></h1>
-   <p>Pour modifier ou supprimer un étudiant, veuillez cliquer <a href="/admin/utilisateurs">ici</a>.</p>
+   <p>Pour ajouter un étudiant, veuillez cliquer <a href="/admin/utilisateurs">ici</a>.</p>
    <table>
       <thead>
          <tr>
@@ -119,7 +123,7 @@ else :
                   <td><?php echo $etudiant['login']; ?></td>
                   <td><?php echo $etudiant['nom']; ?></td>
                   <td><?php echo $etudiant['prenom']; ?></td>
-                  <td><a href="/admin/étudiant/<?php echo $etudiant['idUtil']; ?>/profil"><img src="/img/admin/go_user.png" alt="Profil élève" title="Consulter le profil de cet élève" /></a></td>
+                  <td><a href="/admin/étudiant/<?php echo $etudiant['idUtil']; ?>/profil"><img src="/img/admin/go_user.png" alt="Profil élève" title="Consulter le profil de cet élève" /></a> <a href="/admin/utilisateurs/<?php echo $etudiant['idUtil']; ?>/modifier"><img src="/img/admin/user_edit.png" alt="Modifier cet élève" title="Modifier cet élève" /></a> <a href="/admin/utilisateurs/<?php echo $etudiant['idUtil']; ?>/supprimer"><img src="/img/admin/user_delete.png" alt="Supprimer cet élève" title="Supprimer cet élève" /></a></td>
                </tr>
                <?php
             endforeach;

@@ -38,7 +38,7 @@ class ParticipeModel extends Model {
       $note = is_string($note) ? str_replace(',', '.', $note) : $note;
       if (is_numeric($note) && (float) $note >= 0 && (float) $note <= 20) {
          $this->_note = (float) $note;
-      } else {
+      } else if (!empty($note)) {
          $this->_errors[] = self::BAD_NOTE_ERROR;
       }
    }

@@ -6,9 +6,6 @@
       <base href="<?php echo $root; ?>" />
       <link rel="stylesheet" type="text/css" href="/css/backend.css" />
       <link href="http://fonts.googleapis.com/css?family=Rambla:700|Open+Sans" rel="stylesheet" type="text/css">
-      <script language="javascript" src="/js/ajax.js"></script>
-      <script language="javascript" src="/js/profil.js"></script>
-      <script language="javascript" src="/js/examen.js"></script>
    </head>
    <body>
       <header>
@@ -58,5 +55,9 @@
          <p>Projet réalisé par Soheil Dahmani, Céline Lepicard, Stanislas Michalak et Vincent Simon.</p>
          <p><a href="http://creativecommons.org/licenses/by-sa/3.0/deed.fr"><img src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" title="Cette oeuvre est sous licence creative commons BY-SA" alt="creative commons BY-SA" /></a></p>
       </footer>
+      <script language="javascript" src="/js/ajax.js"></script>
+      <script language="javascript" src="/js/popups.js"></script>
+      <script language="javascript" src="/js/profil.js"></script>
+      <script language="javascript" src="/js/examen.js"></script>
    </body>
 </html>

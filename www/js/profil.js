@@ -1,3 +1,9 @@
+/**
+ * Fonctions de gestion des utilisateurs
+ * 
+ * @author Stanislas Michalak <stanislas.michalak@gmail.com>
+ */
+
 function display_profil(idRole) {
    idRole = parseInt(idRole);
    var fieldsetProf = document.getElementById('profilProf');

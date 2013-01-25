@@ -3,7 +3,7 @@
 /**
  * Prof controller
  * 
- * @author Soheil Dahmani <dahmanisou@eisti.eu>
+ * @author Soheil Dahmani <dahmanisou@eisti.eu> et Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
 class ProfController extends Controller {
@@ -141,6 +141,8 @@ class ProfController extends Controller {
                $this->addVar('module', HTTPRequest::get('module'));
                $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
                if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
+                  $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
+                  $estResponsable = self::model('Matiere')->exists(array('idProf' => self::model('Prof')->first(array('idUtil' => User::id()), 'idProf'), 'idMat' => $idMatiere));
                   if (self::model('Examen')->exists(array('idExam' => HTTPRequest::get('idExam')))) {
                      if (HTTPRequest::getExists('numEtudiant')) {
                         if (self::model('Participe')->exists(array('numEtudiant' => HTTPRequest::get('numEtudiant'), 'idExam' => HTTPRequest::get('idExam')))) {
@@ -151,7 +153,7 @@ class ProfController extends Controller {
                                * Suppression d'une note
                                */
                               self::model('Participe')->delete(array('numEtudiant' => HTTPRequest::get('numEtudiant'), 'idExam' => HTTPRequest::get('idExam')));
-                              User::addPopup('la note a bien été supprimée.', Popup::SUCCESS);
+                              User::addPopup('La note a bien été supprimée.', Popup::SUCCESS);
                               HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo') . '/' . HTTPRequest::get('module') . '/' . HTTPRequest::get('matiere') . '/' . HTTPRequest::get('idExam'));
                            }
                         }
@@ -166,23 +168,31 @@ class ProfController extends Controller {
                               if (self::model('Utilisateur')->exists(array('nom' => HTTPRequest::post('nom'), 'prenom' => HTTPRequest::post('prenom'), 'login' => HTTPRequest::post('login')))) {
                                  $participe = self::model('Participe');
                                  $participe['idExam'] = HTTPRequest::get('idExam');
-                                 $participe['note'] = HTTPRequest::post('note');
+                                 $participe['note'] = HTTPRequest::post('note') === 'ABS' ? null : HTTPRequest::post('note');
                                  $participe['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => self::model('Utilisateur')->first(array('nom' => HTTPRequest::post('nom'), 'prenom' => HTTPRequest::post('prenom'), 'login' => HTTPRequest::post('login')), 'idUtil')), 'numEtudiant');
                                  //On vérifie également qu'il n'existe pas déjà une note pour cet élève
                                  if (!self::model('Participe')->exists(array('numEtudiant' => $participe['numEtudiant'], 'idExam' => $participe['idExam']))) {
                                     if ($participe->save()) {
                                        $this->addVar('data', array('login' => htmlspecialchars(stripslashes(HTTPRequest::post('login'))), 'nom' => htmlspecialchars(stripslashes(HTTPRequest::post('nom'))), 'prenom' => htmlspecialchars(stripslashes(HTTPRequest::post('prenom'))), 'note' => str_replace('.', ',', HTTPRequest::post('note'))));
                                     } else {
-                                       $this->addVar('erreur', 'Impossible d\'ajouter cette note : au moins l\'un des champs est invalide.');
+                                       $erreurs = $participe->errors();
+                                       foreach ($erreurs as &$erreurId) {
+                                          switch ($erreurId) {
+                                             case ParticipeModel::BAD_NOTE_ERROR:
+                                                $erreurId = 'Note incorrecte.';
+                                                break;
+                                          }
+                                       }
+                                       $this->addVar('erreurs', $erreurs);
                                     }
                                  } else {
-                                    $this->addVar('erreur', 'Impossible d\'ajouter cette note : une autre note existe déjà pour cet élève.');
+                                    $this->addVar('erreurs', array('Impossible d\'ajouter cette note : une autre note existe déjà pour cet élève.'));
                                  }
                               } else {
-                                 $this->addVar('erreur', 'Impossible d\'ajouter cette note : cet élève n\'existe pas.');
+                                 $this->addVar('erreurs', array('Impossible d\'ajouter cette note : cet élève n\'existe pas.'));
                               }
                            } else {
-                              $this->addVar('erreur', 'Impossible d\'ajouter cette note : au moins l\'un des champs est vide.');
+                              $this->addVar('erreurs', array('Impossible d\'ajouter cette note : au moins l\'un des champs est vide.'));
                            }
                            $this->setSubAction('addNote');
                            HTTPResponse::addHeader('Content-Type: application/xml');
@@ -190,9 +200,9 @@ class ProfController extends Controller {
                         } else {
                            $this->addVar('urlPage', HTTPRequest::requestURI());
                            $this->addVar('matiere', HTTPRequest::get('matiere'));
-                           $this->addVar('examen', htmlspecialchars(stripslashes(self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')), 'libelle'))));
+                           $examen = htmlspecialchars(stripslashes(self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')), 'libelle')));
+                           $this->addVar('examen', $examen);
                            $this->addVar('idExam', HTTPRequest::get('idExam'));
-                           $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
                            $listeDesNotes = self::model('Participe')->find(array('idExam' => self::model('Examen')->field('idExam', array('idMat' => $idMatiere))));
                            foreach ($listeDesNotes as &$note) {
                               $etudiant = self::model('Utilisateur')->first(array('idUtil' => self::model('Eleve')->first(array('numEtudiant' => $note['numEtudiant']), 'idUtil')));
@@ -202,8 +212,8 @@ class ProfController extends Controller {
                               $note['note'] = !empty($note['note']) ? str_replace('.', ',', $note['note']) : null;
                            }
                            $this->addVar('listeDesNotes', $listeDesNotes);
-                           $this->addVar('estResponsable', self::model('Matiere')->exists(array('idProf' => self::model('Prof')->first(array('idUtil' => User::id()), 'idProf'), 'idMat' => $idMatiere)));
-                           $this->setWindowTitle('Gestion des Notes' . HTTPRequest::get('examen'));
+                           $this->addVar('estResponsable', $estResponsable);
+                           $this->setWindowTitle('Notes de l\'examen « ' . $examen . ' »');
                         }
                      }
                   } else {
