@@ -28,6 +28,7 @@
      
     <route url="/prof/" module="Prof" action="index" />
     <route url="/prof/promos" module="Prof" action="index" />
+    <route url="/prof/étudiant/([0-9]+)/profil" module="Prof" action="etudiant" vars="idUtil" />
     <route url="/prof/([a-z]{3}[1-9]{1})" module="Prof" action="promo" vars="promo" />
     <route url="/prof/([a-z]{3}[1-9]{1})/modules" module="Prof" action="module" vars="promo" />
     <route url="/prof/([a-z]{3}[1-9]{1})/étudiants" module="Prof" action="etudiant" vars="promo" />

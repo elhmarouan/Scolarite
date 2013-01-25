@@ -194,6 +194,8 @@ class ProfController extends Controller {
                            }
                         }
                      } else {
+                        $this->addVar('matiere', HTTPRequest::get('matiere'));
+                        $this->addVar('idExam', HTTPRequest::get('idExam'));
                         /**
                          * Ajout d'une note en Ajax
                          */
@@ -209,7 +211,7 @@ class ProfController extends Controller {
                                  //On vérifie également qu'il n'existe pas déjà une note pour cet élève
                                  if (!self::model('Participe')->exists(array('numEtudiant' => $participe['numEtudiant'], 'idExam' => $participe['idExam']))) {
                                     if ($participe->save()) {
-                                       $this->addVar('data', array('login' => htmlspecialchars(stripslashes(HTTPRequest::post('login'))), 'nom' => htmlspecialchars(stripslashes(HTTPRequest::post('nom'))), 'prenom' => htmlspecialchars(stripslashes(HTTPRequest::post('prenom'))), 'note' => str_replace('.', ',', HTTPRequest::post('note'))));
+                                       $this->addVar('data', array('login' => htmlspecialchars(stripslashes(HTTPRequest::post('login'))), 'nom' => htmlspecialchars(stripslashes(HTTPRequest::post('nom'))), 'prenom' => htmlspecialchars(stripslashes(HTTPRequest::post('prenom'))), 'note' => str_replace('.', ',', HTTPRequest::post('note')), 'numEtudiant' => $participe['numEtudiant'], 'idUtil' => self::model('Eleve')->first(array('numEtudiant' => $participe['numEtudiant']), 'idUtil')));
                                     } else {
                                        $erreurs = $participe->errors();
                                        foreach ($erreurs as &$erreurId) {
@@ -235,13 +237,13 @@ class ProfController extends Controller {
                            $this->page()->useRawView();
                         } else {
                            $this->addVar('urlPage', HTTPRequest::requestURI());
-                           $this->addVar('matiere', HTTPRequest::get('matiere'));
                            $examen = htmlspecialchars(stripslashes(self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')), 'libelle')));
                            $this->addVar('examen', $examen);
-                           $this->addVar('idExam', HTTPRequest::get('idExam'));
                            $listeDesNotes = self::model('Participe')->find(array('idExam' => self::model('Examen')->field('idExam', array('idMat' => $idMatiere))));
                            foreach ($listeDesNotes as &$note) {
-                              $etudiant = self::model('Utilisateur')->first(array('idUtil' => self::model('Eleve')->first(array('numEtudiant' => $note['numEtudiant']), 'idUtil')));
+                              $idUtil = self::model('Eleve')->first(array('numEtudiant' => $note['numEtudiant']), 'idUtil');
+                              $etudiant = self::model('Utilisateur')->first(array('idUtil' => $idUtil));
+                              $note['idUtil'] = $idUtil;
                               $note['login'] = htmlspecialchars(stripslashes($etudiant['login']));
                               $note['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
                               $note['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
@@ -297,9 +299,81 @@ class ProfController extends Controller {
             User::addPopup('Désolé, la promo « ' . HTTPRequest::get('promo') . ' » n\'existe pas.', Popup::ERROR);
             HTTPResponse::redirect('/prof/');
          }
-      } else {
-         User::addPopup('Veuillez sélectionner une promotion avant.');
-         HTTPResponse::redirect('/prof/');
+      } else if (HTTPRequest::getExists('idUtil')) {
+         if (self::model('Eleve')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            $this->setWindowTitle('Profil étudiant');
+            $this->setSubAction('showProfil');
+            $etudiant = array_merge(self::model('Eleve')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));
+            $etudiant['promo'] = htmlspecialchars(stripslashes(self::model('Promo')->first(array('idPromo' => $etudiant['idPromo']), 'libelle')));
+            $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+            $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+            $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+            $etudiant['listeDesModules'] = self::model('Module')->find(array('idPromo' => $etudiant['idPromo']));
+            $numEtudiantsPromo = self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']));
+            $moyennesEleveModules = array();
+            $quotientMoyennesEleveModules = 0;
+            foreach ($etudiant['listeDesModules'] as &$module) {
+               $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
+               $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+               $moyennesEleveMatieres = array();
+               $quotientMoyennesEleveMatieres = 0;
+               $moyennesPromoMatieres = array();
+               $quotientMoyennesPromoMatieres = 0;
+               foreach ($module['listeDesMatieres'] as &$matiere) {
+                  $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
+                  $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
+                  //Calcul de la moyenne de la promo
+                  $idsExams = self::model('Examen')->field('idExam', array('idMat' => $matiere['idMat']));
+                  $participationsPromo = self::model('Participe')->find(array('numEtudiant' => $numEtudiantsPromo, 'idExam' => $idsExams, 'note !=' => null));
+                  $notesPromo = array();
+                  $quotient = 0;
+                  foreach ($participationsPromo as $participation) {
+                     $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                     $notesPromo[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                     $quotient += $coef;
+                  }
+                  if (!empty($notesPromo)) {
+                     $moyennesPromoMatieres[] = (array_sum($notesPromo) / $quotient) * $matiere['coefMat'];
+                     $quotientMoyennesPromoMatieres += $matiere['coefMat'];
+                  }
+                  $matiere['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / $quotient, 2)) : null;
+
+                  //Calcul de la moyenne de l'élève
+                  $participationsEleve = self::model('Participe')->find(array('numEtudiant' => $etudiant['numEtudiant'], 'idExam' => $idsExams, 'note !=' => null));
+                  $notesEleve = array();
+                  $quotient = 0;
+                  foreach ($participationsEleve as $participation) {
+                     $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                     $notesEleve[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                     $quotient += $coef;
+                  }
+                  if (!empty($notesEleve)) {
+                     $moyennesEleveMatieres[] = (array_sum($notesEleve) / $quotient) * $matiere['coefMat'];
+                     $quotientMoyennesEleveMatieres += $matiere['coefMat'];
+                  }
+                  $matiere['moyenneEleve'] = !empty($notesEleve) ? str_replace('.', ',', round(array_sum($notesEleve) / $quotient, 2)) : null;
+
+                  foreach ($matiere['listeDesExamens'] as &$examen) {
+                     $examen['libelle'] = htmlspecialchars(stripslashes($examen['libelle']));
+                     $examen['note'] = str_replace('.', ',', round(self::model('Participe')->first(array('idExam' => $examen['idExam'], 'numEtudiant' => $etudiant['numEtudiant']), 'note'), 2));
+                     $notesPromo = self::model('Participe')->field('note', array('idExam' => $examen['idExam'], 'numEtudiant' => self::model('Eleve')->field('numEtudiant', array('idPromo' => $etudiant['idPromo']))));
+                     $examen['moyennePromo'] = !empty($notesPromo) ? str_replace('.', ',', round(array_sum($notesPromo) / count($notesPromo), 2)) : null;
+                  }
+               }
+               $module['coef'] = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+               if (!empty($moyennesEleveMatieres)) {
+                  $moyennesEleveModules[] = (array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres) * $module['coef'];
+                  $quotientMoyennesEleveModules += $module['coef'];
+               }
+               $module['moyennePromo'] = !empty($moyennesPromoMatieres) ? str_replace('.', ',', round(array_sum($moyennesPromoMatieres) / $quotientMoyennesPromoMatieres, 2)) : null;
+               $module['moyenneEleve'] = !empty($moyennesEleveMatieres) ? str_replace('.', ',', round(array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres, 2)) : null;
+            }
+            $etudiant['moyenneGenerale'] = !empty($moyennesEleveModules) ? str_replace('.', ',', round(array_sum($moyennesEleveModules) / $quotientMoyennesEleveModules, 2)) : null;
+            $this->addVar('etudiant', $etudiant);
+         } else {
+            User::addPopup('Cet étudiant n\'existe pas.', Popup::ERROR);
+            HTTPResponse::redirect('/admin/');
+         }
       }
    }
 

@@ -6,7 +6,6 @@ Allow From All
 
    RewriteRule ^connexion$ backend.php [QSA,L]
    RewriteRule ^(admin|prof|étudiant)/ backend.php [QSA,L]
-   RewriteRule ^sandbox/ sandbox.php [QSA,L]
 
    #If the file exists, it isn't necessary to rewrite the url
    RewriteCond %{REQUEST_FILENAME} !-f

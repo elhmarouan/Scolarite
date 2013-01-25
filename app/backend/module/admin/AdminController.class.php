@@ -302,6 +302,7 @@ class AdminController extends Controller {
                                  $prof->save();
                                  //Si le rôle a changé, et que l'ancien rôle était "étudiant", on supprime l'ancienne entrée
                                  if ((int) $oldIdRole === 3) {
+                                    self::model('Participe')->delete(array('numEtudiant' => self::model('Eleve')->first(array('idUtil' => HTTPResponse::get('idUtil')), 'numEtudiant')));
                                     self::model('Eleve')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                                  }
                               } else {
@@ -416,6 +417,7 @@ class AdminController extends Controller {
                      self::model('Prof')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                   } else if ($idRole === 3) {
                      self::model('Eleve')->delete(array('idUtil' => HTTPRequest::get('idUtil')));
+                     self::model('Participe')->delete(array('idUtil' => HTTPResponse::get('idUtil')));
                   }
                   $utilisateur->delete(array('idUtil' => HTTPRequest::get('idUtil')));
                   User::addPopup('L\'utilisateur a bien été supprimé.', Popup::SUCCESS);

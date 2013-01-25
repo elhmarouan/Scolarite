@@ -5,18 +5,23 @@ if ($addNote) :
       echo '<?xml version="1.0" encoding="utf-8"?>'; ?>
       <root>
          <data>
-            <td><?php echo $data['login']; ?></td>
-            <td><?php echo $data['nom']; ?></td>
-            <td><?php echo $data['prenom']; ?></td>
-            <td><?php echo $data['note']; ?>/20</td>
-            <td>-</td>
+            <idUtil><?php echo $data['idUtil']; ?></idUtil>
+            <login><?php echo $data['login']; ?></login>
+            <nom><?php echo $data['nom']; ?></nom>
+            <prenom><?php echo $data['prenom']; ?></prenom>
+            <note><?php echo $data['note']; ?>/20</note>
+            <promo><?php echo $promo; ?></promo>
+            <module><?php echo $module; ?></module>
+            <matiere><?php echo $matiere; ?></matiere>
+            <idExam><?php echo $idExam; ?></idExam>
+            <numEtudiant><?php echo $data['numEtudiant']; ?></numEtudiant>
          </data>
          <erreurs></erreurs>
       </root>
    <?php else :
       echo '<?xml version="1.0" encoding="utf-8"?>'; ?>
       <root>
-         <data></data>
+         <tr></tr>
          <erreurs>
             <?php foreach ($erreurs as $erreur) : ?>
                <erreur><?php echo $erreur; ?></erreur>
@@ -43,7 +48,7 @@ if ($addNote) :
                foreach ($listeDesNotes as $note) :
                   ?>
                   <tr>
-                     <td><?php echo $note['login']; ?></td>
+                     <td><a href="/prof/étudiant/<?php echo $note['idUtil']; ?>/profil"><?php echo $note['login']; ?></a></td>
                      <td><?php echo $note['nom']; ?></td>
                      <td><?php echo $note['prenom']; ?></td>
                      <td>

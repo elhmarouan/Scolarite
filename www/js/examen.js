@@ -44,16 +44,48 @@ function save_note(form, url) {
 		if (xhr.readyState === 4 && (xhr.status === 200 || xhr.status === 0)){
          var reponse = xhr.responseXML.getElementsByTagName('root').item(0);
          var erreurs = reponse.getElementsByTagName('erreur');
-         var data = reponse.getElementsByTagName('td');
+         var data = reponse.getElementsByTagName('data').item(0);
          if (erreurs.length > 0) {
             for (var i = 0 ; i < erreurs.length ; i++) {
                popup.add(erreurs[i].firstChild.value, popup.ERROR);
             }
          } else {
-            tr.innerHTML = '';
-            for (var i = 0 ; i < data.length ; i++) {
-               tr.appendChild(data[i]);
+            var tbody = tr.parentNode;
+            var newTr = document.createElement('tr');
+            var tds = Array(
+                    document.createElement('td'),
+                    document.createElement('td'),
+                    document.createElement('td'),
+                    document.createElement('td'),
+                    document.createElement('td')
+            );
+            var aLogin = document.createElement('a');
+            aLogin.innerHTML = data.getElementsByTagName('login')[0].firstChild.nodeValue;
+            aLogin.href = '/prof/étudiant/' + data.getElementsByTagName('idUtil')[0].firstChild.nodeValue + '/profil';
+            tds[0].appendChild(aLogin);
+            tds[1].appendChild(document.createTextNode(data.getElementsByTagName('prenom')[0].firstChild.nodeValue));
+            tds[2].appendChild(document.createTextNode(data.getElementsByTagName('nom')[0].firstChild.nodeValue));
+            tds[3].appendChild(document.createTextNode(data.getElementsByTagName('note')[0].firstChild.nodeValue));
+            var aModif = document.createElement('a');
+            aModif.href = '/prof/' + data.getElementsByTagName('promo')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('module')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('matiere')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('idExam')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('numEtudiant')[0].firstChild.nodeValue + '/modifier';
+            var imgModif = document.createElement('img');
+            imgModif.src= '/img/prof/note_edit.png';
+            imgModif.title = 'Modifier la note';
+            imgModif.alt= 'Modifier la note';
+            aModif.appendChild(imgModif);
+            var aDelete = document.createElement('a');
+            aDelete.href = '/prof/' + data.getElementsByTagName('promo')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('module')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('matiere')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('idExam')[0].firstChild.nodeValue + '/' + data.getElementsByTagName('numEtudiant')[0].firstChild.nodeValue + '/supprimer';
+            var imgDelete = document.createElement('img');
+            imgDelete.src= '/img/prof/note_delete.png';
+            imgDelete.title = 'Supprimer la note';
+            imgDelete.alt= 'Suprpimer la note';
+            aDelete.appendChild(imgDelete);
+            tds[4].appendChild(aModif);
+            tds[4].appendChild(aDelete);
+            for (var i = 0 ; i < tds.length ; i++) {
+               newTr.appendChild(tds[i]);
             }
+            tbody.replaceChild(newTr, tr);
             popup.add('La note a été ajoutée avec succès.', popup.SUCCESS);
          }
 		}

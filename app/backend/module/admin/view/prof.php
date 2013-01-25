@@ -1,4 +1,5 @@
 <h1>Profil professeur</h1>
+<p><a href="/admin/utilisateurs/<?php echo $prof['idUtil']; ?>/modifier" class="button orangeButton">Modifier ce profil</a></p>
 <p><strong>Login</strong> : <?php echo $prof['login']; ?></p>
 <p><strong>Nom</strong> : <?php echo $prof['nom']; ?></p>
 <p><strong>Prénom</strong> : <?php echo $prof['prenom']; ?></p>
