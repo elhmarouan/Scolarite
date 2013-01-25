@@ -2,6 +2,8 @@
 <routes>
     <route url="/admin/" module="Admin" action="index" />
     <route url="/admin/exporter" module="Admin" action="exporterCsv" />
+    <route url="/admin/exporter/(étudiant|promotion)" module="Admin" action="exporterCsv" vars="what" />
+    <route url="/admin/exporter/(étudiant)/([0-9]+)" module="Admin" action="exporterCsv" vars="what,idUtil" />
     <route url="/admin/typesExams" module="Admin" action="typesExams" />
     <route url="/admin/typesExams/(ajouter)" module="Admin" action="typesExams" vars="action" />
     <route url="/admin/typesExams/([0-9]+)/(modifier|supprimer)" module="Admin" action="typesExams" vars="idTypeExam,action" />

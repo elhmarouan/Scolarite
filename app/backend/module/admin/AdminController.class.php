@@ -1071,9 +1071,113 @@ class AdminController extends Controller {
     * Export au format CSV
     */
    public function exporterCsv() {
-      HTTPResponse::addHeader('Content-Type: text/csv');
-      HTTPResponse::addHeader('Content-Disposition: attachment;filename=export.csv');
-      $this->page()->useRawView();
+      if (HTTPRequest::getExists('what')) {
+         if (HTTPRequest::get('what') === 'étudiant') {
+            if (HTTPRequest::postExists('idUtil')) {
+               //Si le formulaire a été validé
+               $data = array();
+               $fields = array();
+               $donneesUtil = self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::post('idUtil')));
+               $donneesUtil['numEtudiant'] = self::model('Eleve')->first(array('idUtil' => $donneesUtil['idUtil']), 'numEtudiant');
+               $donneesUtil['idPromo'] = self::model('Eleve')->first(array('idUtil' => $donneesUtil['idUtil']), 'idPromo');
+               if (HTTPRequest::postExists('login')) {
+                  $data['login'] = htmlspecialchars(stripslashes($donneesUtil['login']));
+                  $fields[] = 'login';
+               }
+               if (HTTPRequest::postExists('nom')) {
+                  $data['nom'] = htmlspecialchars(stripslashes($donneesUtil['nom']));
+                  $fields[] = 'nom';
+               }
+               if (HTTPRequest::postExists('prenom')) {
+                  $data['prenom'] = htmlspecialchars(stripslashes($donneesUtil['prenom']));
+                  $fields[] = 'prenom';
+               }
+               if (HTTPRequest::postExists('promotion')) {
+                  $data['promotion'] = htmlspecialchars(stripslashes(self::model('Promo')->first(array('idPromo' => $donneesUtil['idPromo']), 'libelle')));
+                  $fields[] = 'promotion';
+               }
+               if (HTTPRequest::postExists('numEtudiant')) {
+                  $data['numEtudiant'] = $donneesUtil['numEtudiant'];
+                  $fields[] = 'numEtudiant';
+               }
+               if (HTTPRequest::postExists('anneeRedouble')) {
+                  $anneeRedouble = self::model('Eleve')->first(array('idUtil' => $donneesUtil['idUtil']), 'anneeRedouble');
+                  $data['anneeRedouble'] = ($anneeRedouble !== 0) ? $anneeRedouble : 'Aucune';
+                  $fields[] = 'anneeRedouble';
+               }
+               if (HTTPRequest::postExists('moyenneGenerale') || HTTPRequest::postExists('moyenneMatieres')) {
+                  $moyennesEleveModules = array();
+                  $quotientMoyennesEleveModules = 0;
+                  $listeDesModules = self::model('Module')->find(array('idPromo' => $donneesUtil['idPromo']));
+                  foreach ($listeDesModules as &$module) {
+                     $module['libelle'] = htmlspecialchars(stripslashes($module['libelle']));
+                     $module['listeDesMatieres'] = self::model('Matiere')->find(array('idMod' => $module['idMod']));
+                     $moyennesEleveMatieres = array();
+                     $quotientMoyennesEleveMatieres = 0;
+                     foreach ($module['listeDesMatieres'] as &$matiere) {
+                        $matiere['libelle'] = htmlspecialchars(stripslashes($matiere['libelle']));
+                        $matiere['listeDesExamens'] = self::model('Examen')->find(array('idMat' => $matiere['idMat'], 'idExam' => self::model('Participe')->field('idExam')));
+                        $idsExams = self::model('Examen')->field('idExam', array('idMat' => $matiere['idMat']));
+                        
+                        //Calcul de la moyenne de l'élève
+                        $participationsEleve = self::model('Participe')->find(array('numEtudiant' => $donneesUtil['numEtudiant'], 'idExam' => $idsExams, 'note !=' => null));
+                        $notesEleve = array();
+                        $quotient = 0;
+                        foreach ($participationsEleve as $participation) {
+                           $coef = self::model('TypeExam')->first(array('idType' => self::model('Examen')->first(array('idExam' => $participation['idExam']), 'idType')), 'coef');
+                           $notesEleve[] = self::model('Participe')->first(array('numEtudiant' => $participation['numEtudiant'], 'idExam' => $participation['idExam']), 'note') * $coef;
+                           $quotient += $coef;
+                        }
+                        if (!empty($notesEleve)) {
+                           $moyennesEleveMatieres[] = (array_sum($notesEleve) / $quotient) * $matiere['coefMat'];
+                           $quotientMoyennesEleveMatieres += $matiere['coefMat'];
+                        }
+                        if (HTTPRequest::postExists('moyenneMatieres')) {
+                           $data[$matiere['libelle']] = !empty($notesEleve) ? str_replace('.', ',', round(array_sum($notesEleve) / $quotient, 2)) : '"Moyenne indisponible"';
+                           $fields[] = '"' . $matiere['libelle'] . '"';
+                        }
+                     }
+                     $module['coef'] = self::model('Matiere')->avg('coefMat', array('idMod' => $module['idMod']));
+                     if (!empty($moyennesEleveMatieres)) {
+                        $moyennesEleveModules[] = (array_sum($moyennesEleveMatieres) / $quotientMoyennesEleveMatieres) * $module['coef'];
+                        $quotientMoyennesEleveModules += $module['coef'];
+                     }
+                  }
+                  if (HTTPRequest::postExists('moyenneGenerale')) {
+                     $data['moyenneGenerale'] = !empty($moyennesEleveModules) ? str_replace('.', ',', round(array_sum($moyennesEleveModules) / $quotientMoyennesEleveModules, 2)) : null;
+                     $fields[] = 'moyenneGenerale';
+                  }
+               }
+               $this->addVar('fields', implode(';', $fields));
+               $this->addVar('data', implode(';', $data));
+               HTTPResponse::addHeader('Content-Type: text/csv');
+               HTTPResponse::addHeader('Content-Disposition: attachment;filename=etudiant_' . $donneesUtil['numEtudiant'] . '.csv');
+               $this->page()->useRawView();
+            }
+            if (HTTPRequest::getExists('idUtil')) {
+               if (self::model('Eleve')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+                  $this->addVar('idUtil', (int) HTTPRequest::get('idUtil'));
+               } else {
+                  User::addPopup('Cet étudiant n\'existe pas.', Popup::ERROR);
+                  HTTPResponse::redirect('/admin/exporter/étudiant');
+               }
+            }
+            $this->setWindowTitle('Exporter les données d\'un étudiant');
+            $listeDesEtudiants = self::model('Utilisateur')->find(array('idUtil' => self::model('Eleve')->field('idUtil')));
+            foreach ($listeDesEtudiants as &$etudiant) {
+               $etudiant['login'] = htmlspecialchars(stripslashes($etudiant['login']));
+               $etudiant['nom'] = htmlspecialchars(stripslashes($etudiant['nom']));
+               $etudiant['prenom'] = htmlspecialchars(stripslashes($etudiant['prenom']));
+            }
+            $this->addVar('listeDesEtudiants', $listeDesEtudiants);
+            $this->setSubAction('exportUser');
+         } else if (HTTPRequest::get('what') === 'promotion') {
+            $this->setWindowTitle('Exporter les données d\'une promotion');
+            $this->setSubAction('exportPromo');
+         }
+      } else {
+         $this->setWindowTitle('Exporter des informations');
+      }
    }
 
 }

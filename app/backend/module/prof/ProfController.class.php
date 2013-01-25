@@ -3,11 +3,18 @@
 /**
  * Prof controller
  * 
+ * Contrôleur du module réservé aux professeurs
+ * 
  * @author Soheil Dahmani <dahmanisou@eisti.eu> et Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
 class ProfController extends Controller {
 
+   /**
+    * Vérifie si l'utilisateur connecté est un professeur,
+    * et autorise ou non l'accès au module.
+    * @return boolean
+    */
    public function accessFilter() {
       if (User::isMemberOf('Professeur')) {
          return true;
@@ -57,6 +64,9 @@ class ProfController extends Controller {
             if (HTTPRequest::getExists('module')) {
                //Si le module existe
                if (self::model('Module')->exists(array('libelle' => HTTPRequest::get('module')))) {
+                  /**
+                   * Affichage d'un module
+                   */
                   $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo')), 'idMod');
                   $this->setWindowTitle('Matières du module ' . HTTPRequest::get('module'));
                   $this->setSubAction('manageMatieres');
@@ -82,6 +92,9 @@ class ProfController extends Controller {
                   HTTPResponse::redirect('/prof/' . HTTPRequest::get('promo'));
                }
             } else {
+               /**
+                * Affichage de la liste des modules
+                */
                if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
                   $prefixPromo = 'd\'';
                } else {
@@ -115,6 +128,9 @@ class ProfController extends Controller {
                $this->addVar('module', HTTPRequest::get('module'));
                $idModule = self::model('Module')->first(array('libelle' => HTTPRequest::get('module'), 'idPromo' => $idPromo), 'idMod');
                if (self::model('Matiere')->exists(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule))) {
+                  /**
+                   * Affichage d'une matière
+                   */
                   $this->addVar('matiere', HTTPRequest::get('matiere'));
                   $idMatiere = self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'idMat');
                   $this->addVar('coef', str_replace('.', ',', round(self::model('Matiere')->first(array('libelle' => HTTPRequest::get('matiere'), 'idMod' => $idModule), 'coefMat'))));
@@ -269,6 +285,9 @@ class ProfController extends Controller {
                            HTTPResponse::addHeader('Content-Type: application/xml');
                            $this->page()->useRawView();
                         } else {
+                           /**
+                            * Affichage de la liste des notes d'un examen
+                            */
                            $this->addVar('urlPage', HTTPRequest::requestURI());
                            $examen = htmlspecialchars(stripslashes(self::model('Examen')->first(array('idExam' => HTTPRequest::get('idExam')), 'libelle')));
                            $this->addVar('examen', $examen);
@@ -312,6 +331,9 @@ class ProfController extends Controller {
       if (HTTPRequest::get('promo')) {
          //Si la promotion existe
          if (self::model('Promo')->exists(array('libelle' => HTTPRequest::get('promo')))) {
+            /**
+             * Affichage de la liste des étudiants
+             */
             $this->addVar('promo', HTTPRequest::get('promo'));
             if (preg_match('#^[aeiouy]#', HTTPRequest::get('promo'))) {
                $prefixPromo = 'd\'';
@@ -320,7 +342,7 @@ class ProfController extends Controller {
             }
             $this->addVar('prefixPromo', $prefixPromo);
             $this->setWindowTitle('Liste des étudiants ' . $prefixPromo . HTTPRequest::get('promo'));
-            //Récupèration de la liste des modules correspondants à la promo
+            //Récupèration de la liste des étudiants
             $idPromo = self::model('Promo')->first(array('libelle' => HTTPRequest::get('promo')), 'idPromo');
             $studentsList = self::model('Utilisateur')->find(array('idUtil' => self::model('Eleve')->field('idUtil', array('idPromo' => $idPromo))));
             foreach ($studentsList as &$student) {
@@ -334,6 +356,9 @@ class ProfController extends Controller {
          }
       } else if (HTTPRequest::getExists('idUtil')) {
          if (self::model('Eleve')->exists(array('idUtil' => HTTPRequest::get('idUtil')))) {
+            /**
+             * Affichage du profil d'un étudiant
+             */
             $this->setWindowTitle('Profil étudiant');
             $this->setSubAction('showProfil');
             $etudiant = array_merge(self::model('Eleve')->first(array('idUtil' => HTTPRequest::get('idUtil'))), self::model('Utilisateur')->first(array('idUtil' => HTTPRequest::get('idUtil'))));

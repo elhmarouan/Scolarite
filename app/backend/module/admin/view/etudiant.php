@@ -1,6 +1,6 @@
 <?php if ($showProfil) : ?>
    <h1>Profil étudiant</h1>
-   <p><a href="/admin/utilisateurs/<?php echo $etudiant['idUtil']; ?>/modifier" class="button orangeButton">Modifier ce profil</a></p>
+   <p><a href="/admin/utilisateurs/<?php echo $etudiant['idUtil']; ?>/modifier" class="button orangeButton">Modifier ce profil</a> <a href="/admin/exporter/étudiant/<?php echo $etudiant['idUtil']; ?>" class="button blueButton">Exporter ce profil</a></p>
    <p><strong>Login</strong> : <?php echo $etudiant['login']; ?></p>
    <p><strong>Nom</strong> : <?php echo $etudiant['nom']; ?></p>
    <p><strong>Prénom</strong> : <?php echo $etudiant['prenom']; ?></p>

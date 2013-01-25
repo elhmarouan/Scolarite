@@ -3,11 +3,18 @@
 /**
  * Élève controller
  * 
+ * Contrôleur du module réservé aux étudiants
+ * 
  * @author Vincent Simon <simonvince@eisti.eu> et Stanislas Michalak <stanislas.michalak@gmail.com>
  * 
  */
 class EleveController extends Controller {
 
+   /**
+    * Vérifie si l'utilisateur connecté est un étudiant,
+    * et autorise ou non l'accès au module.
+    * @return boolean
+    */
    public function accessFilter() {
       if (User::isMemberOf('Élève')) {
          return true;
@@ -17,6 +24,9 @@ class EleveController extends Controller {
       }
    }
 
+   /**
+    * Page d'accueil du module élève
+    */
    public function index() {
       $this->setWindowTitle('Accueil étudiant');
    }
